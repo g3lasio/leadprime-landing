@@ -1,0 +1,124 @@
+const AI_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/leadprime-ai-agent-YfBKo4A9LiWB4AkDpmP439.webp";
+
+const capabilities = [
+  {
+    title: "Talks to Your Clients",
+    desc: "Mervin answers questions, qualifies leads, and handles objections via SMS, email, and voice — 24/7, without you lifting a finger.",
+    icon: "💬",
+  },
+  {
+    title: "Communicates with Owners",
+    desc: "Sends personalized follow-ups to property owners, motivated sellers, and business contacts on your behalf.",
+    icon: "👤",
+  },
+  {
+    title: "Connects with Other AI Agents",
+    desc: "Via Agent Connector MCP, Mervin integrates with external AI tools — letting other agents send leads directly into your CRM.",
+    icon: "🤖",
+  },
+  {
+    title: "Books Appointments",
+    desc: "Qualifies leads and books appointments directly on your calendar. You only talk to people who are ready to do business.",
+    icon: "📅",
+  },
+  {
+    title: "Trained on Your Business",
+    desc: "Feed Mervin your pricing, FAQs, service area, and documents via the Knowledge Base. He knows your business as well as you do.",
+    icon: "🧠",
+  },
+  {
+    title: "Multi-Channel Presence",
+    desc: "Active on SMS, email, voice calls, and web chat simultaneously. Never miss a lead regardless of how they contact you.",
+    icon: "📡",
+  },
+];
+
+export default function AIAgentSection() {
+  return (
+    <section className="py-24 bg-[#0A1628] relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF]/3 via-transparent to-[#F59E0B]/3" />
+
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left: Content */}
+          <div>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-6">
+              <span className="w-2 h-2 rounded-full bg-[#00D4FF] animate-pulse" />
+              <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                AI Super-Agent
+              </span>
+            </div>
+
+            <h2
+              className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              Meet Mervin.
+              <br />
+              <span className="lp-text-gradient-cyan">Your AI That Never Sleeps.</span>
+            </h2>
+
+            <p className="text-white/60 mb-10 leading-relaxed text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Mervin is not just a chatbot. He's a full AI agent that communicates with your clients,
+              follows up with leads, talks to other AI agents, and keeps your pipeline moving —
+              all while you focus on what you do best.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+              {capabilities.map((cap, i) => (
+                <div key={i} className="lp-card rounded-xl p-4 hover:border-[#00D4FF]/30 transition-all duration-200">
+                  <div className="text-2xl mb-2">{cap.icon}</div>
+                  <div className="text-sm font-bold text-white mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {cap.title}
+                  </div>
+                  <div className="text-xs text-white/50" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    {cap.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <a
+              href="https://leadprime.chyrris.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"
+            >
+              <span>🤖</span>
+              Activate Mervin — Free 90 Days
+            </a>
+          </div>
+
+          {/* Right: Image */}
+          <div className="relative">
+            <div className="relative rounded-2xl overflow-hidden lp-border-cyan animate-float">
+              <img
+                src={AI_IMG}
+                alt="Mervin AI Agent"
+                className="w-full object-cover"
+                style={{ height: "500px", objectPosition: "center" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628]/40 to-transparent" />
+            </div>
+
+            {/* Floating chat bubbles */}
+            <div className="absolute top-8 -left-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-cyan">
+              <div className="text-xs text-[#00D4FF] font-semibold mb-1">Mervin → Lead</div>
+              <div className="text-xs text-white/80">"Hi John! I saw you're interested in a fence quote. When's a good time to chat?"</div>
+            </div>
+
+            <div className="absolute bottom-16 -right-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-amber">
+              <div className="text-xs text-[#F59E0B] font-semibold mb-1">Lead → Mervin</div>
+              <div className="text-xs text-white/80">"Tomorrow at 2pm works for me!"</div>
+            </div>
+
+            <div className="absolute bottom-2 left-8 lp-card rounded-xl px-4 py-3 max-w-[200px]" style={{ border: "1px solid #10B98130" }}>
+              <div className="text-xs text-[#10B981] font-semibold mb-1">✓ Appointment Booked</div>
+              <div className="text-xs text-white/80">Tomorrow 2:00 PM — Added to calendar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
