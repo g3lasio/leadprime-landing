@@ -7,14 +7,29 @@ const networkBenefits = [
     desc: "Connect directly with verified Contractors, PMs, Investors, Realtors, Lenders, and Wholesalers in your area.",
   },
   {
+    icon: "🏗️",
+    title: "Government & Residential Projects",
+    desc: "Access federal, state, and residential projects. Bid on real opportunities that match your specialty and location.",
+  },
+  {
     icon: "🛡️",
     title: "Trust Score & Compliance Kit",
     desc: "Your verified Trust Score, license check, insurance status, and W-9 — all in one shareable profile.",
   },
   {
-    icon: "📋",
-    title: "Browse Network Projects",
-    desc: "Access real projects posted by PMs and investors. Bid on opportunities that match your specialty.",
+    icon: "🎟️",
+    title: "Networking Events — Las Vegas, SF, Miami",
+    desc: "Exclusive coworking and networking events in top U.S. cities. Meet PMs, investors, lenders, and partners in person.",
+  },
+  {
+    icon: "💰",
+    title: "Business Financing & Credit Lines",
+    desc: "Preferred business financing, commercial credit reconstruction program, and strategic growth partners — exclusive to Elite members.",
+  },
+  {
+    icon: "📈",
+    title: "Legacy Investment Access",
+    desc: "Exclusive access to legacy investment opportunities available only to verified LeadPrime Network Elite members.",
   },
   {
     icon: "⚖️",
@@ -22,14 +37,9 @@ const networkBenefits = [
     desc: "Get your LLC, EIN, Articles of Organization, and more — directly from your CRM.",
   },
   {
-    icon: "🏷️",
-    title: "Public @Handle Profile",
-    desc: "Your verified public profile with @handle. Share it with any client as your professional digital card.",
-  },
-  {
     icon: "🔒",
-    title: "Founding Member Badge",
-    desc: "Join now and earn the Founding Member badge — priority placement in the network for life.",
+    title: "Founding Member Badge — For Life",
+    desc: "Join now and earn the Founding Member badge — priority placement in the network and locked-in pricing forever.",
   },
 ];
 

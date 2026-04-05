@@ -27,11 +27,25 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00D4FF] to-[#0099CC] flex items-center justify-center">
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                <path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" fill="#050B18" />
-                <path d="M12 6L7 9V15L12 18L17 15V9L12 6Z" fill="#00D4FF" opacity="0.6" />
-                <circle cx="12" cy="12" r="2" fill="#050B18" />
+            <div className="w-9 h-9 flex items-center justify-center">
+              {/* LeadPrime rocket/arrow logo matching the CRM */}
+              <svg viewBox="0 0 40 40" fill="none" className="w-9 h-9">
+                <defs>
+                  <linearGradient id="lp-logo-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#00D4FF" />
+                    <stop offset="100%" stopColor="#0066FF" />
+                  </linearGradient>
+                </defs>
+                {/* Rocket body */}
+                <path d="M20 4 L28 20 L20 17 L12 20 Z" fill="url(#lp-logo-grad)" />
+                {/* Fins */}
+                <path d="M12 20 L8 30 L20 25 Z" fill="#00D4FF" opacity="0.7" />
+                <path d="M28 20 L32 30 L20 25 Z" fill="#0066FF" opacity="0.7" />
+                {/* Flame */}
+                <path d="M20 25 L17 34 L20 31 L23 34 Z" fill="#00D4FF" opacity="0.5" />
+                {/* Window */}
+                <circle cx="20" cy="16" r="2.5" fill="#050B18" />
+                <circle cx="20" cy="16" r="1.5" fill="#00D4FF" opacity="0.6" />
               </svg>
             </div>
             <span
