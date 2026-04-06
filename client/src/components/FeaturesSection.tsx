@@ -79,8 +79,8 @@ const features = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
       </svg>
     ),
-    title: "AI Agent — Mervin",
-    desc: "Your AI super-agent. Talks to owners, clients, and other AI agents. Handles follow-ups, qualifies leads, and books appointments 24/7.",
+    title: "AI Agent — Tu Asistente",
+    desc: "Tu agente AI personalizable. Gestiona leads de forma autónoma, da seguimiento por SMS en autopilot, habla con clientes y otros agentes AI — 24/7.",
     color: "#00D4FF",
     highlight: true,
   },

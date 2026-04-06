@@ -4,7 +4,7 @@
 const basePlanFeatures = [
   "Unlimited contacts & lead pipeline",
   "SMS, Email & Voice campaigns",
-  "AI Agent Mervin — full access",
+  "AI Agent — Acceso Completo (Nombre Personalizable)",
   "LeadSign — digital contracts & e-sign",
   "Lead Hunter — AI prospect discovery",
   "Skip Trace Pro — property owner lookup",
@@ -107,7 +107,7 @@ export default function PricingSection() {
             </div>
 
             <a
-              href="https://leadprime.chyrris.com"
+              href="https://lead-prime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full py-4 rounded-xl text-sm font-bold text-center mb-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
@@ -177,7 +177,7 @@ export default function PricingSection() {
             </div>
 
             <a
-              href="https://leadprime.chyrris.com"
+              href="https://lead-prime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full py-4 rounded-xl text-sm font-bold text-center mb-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
@@ -233,7 +233,7 @@ export default function PricingSection() {
               network, exclusive events, and locked-in pricing forever. No credit card. No commitment.
             </p>
             <a
-              href="https://leadprime.chyrris.com"
+              href="https://lead-prime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-amber px-10 py-4 rounded-xl text-base font-bold inline-flex items-center justify-center gap-2"

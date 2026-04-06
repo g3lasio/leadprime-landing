@@ -113,7 +113,7 @@ export default function NetworkSection() {
             </div>
 
             <a
-              href="https://leadprime.chyrris.com"
+              href="https://lead-prime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-amber px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"

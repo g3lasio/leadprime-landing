@@ -17,7 +17,7 @@ const industries = [
       { icon: "🏗️", title: "Government & Residential Projects", desc: "Access federal, state, and residential projects posted by PMs and investors. Bid directly from the app." },
       { icon: "💰", title: "Business Financing & Credit Lines", desc: "Preferred financing options, commercial credit reconstruction, and strategic growth partners — exclusive to Network Elite members." },
       { icon: "🎟️", title: "Networking Events — Las Vegas, SF, Miami", desc: "Coworking and networking events in top cities. Meet PMs, investors, lenders, and partners face to face." },
-      { icon: "🤖", title: "AI Agent Mervin", desc: "Your AI handles client communication 24/7 — answers questions, books appointments, qualifies leads." },
+      { icon: "🤖", title: "Agente AI 24/7", desc: "Tu agente AI maneja la comunicación con clientes 24/7 — responde preguntas, agenda citas y califica leads en autopilot." },
     ],
     cta: "Join as a Contractor",
   },
@@ -26,16 +26,18 @@ const industries = [
     label: "Property Managers",
     emoji: "🏢",
     color: "#F59E0B",
-    tagline: "Find reliable contractors. Manage everything in one place.",
-    headline: "The PM's Command Center for Vendors, Leads & Operations",
-    desc: "Managing properties means managing people. LeadPrime gives you a verified network of contractors, automated lead follow-up, and all your vendor documents in one place.",
+    tagline: "Automatiza tu portafolio. Gestiona todo desde un solo lugar.",
+    headline: "El Centro de Comando del PM: Automatización Total de Propiedades",
+    desc: "Administrar propiedades significa manejar personas, pagos, mantenimiento y contratos — todo al mismo tiempo. LeadPrime automatiza las tareas repetitivas para que puedas enfocarte en crecer tu portafolio.",
     benefits: [
-      { icon: "🔍", title: "Verified Contractor Network", desc: "Find licensed, insured contractors with verified Trust Scores. No more guessing." },
-      { icon: "📋", title: "Vendor Compliance Requests", desc: "Request W-9, COI, and license documents from contractors directly in the app." },
-      { icon: "📊", title: "Lead Pipeline Management", desc: "Track tenant inquiries, owner leads, and vendor relationships in one visual pipeline." },
-      { icon: "📣", title: "Multi-Channel Campaigns", desc: "Send SMS, email, and voice campaigns to owners and tenants at scale." },
-      { icon: "📅", title: "Calendar & Scheduling", desc: "Manage appointments, inspections, and follow-ups with integrated calendar." },
-      { icon: "🔗", title: "Integration Hub", desc: "Connect Meta Ads, Google Ads, Zoom, Outlook, and more to centralize your workflow." },
+      { icon: "💰", title: "Cobro de Rentas Automatizado", desc: "Automatiza el cobro mensual de rentas con recordatorios por SMS y email. Reduce la morosidad y elimina el seguimiento manual." },
+      { icon: "🔧", title: "Gestión de Mantenimiento", desc: "Los inquilinos reportan problemas desde el portal. El agente AI asigna contratistas, da seguimiento y cierra tickets automáticamente." },
+      { icon: "📋", title: "Gestión de Aplicaciones", desc: "Recibe, revisa y procesa aplicaciones de nuevos inquilinos en un pipeline visual. Verifica antecedentes y aprueba desde la app." },
+      { icon: "📄", title: "Renovación de Contratos", desc: "Automatiza el proceso de renovación: notificaciones, negociación de términos, firma digital y archivado — sin papeleo manual." },
+      { icon: "🔍", title: "Red de Contratistas Verificados", desc: "Encuentra contratistas con licencia y seguro con Trust Scores verificados. Sin adivinar, sin sorpresas." },
+      { icon: "📊", title: "Pipeline de Prospectos", desc: "Gestiona inquilinos potenciales, propietarios y relaciones con vendedores en un pipeline visual unificado." },
+      { icon: "📣", title: "Campañas Multi-Canal", desc: "Envía campañas de SMS, email y voz a propietarios e inquilinos a escala con un solo clic." },
+      { icon: "🤖", title: "Agente AI 24/7", desc: "Tu agente AI responde preguntas de inquilinos, califica prospectos y agenda visitas — sin que levantes un dedo." },
     ],
     cta: "Join as a Property Manager",
   },
@@ -190,7 +192,7 @@ export default function IndustrySection() {
                 {ind.desc}
               </p>
               <a
-                href="https://leadprime.chyrris.com"
+                href="https://lead-prime.chyrris.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"

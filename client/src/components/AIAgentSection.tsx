@@ -2,34 +2,44 @@ const AI_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK
 
 const capabilities = [
   {
-    title: "Talks to Your Clients",
-    desc: "Mervin answers questions, qualifies leads, and handles objections via SMS, email, and voice — 24/7, without you lifting a finger.",
+    title: "Gestión Autónoma de Leads",
+    desc: "Tu agente AI gestiona y maneja tus leads de forma completamente autónoma — califica, prioriza y responde sin que tengas que intervenir.",
+    icon: "🎯",
+  },
+  {
+    title: "Seguimiento por SMS en Autopilot",
+    desc: "Cada nuevo lead recibe seguimiento inmediato vía SMS de forma automática. Tu pipeline nunca se enfría — el agente trabaja 24/7 sin descanso.",
+    icon: "📲",
+  },
+  {
+    title: "Comunicación con Clientes",
+    desc: "Tu agente responde preguntas, califica leads y maneja objeciones por SMS, email y voz — 24/7, sin que levantes un dedo.",
     icon: "💬",
   },
   {
-    title: "Communicates with Owners",
-    desc: "Sends personalized follow-ups to property owners, motivated sellers, and business contacts on your behalf.",
-    icon: "👤",
-  },
-  {
-    title: "Connects with Other AI Agents",
-    desc: "Via Agent Connector MCP, Mervin integrates with external AI tools — letting other agents send leads directly into your CRM.",
+    title: "Conecta con Otros Agentes AI",
+    desc: "Vía Agent Connector MCP, tu agente se integra con herramientas AI externas — permitiendo que otros agentes envíen leads directamente a tu CRM.",
     icon: "🤖",
   },
   {
-    title: "Books Appointments",
-    desc: "Qualifies leads and books appointments directly on your calendar. You only talk to people who are ready to do business.",
+    title: "Agenda Citas Automáticamente",
+    desc: "Califica leads y agenda citas directamente en tu calendario. Solo hablas con personas listas para hacer negocios.",
     icon: "📅",
   },
   {
-    title: "Trained on Your Business",
-    desc: "Feed Mervin your pricing, FAQs, service area, and documents via the Knowledge Base. He knows your business as well as you do.",
+    title: "Entrenado en Tu Negocio",
+    desc: "Alimenta tu agente con tus precios, FAQs, área de servicio y documentos vía la Base de Conocimiento. Conoce tu negocio tan bien como tú.",
     icon: "🧠",
   },
   {
-    title: "Multi-Channel Presence",
-    desc: "Active on SMS, email, voice calls, and web chat simultaneously. Never miss a lead regardless of how they contact you.",
+    title: "Presencia Multi-Canal",
+    desc: "Activo en SMS, email, llamadas de voz y chat web simultáneamente. Nunca pierdas un lead sin importar cómo te contacten.",
     icon: "📡",
+  },
+  {
+    title: "Nombre y Personalidad Propios",
+    desc: "Dale a tu agente el nombre que quieras y entrénalo con el conocimiento de tu negocio. Es tu asistente, con tu identidad.",
+    icon: "✨",
   },
 ];
 
@@ -53,15 +63,18 @@ export default function AIAgentSection() {
               className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Meet Mervin.
+              Tu Agente AI.
               <br />
-              <span className="lp-text-gradient-cyan">Your AI That Never Sleeps.</span>
+              <span className="lp-text-gradient-cyan">El Que Nunca Duerme.</span>
             </h2>
 
-            <p className="text-white/60 mb-10 leading-relaxed text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Mervin is not just a chatbot. He's a full AI agent that communicates with your clients,
-              follows up with leads, talks to other AI agents, and keeps your pipeline moving —
-              all while you focus on what you do best.
+            <p className="text-white/60 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Tu agente AI no es solo un chatbot. Es un agente completo que gestiona tus leads de forma autónoma,
+              da seguimiento automático por SMS en modo autopilot, habla con otros agentes AI y mantiene
+              tu pipeline en movimiento — todo mientras tú te enfocas en lo que mejor sabes hacer.
+            </p>
+            <p className="text-[#00D4FF] font-semibold mb-10 text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Dale el nombre que quieras. Entrénalo con tu negocio. Es tuyo.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
@@ -79,13 +92,13 @@ export default function AIAgentSection() {
             </div>
 
             <a
-              href="https://leadprime.chyrris.com"
+              href="https://lead-prime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"
             >
               <span>🤖</span>
-              Activate Mervin — Free 90 Days
+              Activa Tu Agente AI — 90 Días Gratis
             </a>
           </div>
 
@@ -94,7 +107,7 @@ export default function AIAgentSection() {
             <div className="relative rounded-2xl overflow-hidden lp-border-cyan animate-float">
               <img
                 src={AI_IMG}
-                alt="Mervin AI Agent"
+                alt="LeadPrime AI Agent"
                 className="w-full object-cover"
                 style={{ height: "500px", objectPosition: "center" }}
               />
@@ -103,18 +116,18 @@ export default function AIAgentSection() {
 
             {/* Floating chat bubbles */}
             <div className="absolute top-8 -left-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-cyan">
-              <div className="text-xs text-[#00D4FF] font-semibold mb-1">Mervin → Lead</div>
-              <div className="text-xs text-white/80">"Hi John! I saw you're interested in a fence quote. When's a good time to chat?"</div>
+              <div className="text-xs text-[#00D4FF] font-semibold mb-1">Agente AI → Lead</div>
+              <div className="text-xs text-white/80">"¡Hola! Vi que estás interesado. ¿Cuándo tienes disponibilidad para hablar?"</div>
             </div>
 
             <div className="absolute bottom-16 -right-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-amber">
-              <div className="text-xs text-[#F59E0B] font-semibold mb-1">Lead → Mervin</div>
-              <div className="text-xs text-white/80">"Tomorrow at 2pm works for me!"</div>
+              <div className="text-xs text-[#F59E0B] font-semibold mb-1">Lead → Agente AI</div>
+              <div className="text-xs text-white/80">"¡Mañana a las 2pm me viene bien!"</div>
             </div>
 
             <div className="absolute bottom-2 left-8 lp-card rounded-xl px-4 py-3 max-w-[200px]" style={{ border: "1px solid #10B98130" }}>
-              <div className="text-xs text-[#10B981] font-semibold mb-1">✓ Appointment Booked</div>
-              <div className="text-xs text-white/80">Tomorrow 2:00 PM — Added to calendar</div>
+              <div className="text-xs text-[#10B981] font-semibold mb-1">✓ Cita Agendada</div>
+              <div className="text-xs text-white/80">Mañana 2:00 PM — Agregado al calendario</div>
             </div>
           </div>
         </div>
