@@ -80,7 +80,7 @@ const features = [
       </svg>
     ),
     title: "AI Agent — Tu Asistente",
-    desc: "Tu agente AI personalizable. Gestiona leads de forma autónoma, da seguimiento por SMS en autopilot, habla con clientes y otros agentes AI — 24/7.",
+    desc: "Your fully customizable AI agent. Autonomously manages leads, follows up via SMS on autopilot, and communicates with clients and other AI agents — 24/7.",
     color: "#00D4FF",
     highlight: true,
   },

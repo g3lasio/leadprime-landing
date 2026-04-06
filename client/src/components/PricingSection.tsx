@@ -4,7 +4,7 @@
 const basePlanFeatures = [
   "Unlimited contacts & lead pipeline",
   "SMS, Email & Voice campaigns",
-  "AI Agent — Acceso Completo (Nombre Personalizable)",
+  "AI Agent — Full Access (Custom Name & Personality)",
   "LeadSign — digital contracts & e-sign",
   "Lead Hunter — AI prospect discovery",
   "Skip Trace Pro — property owner lookup",
