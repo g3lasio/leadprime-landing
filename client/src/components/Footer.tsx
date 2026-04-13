@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-8">
             <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
             <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Founding Member Spots Available
+              Start Free — No Credit Card Required
             </span>
           </div>
           <h2
@@ -30,8 +30,7 @@ export default function Footer() {
             <span className="lp-text-gradient-cyan">Your Market?</span>
           </h2>
           <p className="text-xl text-white/60 max-w-2xl mx-auto mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Join LeadPrime Network today. 90 days free. No credit card.
-            Be one of the first in your city to claim your Founding Member badge.
+            Start free with Pay-As-You-Go. Upgrade to Pro or Network Elite when you're ready to scale.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
@@ -43,7 +42,7 @@ export default function Footer() {
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Start Free — 90 Days
+              Get Started Free
             </a>
           </div>
           <p className="text-white/20 text-sm mt-6">

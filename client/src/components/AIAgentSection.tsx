@@ -98,7 +98,7 @@ export default function AIAgentSection() {
               className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"
             >
               <span>🤖</span>
-              Activate Your AI Agent — Free 90 Days
+              Activate Your AI Agent — Free
             </a>
           </div>
 

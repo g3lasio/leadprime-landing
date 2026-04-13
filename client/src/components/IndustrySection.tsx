@@ -8,10 +8,10 @@ const industries = [
     color: "#00D4FF",
     tagline: "Stop chasing leads. Start closing jobs.",
     headline: "Built for the Contractor Who Wants to Dominate Their Market",
-    desc: "You're good at your trade. LeadPrime handles the business side — lead follow-up, contracts, compliance, and network connections — so you can focus on the work. Join as a Founding Member and get 90 days free with full access to OWL FENC Suite.",
+    desc: "You're good at your trade. LeadPrime handles the business side — lead follow-up, contracts, compliance, and network connections — so you can focus on the work. Upgrade to Network Elite for full access to OWL FENC Suite and verified B2B connections.",
     benefits: [
       { icon: "📲", title: "Auto Lead Follow-Up", desc: "Never lose a lead again. AI follows up via SMS, email, and voice automatically." },
-      { icon: "📄", title: "OWL FENC Suite — Free 90 Days", desc: "Generate professional estimates, contracts, and permits at no extra cost during your 90-day trial. Worth $100/month." },
+      { icon: "📄", title: "OWL FENC Suite", desc: "Generate professional estimates, contracts, and permits. Available with Network Elite — worth $100/month." },
       { icon: "🛡️", title: "Trust Score & Compliance Kit", desc: "W-9, license verification, COI — all organized and shareable with PMs and investors." },
       { icon: "🌐", title: "Public Verified Profile", desc: "Your @handle profile shows your credentials, Trust Score, and years of experience." },
       { icon: "🏗️", title: "Government & Residential Projects", desc: "Access federal, state, and residential projects posted by PMs and investors. Bid directly from the app." },
@@ -203,7 +203,7 @@ export default function IndustrySection() {
                   boxShadow: `0 0 20px ${ind.color}40`,
                 }}
               >
-                {ind.cta} — Free 90 Days
+                {ind.cta} — Get Started Free
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

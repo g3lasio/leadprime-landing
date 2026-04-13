@@ -76,7 +76,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="lp-btn-primary px-5 py-2.5 rounded-lg text-sm font-bold"
             >
-              Start Free — 90 Days
+              Get Started Free
             </a>
           </div>
 
@@ -121,7 +121,7 @@ export default function Navbar() {
                 rel="noopener noreferrer"
                 className="lp-btn-primary px-5 py-3 rounded-lg text-sm font-bold text-center mt-2"
               >
-                Start Free — 90 Days
+                Get Started Free
               </a>
             </div>
           </div>
