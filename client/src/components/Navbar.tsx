@@ -63,7 +63,7 @@ export default function Navbar() {
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-white/70 hover:text-white transition-colors"
@@ -71,7 +71,7 @@ export default function Navbar() {
               Sign In
             </a>
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-primary px-5 py-2.5 rounded-lg text-sm font-bold"
@@ -116,7 +116,7 @@ export default function Navbar() {
                 </button>
               ))}
               <a
-                href="https://lead-prime.chyrris.com"
+                href="https://leadprime.chyrris.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="lp-btn-primary px-5 py-3 rounded-lg text-sm font-bold text-center mt-2"

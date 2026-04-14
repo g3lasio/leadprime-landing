@@ -34,7 +34,7 @@ export default function Footer() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-primary px-10 py-5 rounded-xl text-lg font-black inline-flex items-center justify-center gap-3"
@@ -80,7 +80,7 @@ export default function Footer() {
                 {["Features", "LeadPrime Network", "AI Agent", "Pricing", "Integrations"].map((item) => (
                   <li key={item}>
                     <a
-                      href="https://lead-prime.chyrris.com"
+                      href="https://leadprime.chyrris.com"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-white/40 hover:text-[#00D4FF] transition-colors"
@@ -102,7 +102,7 @@ export default function Footer() {
                 {["Contractors", "Property Managers", "Investors", "Realtors", "Lenders", "Wholesalers"].map((item) => (
                   <li key={item}>
                     <a
-                      href="https://lead-prime.chyrris.com"
+                      href="https://leadprime.chyrris.com"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-white/40 hover:text-[#00D4FF] transition-colors"
@@ -124,7 +124,7 @@ export default function Footer() {
               {["Privacy Policy", "Terms of Service", "Support"].map((item) => (
                 <a
                   key={item}
-                  href="https://lead-prime.chyrris.com"
+                  href="https://leadprime.chyrris.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-white/20 hover:text-white/50 transition-colors"

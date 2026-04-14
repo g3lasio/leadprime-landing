@@ -110,7 +110,7 @@ export default function PricingSection() {
             </div>
 
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full py-4 rounded-xl text-sm font-bold text-center mb-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
@@ -180,7 +180,7 @@ export default function PricingSection() {
             </div>
 
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full py-4 rounded-xl text-sm font-bold text-center mb-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
@@ -250,7 +250,7 @@ export default function PricingSection() {
             </div>
 
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full py-4 rounded-xl text-sm font-bold text-center mb-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"

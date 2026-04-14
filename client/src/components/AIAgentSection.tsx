@@ -92,7 +92,7 @@ export default function AIAgentSection() {
             </div>
 
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"

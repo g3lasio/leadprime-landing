@@ -98,7 +98,7 @@ export default function HeroSection() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 mb-16">
             <a
-              href="https://lead-prime.chyrris.com"
+              href="https://leadprime.chyrris.com"
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold text-center inline-flex items-center justify-center gap-2"

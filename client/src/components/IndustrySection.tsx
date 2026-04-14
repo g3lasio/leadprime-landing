@@ -192,7 +192,7 @@ export default function IndustrySection() {
                 {ind.desc}
               </p>
               <a
-                href="https://lead-prime.chyrris.com"
+                href="https://leadprime.chyrris.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
