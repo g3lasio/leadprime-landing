@@ -97,7 +97,17 @@ async function sendConfirmationEmail(email: string, name: string, code: string) 
 }
 
 // Notify owner: email to info@owlfenc.com + Manus push notification
-async function notifyOwnerNewRegistration(name: string, role: string, email: string, code: string) {
+async function notifyOwnerNewRegistration(name: string, role: string, email: string, code: string, extra: {
+  phone: string;
+  city: string;
+  preferred_language: string;
+  years_in_business?: string | null;
+  brokerage_name?: string | null;
+  business_name?: string | null;
+  units_managed?: string | null;
+  referral_source: string;
+  dietary_restriction: string;
+}) {
   const apiKey = process.env.RESEND_API_KEY;
   const forgeApiUrl = process.env.BUILT_IN_FORGE_API_URL;
   const forgeApiKey = process.env.BUILT_IN_FORGE_API_KEY;
@@ -114,8 +124,22 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
         body: JSON.stringify({
           from: "La Noche Chyrris <noreply@owlfenc.com>",
           to: ["mervin@owlfenc.com"],
-          subject: `🎉 Nuevo registro: ${name} — La Noche Chyrris`,
-          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎉 Nuevo registro — La Noche Chyrris</h2><table style="width:100%;border-collapse:collapse;margin-top:16px;"><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Email</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${email}</td></tr><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Rol</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${role}</td></tr><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;">Código</td><td style="color:#D4AF37;padding:8px 0;font-weight:900;font-size:20px;letter-spacing:2px;">${code}</td></tr></table><p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:32px;">Dashboard admin: leadprime.chyrris.com/admin/evento</p></body></html>`,
+          subject: `🎉 Nuevo registro: ${name} (${role}) — La Noche Chyrris`,
+          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎉 Nuevo registro — La Noche Chyrris</h2><table style="width:100%;border-collapse:collapse;margin-top:16px;">
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);width:40%">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Email</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${email}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Teléfono</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.phone}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Rol</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${role}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Ciudad</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.city}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Idioma</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.preferred_language}</td></tr>
+${extra.brokerage_name ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Brokerage</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.brokerage_name}</td></tr>` : ''}
+${extra.business_name ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Empresa</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.business_name}</td></tr>` : ''}
+${extra.units_managed ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Unidades</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.units_managed}</td></tr>` : ''}
+${extra.years_in_business ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Años en el negocio</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.years_in_business}</td></tr>` : ''}
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Referido por</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.referral_source}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Restricción dieta</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.dietary_restriction}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;">Código</td><td style="color:#D4AF37;padding:8px 0;font-weight:900;font-size:20px;letter-spacing:2px;">${code}</td></tr>
+</table><p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:32px;">Dashboard admin: <a href="https://lead-prime.chyrris.com/admin/evento" style="color:#D4AF37;">lead-prime.chyrris.com/admin/evento</a></p></body></html>`,
         }),
       });
       if (!res.ok) {
@@ -255,7 +279,17 @@ export const eventoRouter = router({
 
     // Fire-and-forget: email + owner notification
     sendConfirmationEmail(input.email, input.full_name, code).catch(console.error);
-    notifyOwnerNewRegistration(input.full_name, input.role, input.email, code).catch(console.error);
+    notifyOwnerNewRegistration(input.full_name, input.role, input.email, code, {
+      phone: input.phone,
+      city: input.city,
+      preferred_language: input.preferred_language,
+      years_in_business: input.years_in_business ?? null,
+      brokerage_name: input.brokerage_name ?? null,
+      business_name: input.business_name ?? null,
+      units_managed: input.units_managed ?? null,
+      referral_source: input.referral_source,
+      dietary_restriction: input.dietary_restriction,
+    }).catch(console.error);
 
     return { success: true, code };
   }),

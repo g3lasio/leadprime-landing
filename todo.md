@@ -36,3 +36,4 @@
 - [x] Update notification recipient to mervin@owlfenc.com (info@owlfenc.com had issues)
 - [ ] Confirm event date (28 or 29 May) with Gelasio — currently shows "29 de Mayo"
 - [ ] Add more cities to the registration form dropdown if needed
+- [x] Improve owner notification email to include all fields: phone, city, brokerage, years in business, referral source, dietary restriction, language
