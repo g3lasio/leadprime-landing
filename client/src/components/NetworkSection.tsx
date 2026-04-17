@@ -37,9 +37,9 @@ const networkBenefits = [
     desc: "Get your LLC, EIN, Articles of Organization, and more — directly from your CRM.",
   },
   {
-    icon: "🔒",
-    title: "Founding Member Badge — For Life",
-    desc: "Join now and earn the Founding Member badge — priority placement in the network and locked-in pricing forever.",
+    icon: "⭐",
+    title: "Priority Network Placement",
+    desc: "Network Elite members get priority placement in search results, verified badges, and dedicated account management.",
   },
 ];
 
@@ -63,13 +63,13 @@ export default function NetworkSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628]/60 to-transparent" />
             </div>
 
-            {/* Floating badge */}
+            {/* Floating badge — Network Elite */}
             <div className="absolute -bottom-6 -right-6 lp-card rounded-xl p-4 lp-border-amber lp-glow-amber max-w-[200px]">
               <div className="text-2xl font-black text-[#F59E0B] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                90 Days
+                $249
               </div>
-              <div className="text-xs text-white/60">Free Founding Member Trial</div>
-              <div className="text-xs text-[#F59E0B] font-semibold mt-1">No credit card required</div>
+              <div className="text-xs text-white/60">Network Elite / month</div>
+              <div className="text-xs text-[#F59E0B] font-semibold mt-1">$250 credits included</div>
             </div>
           </div>
 
@@ -85,7 +85,7 @@ export default function NetworkSection() {
               className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              The Elite B2B Hub
+              The B2B Network Built
               <br />
               <span className="lp-text-gradient-amber">for Real Estate Pros.</span>
             </h2>

@@ -28,25 +28,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 flex items-center justify-center">
-              {/* LeadPrime rocket/arrow logo matching the CRM */}
-              <svg viewBox="0 0 40 40" fill="none" className="w-9 h-9">
-                <defs>
-                  <linearGradient id="lp-logo-grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#00D4FF" />
-                    <stop offset="100%" stopColor="#0066FF" />
-                  </linearGradient>
-                </defs>
-                {/* Rocket body */}
-                <path d="M20 4 L28 20 L20 17 L12 20 Z" fill="url(#lp-logo-grad)" />
-                {/* Fins */}
-                <path d="M12 20 L8 30 L20 25 Z" fill="#00D4FF" opacity="0.7" />
-                <path d="M28 20 L32 30 L20 25 Z" fill="#0066FF" opacity="0.7" />
-                {/* Flame */}
-                <path d="M20 25 L17 34 L20 31 L23 34 Z" fill="#00D4FF" opacity="0.5" />
-                {/* Window */}
-                <circle cx="20" cy="16" r="2.5" fill="#050B18" />
-                <circle cx="20" cy="16" r="1.5" fill="#00D4FF" opacity="0.6" />
-              </svg>
+              <img src="/leadprime-logo.png" alt="LeadPrime" className="w-9 h-9 object-contain" />
             </div>
             <span
               className="font-bold text-xl text-white"
@@ -94,7 +76,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="lp-btn-primary px-5 py-2.5 rounded-lg text-sm font-bold"
             >
-              Start Free — 90 Days
+              Get Started Free
             </a>
           </div>
 
@@ -139,7 +121,7 @@ export default function Navbar() {
                 rel="noopener noreferrer"
                 className="lp-btn-primary px-5 py-3 rounded-lg text-sm font-bold text-center mt-2"
               >
-                Start Free — 90 Days
+                Get Started Free
               </a>
             </div>
           </div>

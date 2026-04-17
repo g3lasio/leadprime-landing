@@ -2,34 +2,44 @@ const AI_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK
 
 const capabilities = [
   {
+    title: "Autonomous Lead Management",
+    desc: "Your AI agent manages and handles your leads completely autonomously — qualifies, prioritizes, and responds without you having to intervene.",
+    icon: "🎯",
+  },
+  {
+    title: "SMS Follow-Up on Autopilot",
+    desc: "Every new lead gets immediate follow-up via SMS automatically. Your pipeline never goes cold — the agent works 24/7 without rest.",
+    icon: "📲",
+  },
+  {
     title: "Talks to Your Clients",
-    desc: "Mervin answers questions, qualifies leads, and handles objections via SMS, email, and voice — 24/7, without you lifting a finger.",
+    desc: "Your agent answers questions, qualifies leads, and handles objections via SMS, email, and voice — 24/7, without you lifting a finger.",
     icon: "💬",
   },
   {
-    title: "Communicates with Owners",
-    desc: "Sends personalized follow-ups to property owners, motivated sellers, and business contacts on your behalf.",
-    icon: "👤",
-  },
-  {
     title: "Connects with Other AI Agents",
-    desc: "Via Agent Connector MCP, Mervin integrates with external AI tools — letting other agents send leads directly into your CRM.",
+    desc: "Via Agent Connector MCP, your agent integrates with external AI tools — letting other agents send leads directly into your CRM.",
     icon: "🤖",
   },
   {
-    title: "Books Appointments",
+    title: "Books Appointments Automatically",
     desc: "Qualifies leads and books appointments directly on your calendar. You only talk to people who are ready to do business.",
     icon: "📅",
   },
   {
     title: "Trained on Your Business",
-    desc: "Feed Mervin your pricing, FAQs, service area, and documents via the Knowledge Base. He knows your business as well as you do.",
+    desc: "Feed your agent your pricing, FAQs, service area, and documents via the Knowledge Base. It knows your business as well as you do.",
     icon: "🧠",
   },
   {
     title: "Multi-Channel Presence",
     desc: "Active on SMS, email, voice calls, and web chat simultaneously. Never miss a lead regardless of how they contact you.",
     icon: "📡",
+  },
+  {
+    title: "Your Name. Your Identity.",
+    desc: "Give your agent any name you want and train it with your business knowledge. It's your assistant — fully branded to you.",
+    icon: "✨",
   },
 ];
 
@@ -53,15 +63,18 @@ export default function AIAgentSection() {
               className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Meet Mervin.
+              Your AI Agent.
               <br />
-              <span className="lp-text-gradient-cyan">Your AI That Never Sleeps.</span>
+              <span className="lp-text-gradient-cyan">The One That Never Sleeps.</span>
             </h2>
 
-            <p className="text-white/60 mb-10 leading-relaxed text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Mervin is not just a chatbot. He's a full AI agent that communicates with your clients,
-              follows up with leads, talks to other AI agents, and keeps your pipeline moving —
+            <p className="text-white/60 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Your AI agent is not just a chatbot. It's a full agent that autonomously manages your leads,
+              follows up via SMS on autopilot, talks to other AI agents, and keeps your pipeline moving —
               all while you focus on what you do best.
+            </p>
+            <p className="text-[#00D4FF] font-semibold mb-10 text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              Give it any name you want. Train it on your business. It's yours.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
@@ -85,7 +98,7 @@ export default function AIAgentSection() {
               className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"
             >
               <span>🤖</span>
-              Activate Mervin — Free 90 Days
+              Activate Your AI Agent — Free
             </a>
           </div>
 
@@ -94,7 +107,7 @@ export default function AIAgentSection() {
             <div className="relative rounded-2xl overflow-hidden lp-border-cyan animate-float">
               <img
                 src={AI_IMG}
-                alt="Mervin AI Agent"
+                alt="LeadPrime AI Agent"
                 className="w-full object-cover"
                 style={{ height: "500px", objectPosition: "center" }}
               />
@@ -103,12 +116,12 @@ export default function AIAgentSection() {
 
             {/* Floating chat bubbles */}
             <div className="absolute top-8 -left-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-cyan">
-              <div className="text-xs text-[#00D4FF] font-semibold mb-1">Mervin → Lead</div>
-              <div className="text-xs text-white/80">"Hi John! I saw you're interested in a fence quote. When's a good time to chat?"</div>
+              <div className="text-xs text-[#00D4FF] font-semibold mb-1">AI Agent → Lead</div>
+              <div className="text-xs text-white/80">"Hi! I saw you're interested. When's a good time to connect?"</div>
             </div>
 
             <div className="absolute bottom-16 -right-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-amber">
-              <div className="text-xs text-[#F59E0B] font-semibold mb-1">Lead → Mervin</div>
+              <div className="text-xs text-[#F59E0B] font-semibold mb-1">Lead → AI Agent</div>
               <div className="text-xs text-white/80">"Tomorrow at 2pm works for me!"</div>
             </div>
 

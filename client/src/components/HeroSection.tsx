@@ -5,7 +5,7 @@ const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZf
 const stats = [
   { value: "10+", label: "Industry Verticals" },
   { value: "AI", label: "Powered Automation" },
-  { value: "90", label: "Days Free Trial" },
+  { value: "$0", label: "To Get Started" },
   { value: "5+", label: "Integrations" },
 ];
 
@@ -66,7 +66,7 @@ export default function HeroSection() {
               className="text-sm font-semibold text-[#00D4FF]"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Founding Member Program — 90 Days Free
+              Start free — Pay only for what you use
             </span>
           </div>
 
@@ -106,7 +106,7 @@ export default function HeroSection() {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Join the Network — Free 90 Days
+              Get Started Free
             </a>
             <button
               onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}

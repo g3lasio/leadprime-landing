@@ -8,16 +8,16 @@ const industries = [
     color: "#00D4FF",
     tagline: "Stop chasing leads. Start closing jobs.",
     headline: "Built for the Contractor Who Wants to Dominate Their Market",
-    desc: "You're good at your trade. LeadPrime handles the business side — lead follow-up, contracts, compliance, and network connections — so you can focus on the work. Join as a Founding Member and get 90 days free with full access to OWL FENC Suite.",
+    desc: "You're good at your trade. LeadPrime handles the business side — lead follow-up, contracts, compliance, and network connections — so you can focus on the work. Upgrade to Network Elite for full access to OWL FENC Suite and verified B2B connections.",
     benefits: [
       { icon: "📲", title: "Auto Lead Follow-Up", desc: "Never lose a lead again. AI follows up via SMS, email, and voice automatically." },
-      { icon: "📄", title: "OWL FENC Suite — Free 90 Days", desc: "Generate professional estimates, contracts, and permits at no extra cost during your 90-day trial. Worth $100/month." },
+      { icon: "📄", title: "OWL FENC Suite", desc: "Generate professional estimates, contracts, and permits. Available with Network Elite — worth $100/month." },
       { icon: "🛡️", title: "Trust Score & Compliance Kit", desc: "W-9, license verification, COI — all organized and shareable with PMs and investors." },
       { icon: "🌐", title: "Public Verified Profile", desc: "Your @handle profile shows your credentials, Trust Score, and years of experience." },
       { icon: "🏗️", title: "Government & Residential Projects", desc: "Access federal, state, and residential projects posted by PMs and investors. Bid directly from the app." },
       { icon: "💰", title: "Business Financing & Credit Lines", desc: "Preferred financing options, commercial credit reconstruction, and strategic growth partners — exclusive to Network Elite members." },
       { icon: "🎟️", title: "Networking Events — Las Vegas, SF, Miami", desc: "Coworking and networking events in top cities. Meet PMs, investors, lenders, and partners face to face." },
-      { icon: "🤖", title: "AI Agent Mervin", desc: "Your AI handles client communication 24/7 — answers questions, books appointments, qualifies leads." },
+      { icon: "🤖", title: "AI Agent 24/7", desc: "Your AI agent handles client communication 24/7 — answers questions, books appointments, and qualifies leads on autopilot." },
     ],
     cta: "Join as a Contractor",
   },
@@ -26,16 +26,18 @@ const industries = [
     label: "Property Managers",
     emoji: "🏢",
     color: "#F59E0B",
-    tagline: "Find reliable contractors. Manage everything in one place.",
-    headline: "The PM's Command Center for Vendors, Leads & Operations",
-    desc: "Managing properties means managing people. LeadPrime gives you a verified network of contractors, automated lead follow-up, and all your vendor documents in one place.",
+    tagline: "Automate your portfolio. Manage everything from one place.",
+    headline: "The PM's Command Center: Full Property Automation",
+    desc: "Managing properties means juggling people, payments, maintenance, and contracts — all at once. LeadPrime automates the repetitive tasks so you can focus on growing your portfolio.",
     benefits: [
-      { icon: "🔍", title: "Verified Contractor Network", desc: "Find licensed, insured contractors with verified Trust Scores. No more guessing." },
-      { icon: "📋", title: "Vendor Compliance Requests", desc: "Request W-9, COI, and license documents from contractors directly in the app." },
-      { icon: "📊", title: "Lead Pipeline Management", desc: "Track tenant inquiries, owner leads, and vendor relationships in one visual pipeline." },
-      { icon: "📣", title: "Multi-Channel Campaigns", desc: "Send SMS, email, and voice campaigns to owners and tenants at scale." },
-      { icon: "📅", title: "Calendar & Scheduling", desc: "Manage appointments, inspections, and follow-ups with integrated calendar." },
-      { icon: "🔗", title: "Integration Hub", desc: "Connect Meta Ads, Google Ads, Zoom, Outlook, and more to centralize your workflow." },
+      { icon: "💰", title: "Automated Rent Collection", desc: "Automate monthly rent collection with SMS and email reminders. Reduce delinquency and eliminate manual follow-up." },
+      { icon: "🔧", title: "Maintenance Management", desc: "Tenants report issues from the portal. The AI agent assigns contractors, tracks progress, and closes tickets automatically." },
+      { icon: "📋", title: "Application Management", desc: "Receive, review, and process new tenant applications in a visual pipeline. Run background checks and approve directly from the app." },
+      { icon: "📄", title: "Lease Renewal Automation", desc: "Automate the renewal process: notifications, term negotiation, digital signature, and archiving — zero paperwork." },
+      { icon: "🔍", title: "Verified Contractor Network", desc: "Find licensed, insured contractors with verified Trust Scores. No more guessing, no more surprises." },
+      { icon: "📊", title: "Prospect Pipeline", desc: "Manage prospective tenants, property owners, and vendor relationships in one unified visual pipeline." },
+      { icon: "📣", title: "Multi-Channel Campaigns", desc: "Send SMS, email, and voice campaigns to owners and tenants at scale with a single click." },
+      { icon: "🤖", title: "AI Agent 24/7", desc: "Your AI agent answers tenant questions, qualifies prospects, and schedules showings — without you lifting a finger." },
     ],
     cta: "Join as a Property Manager",
   },
@@ -201,7 +203,7 @@ export default function IndustrySection() {
                   boxShadow: `0 0 20px ${ind.color}40`,
                 }}
               >
-                {ind.cta} — Free 90 Days
+                {ind.cta} — Get Started Free
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
