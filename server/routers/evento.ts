@@ -81,7 +81,7 @@ async function sendConfirmationEmail(email: string, name: string, code: string) 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "La Noche Chyrris <noreply@chyrris.com>",
+        from: "La Noche Chyrris <noreply@owlfenc.com>",
         to: [email],
         subject: `✅ Tu lugar está confirmado — La Noche Chyrris | Código: ${code}`,
         html,
@@ -96,13 +96,13 @@ async function sendConfirmationEmail(email: string, name: string, code: string) 
   }
 }
 
-// Notify owner: email to gelasio@chyrris.com + Manus push notification
+// Notify owner: email to info@owlfenc.com + Manus push notification
 async function notifyOwnerNewRegistration(name: string, role: string, email: string, code: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const forgeApiUrl = process.env.BUILT_IN_FORGE_API_URL;
   const forgeApiKey = process.env.BUILT_IN_FORGE_API_KEY;
 
-  // 1. Email to gelasio@chyrris.com via Resend
+  // 1. Email to info@owlfenc.com via Resend
   if (apiKey) {
     try {
       const res = await fetch("https://api.resend.com/emails", {
@@ -112,8 +112,8 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "La Noche Chyrris <noreply@chyrris.com>",
-          to: ["gelasio@chyrris.com"],
+          from: "La Noche Chyrris <noreply@owlfenc.com>",
+          to: ["info@owlfenc.com"],
           subject: `🎉 Nuevo registro: ${name} — La Noche Chyrris`,
           html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎉 Nuevo registro — La Noche Chyrris</h2><table style="width:100%;border-collapse:collapse;margin-top:16px;"><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Email</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${email}</td></tr><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Rol</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${role}</td></tr><tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;">Código</td><td style="color:#D4AF37;padding:8px 0;font-weight:900;font-size:20px;letter-spacing:2px;">${code}</td></tr></table><p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:32px;">Dashboard admin: leadprime.chyrris.com/admin/evento</p></body></html>`,
         }),
@@ -122,7 +122,7 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
         const err = await res.text();
         console.error("[Evento] Resend owner notification error:", err);
       } else {
-        console.log("[Evento] Owner notification email sent to gelasio@chyrris.com");
+        console.log("[Evento] Owner notification email sent to info@owlfenc.com");
       }
     } catch (e) {
       console.error("[Evento] Failed to send owner email:", e);
