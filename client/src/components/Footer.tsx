@@ -59,7 +59,7 @@ export default function Footer() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 flex items-center justify-center">
-                  <img src="/leadprime-logo.png" alt="LeadPrime" className="w-8 h-8 object-contain" />
+                  <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/leadprime-logo_b6e94952.png" alt="LeadPrime" className="w-8 h-8 object-contain" />
                 </div>
                 <span className="font-bold text-xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   LeadPrime

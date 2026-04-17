@@ -28,7 +28,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 flex items-center justify-center">
-              <img src="/leadprime-logo.png" alt="LeadPrime" className="w-9 h-9 object-contain" />
+              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/leadprime-logo_b6e94952.png" alt="LeadPrime" className="w-9 h-9 object-contain" />
             </div>
             <span
               className="font-bold text-xl text-white"
@@ -58,6 +58,15 @@ export default function Navbar() {
                 {item.label}
               </button>
             ))}
+            {/* La Noche Chyrris event link */}
+            <a
+              href="/evento"
+              className="text-sm font-semibold text-[#D4AF37] hover:text-[#F5D060] transition-colors duration-200 flex items-center gap-1.5"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              <span>🌙</span>
+              <span>La Noche Chyrris</span>
+            </a>
           </div>
 
           {/* CTA */}
@@ -115,6 +124,13 @@ export default function Navbar() {
                   {item.label}
                 </button>
               ))}
+              <a
+                href="/evento"
+                className="text-left text-sm font-semibold text-[#D4AF37] hover:text-[#F5D060] transition-colors py-1 flex items-center gap-1.5"
+              >
+                <span>🌙</span>
+                <span>La Noche Chyrris</span>
+              </a>
               <a
                 href="https://leadprime.chyrris.com"
                 target="_blank"
