@@ -33,5 +33,6 @@
 - [x] Test form submission in production (waiting for Gelasio to publish)
 - [x] Fix email sender: change from noreply@chyrris.com to noreply@owlfenc.com (verified domain)
 - [x] Fix notification recipient: change from gelasio@chyrris.com to info@owlfenc.com
+- [x] Update notification recipient to mervin@owlfenc.com (info@owlfenc.com had issues)
 - [ ] Confirm event date (28 or 29 May) with Gelasio — currently shows "29 de Mayo"
 - [ ] Add more cities to the registration form dropdown if needed
