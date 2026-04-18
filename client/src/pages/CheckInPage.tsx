@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import jsQR from "jsqr";
@@ -37,52 +37,65 @@ export default function CheckInPage() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
 
-  // Camera refs
+  // Camera refs — never cause re-renders
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
   const isProcessingRef = useRef(false);
 
+  // Keep mutable refs to latest values so the scan loop never needs to be recreated
+  const enteredPinRef = useRef(enteredPin);
+  const setLastScanRef = useRef(setLastScan);
+  const statsRefetchRef = useRef<(() => void) | null>(null);
+
   const checkInMutation = trpc.evento.checkIn.useMutation();
+  const checkInMutateRef = useRef(checkInMutation.mutateAsync);
+
+  // Keep refs in sync without causing re-renders
+  useEffect(() => { enteredPinRef.current = enteredPin; }, [enteredPin]);
+  useEffect(() => { checkInMutateRef.current = checkInMutation.mutateAsync; }, [checkInMutation.mutateAsync]);
+
   const statsQuery = trpc.evento.attendanceStats.useQuery(
     { pin: enteredPin },
     { enabled: !!enteredPin, refetchInterval: 10000 }
   );
 
-  const processCode = useCallback(
-    async (rawCode: string) => {
-      if (isProcessingRef.current) return;
-      isProcessingRef.current = true;
-      try {
-        const result = await checkInMutation.mutateAsync({ pin: enteredPin, code: rawCode });
-        setLastScan({ result, timestamp: new Date() });
-        statsQuery.refetch();
-        if (result.alreadyCheckedIn) {
-          toast.warning(`⚠️ ${result.attendee.full_name} ya hizo check-in`);
-        } else {
-          toast.success(`✅ ¡Bienvenido, ${result.attendee.full_name}!`);
-        }
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Código no válido";
-        toast.error(`❌ ${msg}`);
-      } finally {
-        setTimeout(() => { isProcessingRef.current = false; }, 2500);
-      }
-    },
-    [enteredPin, checkInMutation, statsQuery]
-  );
+  useEffect(() => {
+    statsRefetchRef.current = () => statsQuery.refetch();
+  }, [statsQuery]);
 
-  // jsQR scan loop — reads frames from video into canvas and decodes
-  const scanLoop = useCallback(() => {
+  // processCode is stable — uses only refs, never recreated
+  const processCodeRef = useRef(async (rawCode: string) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+    try {
+      const result = await checkInMutateRef.current({ pin: enteredPinRef.current, code: rawCode });
+      setLastScanRef.current({ result, timestamp: new Date() });
+      statsRefetchRef.current?.();
+      if (result.alreadyCheckedIn) {
+        toast.warning(`⚠️ ${result.attendee.full_name} ya hizo check-in`);
+      } else {
+        toast.success(`✅ ¡Bienvenido, ${result.attendee.full_name}!`);
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Código no válido";
+      toast.error(`❌ ${msg}`);
+    } finally {
+      setTimeout(() => { isProcessingRef.current = false; }, 2500);
+    }
+  });
+
+  // scanLoop is stable — only uses refs
+  const scanLoopRef = useRef(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.readyState < 2) {
-      rafRef.current = requestAnimationFrame(scanLoop);
+      rafRef.current = requestAnimationFrame(scanLoopRef.current);
       return;
     }
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) { rafRef.current = requestAnimationFrame(scanLoop); return; }
+    if (!ctx) { rafRef.current = requestAnimationFrame(scanLoopRef.current); return; }
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -93,14 +106,14 @@ export default function CheckInPage() {
       const code = jsQR(imageData.data, imageData.width, imageData.height, {
         inversionAttempts: "dontInvert",
       });
-      if (code && code.data) {
-        processCode(code.data);
+      if (code?.data) {
+        processCodeRef.current(code.data);
       }
     }
-    rafRef.current = requestAnimationFrame(scanLoop);
-  }, [processCode]);
+    rafRef.current = requestAnimationFrame(scanLoopRef.current);
+  });
 
-  // Start/stop camera
+  // Camera lifecycle — only depends on enteredPin and mode (both stable strings)
   useEffect(() => {
     if (!enteredPin || mode !== "camera") return;
 
@@ -111,34 +124,27 @@ export default function CheckInPage() {
       setCameraReady(false);
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
+          video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
         });
-        if (!active) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
+        if (!active) { stream.getTracks().forEach((t) => t.stop()); return; }
         streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().then(() => {
+        const video = videoRef.current;
+        if (video) {
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+            video.play().then(() => {
               if (active) {
                 setCameraReady(true);
-                rafRef.current = requestAnimationFrame(scanLoop);
+                rafRef.current = requestAnimationFrame(scanLoopRef.current);
               }
             }).catch((err) => {
               console.error("Video play error:", err);
-              if (active) setCameraError("No se pudo iniciar el video.");
+              if (active) setCameraError("No se pudo iniciar el video. Intenta recargar la página.");
             });
           };
         }
       } catch (err: unknown) {
-        console.error("Camera access error:", err);
         if (!active) return;
         const e = err as { name?: string };
         if (e.name === "NotAllowedError" || e.name === "PermissionDeniedError") {
@@ -157,19 +163,23 @@ export default function CheckInPage() {
 
     return () => {
       active = false;
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
       }
+      const video = videoRef.current;
+      if (video) { video.srcObject = null; }
       setCameraReady(false);
     };
-  }, [enteredPin, mode, scanLoop]);
+    // Only re-run when pin is entered or mode changes — NOT on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enteredPin, mode]);
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualCode.trim()) return;
-    processCode(manualCode.trim());
+    processCodeRef.current(manualCode.trim());
     setManualCode("");
   };
 
@@ -180,11 +190,13 @@ export default function CheckInPage() {
 
   const switchMode = (newMode: "camera" | "manual") => {
     if (newMode === mode) return;
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
+    const video = videoRef.current;
+    if (video) video.srcObject = null;
     setCameraReady(false);
     setCameraError(null);
     setMode(newMode);
@@ -294,7 +306,6 @@ export default function CheckInPage() {
               )}
             </div>
           </div>
-          {/* Progress bar */}
           <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
             <div
               className="h-full rounded-full transition-all duration-700"
@@ -342,7 +353,7 @@ export default function CheckInPage() {
           </button>
         </div>
 
-        {/* Camera Scanner — uses native getUserMedia + jsQR */}
+        {/* Camera Scanner */}
         {mode === "camera" && (
           <div className="space-y-3">
             {cameraError ? (
@@ -354,7 +365,7 @@ export default function CheckInPage() {
                 <p className="text-red-400 text-sm font-bold">Cámara no disponible</p>
                 <p className="text-white/50 text-xs leading-relaxed">{cameraError}</p>
                 <button
-                  onClick={() => { setCameraError(null); setMode("camera"); }}
+                  onClick={() => { setCameraError(null); }}
                   className="px-4 py-2 rounded-lg text-xs font-bold border border-white/20 text-white/60 hover:text-white transition-colors"
                 >
                   Reintentar
@@ -374,10 +385,10 @@ export default function CheckInPage() {
                 className="relative rounded-2xl overflow-hidden"
                 style={{ border: "1px solid rgba(212,175,55,0.2)", background: "#0D1220", aspectRatio: "4/3" }}
               >
-                {/* Hidden canvas for jsQR processing */}
+                {/* Hidden canvas for jsQR */}
                 <canvas ref={canvasRef} className="hidden" />
 
-                {/* Video element */}
+                {/* Video */}
                 <video
                   ref={videoRef}
                   playsInline
@@ -393,41 +404,21 @@ export default function CheckInPage() {
                     <div className="text-center space-y-3">
                       <div className="text-4xl animate-pulse">📷</div>
                       <p className="text-white/50 text-sm">Iniciando cámara...</p>
-                      <p className="text-white/25 text-xs">Puede aparecer un diálogo de permisos</p>
+                      <p className="text-white/25 text-xs">Acepta el permiso de cámara si aparece</p>
                     </div>
                   </div>
                 )}
 
-                {/* Gold corner overlay when active */}
+                {/* Gold corner overlay */}
                 {cameraReady && (
                   <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                     <div className="relative w-52 h-52">
-                      <div
-                        className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-lg"
-                        style={{ borderColor: "#D4AF37" }}
-                      />
-                      <div
-                        className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-tr-lg"
-                        style={{ borderColor: "#D4AF37" }}
-                      />
-                      <div
-                        className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-bl-lg"
-                        style={{ borderColor: "#D4AF37" }}
-                      />
-                      <div
-                        className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-br-lg"
-                        style={{ borderColor: "#D4AF37" }}
-                      />
+                      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-tl-lg" style={{ borderColor: "#D4AF37" }} />
+                      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-tr-lg" style={{ borderColor: "#D4AF37" }} />
+                      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-bl-lg" style={{ borderColor: "#D4AF37" }} />
+                      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-br-lg" style={{ borderColor: "#D4AF37" }} />
                     </div>
                   </div>
-                )}
-
-                {/* Processing flash */}
-                {isProcessingRef.current && (
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{ background: "rgba(212,175,55,0.15)" }}
-                  />
                 )}
               </div>
             )}
@@ -480,19 +471,13 @@ export default function CheckInPage() {
             className="rounded-2xl p-5 transition-all"
             style={{
               border: `1px solid ${lastScan.result.alreadyCheckedIn ? "rgba(245,158,11,0.4)" : "rgba(34,197,94,0.4)"}`,
-              background: lastScan.result.alreadyCheckedIn
-                ? "rgba(245,158,11,0.05)"
-                : "rgba(34,197,94,0.05)",
+              background: lastScan.result.alreadyCheckedIn ? "rgba(245,158,11,0.05)" : "rgba(34,197,94,0.05)",
             }}
           >
             <div className="flex items-start gap-4">
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
-                style={{
-                  background: lastScan.result.alreadyCheckedIn
-                    ? "rgba(245,158,11,0.15)"
-                    : "rgba(34,197,94,0.15)",
-                }}
+                style={{ background: lastScan.result.alreadyCheckedIn ? "rgba(245,158,11,0.15)" : "rgba(34,197,94,0.15)" }}
               >
                 {lastScan.result.alreadyCheckedIn ? "⚠️" : "✅"}
               </div>
@@ -522,11 +507,7 @@ export default function CheckInPage() {
                   </span>
                 </div>
                 <p className="text-white/30 text-xs mt-2">
-                  {lastScan.timestamp.toLocaleTimeString("es-MX", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}
+                  {lastScan.timestamp.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </p>
               </div>
             </div>
@@ -536,19 +517,13 @@ export default function CheckInPage() {
         {/* Recent Check-ins List */}
         {stats && stats.recentCheckins.length > 0 && (
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
-            <div
-              className="px-4 py-3 flex items-center justify-between"
-              style={{ background: "rgba(255,255,255,0.03)" }}
-            >
+            <div className="px-4 py-3 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.03)" }}>
               <p className="text-white/60 text-xs uppercase tracking-widest font-bold">Últimos check-ins</p>
               <span className="text-white/30 text-xs">{stats.totalAttended} total</span>
             </div>
             <div className="divide-y divide-white/5 max-h-80 overflow-y-auto">
               {stats.recentCheckins.map((r, i) => (
-                <div
-                  key={i}
-                  className="px-4 py-3 flex items-center gap-3 hover:bg-white/2 transition-colors"
-                >
+                <div key={i} className="px-4 py-3 flex items-center gap-3 hover:bg-white/2 transition-colors">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
                     style={{
@@ -560,18 +535,13 @@ export default function CheckInPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-bold truncate">{r.full_name}</p>
-                    <p className="text-white/40 text-xs truncate">
-                      {r.role} · {r.city}
-                    </p>
+                    <p className="text-white/40 text-xs truncate">{r.role} · {r.city}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-white/30 text-xs font-mono">LNC-{r.code}</p>
                     {r.checked_in_at && (
                       <p className="text-white/20 text-xs">
-                        {new Date(r.checked_in_at).toLocaleTimeString("es-MX", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {new Date(r.checked_in_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     )}
                   </div>
@@ -585,9 +555,7 @@ export default function CheckInPage() {
           <div className="text-center py-8">
             <p className="text-4xl mb-2">🎟</p>
             <p className="text-white/30 text-sm">Aún no hay check-ins registrados</p>
-            <p className="text-white/20 text-xs mt-1">
-              Los asistentes aparecerán aquí conforme lleguen
-            </p>
+            <p className="text-white/20 text-xs mt-1">Los asistentes aparecerán aquí conforme lleguen</p>
           </div>
         )}
       </div>
