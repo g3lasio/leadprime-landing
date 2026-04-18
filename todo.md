@@ -72,3 +72,12 @@
 - [x] CAMBIO 4: Make dietary_restriction optional with default "Ninguna"
 - [x] CAMBIO 4: Pre-select "Español" as default language
 -- [x] CORRECCIÓN: Evento es VIERNES 22 de Mayo — corregido en todo el código, emails y landing
+
+## Admin Dashboard & Invitation Flow Upgrades (Apr 18, 2026)
+
+- [ ] Add phone column to admin dashboard table (visible alongside email)
+- [ ] Fix cupos counter from 50 to 150 in admin stats
+- [ ] Add functional "Aprobar" button in owner notification email (secure token link → auto-approves + sends invitation)
+- [ ] Generate QR code per attendee code on approval
+- [ ] Send exclusive invitation email with QR code image on approval
+- [ ] Update "Early Birds" label and cupos in admin stats to reflect 150 total

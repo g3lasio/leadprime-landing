@@ -3,6 +3,8 @@ import { publicProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import pkg from "pg";
 const { Pool } = pkg;
+import QRCode from "qrcode";
+import { buildApproveToken } from "./eventoApprove.js";
 
 // Neon PostgreSQL connection — uses NEON_DATABASE_URL env var
 let _pool: InstanceType<typeof Pool> | null = null;
@@ -80,7 +82,22 @@ async function sendPendingEmail(email: string, name: string, code: string) {
   } catch (e) { console.error("[Evento] Failed to send pending email:", e); }
 }
 
-// Send APPROVED email via Resend
+// Generate QR code as base64 data URL
+async function generateQRDataUrl(text: string): Promise<string> {
+  try {
+    return await QRCode.toDataURL(text, {
+      width: 200,
+      margin: 2,
+      color: { dark: '#D4AF37', light: '#080C14' },
+      errorCorrectionLevel: 'M',
+    });
+  } catch (e) {
+    console.error('[QR] Failed to generate QR:', e);
+    return '';
+  }
+}
+
+// Send APPROVED email via Resend (with QR code)
 async function sendApprovedEmail(email: string, name: string, code: string) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) { console.warn("[Evento] RESEND_API_KEY not set — skipping email"); return; }
@@ -104,6 +121,7 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
       <p style="color:#D4AF37;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">LNC-${code}</p>
       <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:8px 0 0;">Guarda este código — lo necesitarás para el check-in</p>
     </div>
+    {{QR_PLACEHOLDER}}
     <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
       <strong style="color:#fff;">📅 Fecha:</strong> ${EVENT_DATE}<br>
       <strong style="color:#fff;">📍 Venue:</strong> ${EVENT_VENUE}<br>
@@ -121,6 +139,12 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
 </body>
 </html>`;
   try {
+    // Generate QR code with the attendee code
+    const qrDataUrl = await generateQRDataUrl(`LNC-${code}`);
+    const qrHtml = qrDataUrl
+      ? `<div style="text-align:center;margin:24px 0;"><p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;">Tu QR de entrada</p><img src="${qrDataUrl}" alt="QR Code LNC-${code}" style="width:160px;height:160px;border-radius:12px;" /><p style="color:rgba(255,255,255,0.4);font-size:11px;margin:8px 0 0;">Presenta este QR en la entrada del evento</p></div>`
+      : '';
+    const finalHtml = html.replace('{{QR_PLACEHOLDER}}', qrHtml);
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -128,7 +152,7 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
         from: "La Noche Chyrris <noreply@owlfenc.com>",
         to: [email],
         subject: `🎉 ¡Aprobado! Tu lugar en La Noche Chyrris está confirmado — LNC-${code}`,
-        html,
+        html: finalHtml,
       }),
     });
     if (!res.ok) console.error("[Evento] Resend approved email error:", await res.text());
@@ -180,8 +204,9 @@ async function sendRejectedEmail(email: string, name: string) {
   } catch (e) { console.error("[Evento] Failed to send rejected email:", e); }
 }
 
-// Notify owner: email to mervin@owlfenc.com
+// Notify owner: email to mervin@owlfenc.com with approve/reject action buttons
 async function notifyOwnerNewRegistration(name: string, role: string, email: string, code: string, extra: {
+  id?: number;
   phone: string;
   city: string;
   preferred_language: string;
@@ -196,6 +221,22 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
   const forgeApiUrl = process.env.BUILT_IN_FORGE_API_URL;
   const forgeApiKey = process.env.BUILT_IN_FORGE_API_KEY;
 
+  const baseUrl = process.env.VITE_APP_ID ? `https://lead-prime.chyrris.com` : `https://lead-prime.chyrris.com`;
+  const approveToken = extra.id ? buildApproveToken(extra.id, "approve") : "";
+  const rejectToken = extra.id ? buildApproveToken(extra.id, "reject") : "";
+  const waitlistToken = extra.id ? buildApproveToken(extra.id, "waitlist") : "";
+  const approveUrl = `${baseUrl}/api/evento/action?token=${approveToken}`;
+  const rejectUrl = `${baseUrl}/api/evento/action?token=${rejectToken}`;
+  const waitlistUrl = `${baseUrl}/api/evento/action?token=${waitlistToken}`;
+  const actionButtons = extra.id ? `
+  <div style="text-align:center;margin:32px 0;">
+    <p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 16px;">Acción rápida</p>
+    <a href="${approveUrl}" style="display:inline-block;background:#D4AF37;color:#000;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:900;font-size:15px;margin:0 8px 8px;">✅ Aprobar Invitación</a>
+    <a href="${waitlistUrl}" style="display:inline-block;background:rgba(255,165,0,0.2);color:#FFA500;border:1px solid #FFA500;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;margin:0 8px 8px;">⏳ Waitlist</a>
+    <a href="${rejectUrl}" style="display:inline-block;background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid #ef4444;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;margin:0 8px 8px;">❌ Rechazar</a>
+    <p style="color:rgba(255,255,255,0.3);font-size:11px;margin:12px 0 0;">Al aprobar se envía automáticamente el email de invitación con QR al asistente</p>
+  </div>` : '';
+
   if (apiKey) {
     try {
       const res = await fetch("https://api.resend.com/emails", {
@@ -205,7 +246,7 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
           from: "La Noche Chyrris <noreply@owlfenc.com>",
           to: ["mervin@owlfenc.com"],
           subject: `🎟 Nueva solicitud: ${name} (${role}) — La Noche Chyrris`,
-          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎟 Nueva solicitud — La Noche Chyrris</h2><p style="color:orange;font-weight:bold;">Estado: PENDIENTE — requiere aprobación manual</p><table style="width:100%;border-collapse:collapse;margin-top:16px;">
+          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎟 Nueva solicitud — La Noche Chyrris</h2><p style="color:orange;font-weight:bold;">Estado: PENDIENTE — requiere aprobación manual</p>${actionButtons}<table style="width:100%;border-collapse:collapse;margin-top:16px;">
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);width:40%">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr>
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Email</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${email}</td></tr>
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Teléfono</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.phone}</td></tr>
@@ -331,18 +372,19 @@ export const eventoRouter = router({
       attempts++;
     }
     const city = input.city === "Otra" ? (input.city_other ?? input.city) : input.city;
-    await pool.query(
+    const insertResult = await pool.query(
       `INSERT INTO event_registrations (
         full_name, phone, email, role, city, preferred_language,
         referral_source, dietary_restriction, consent_contact, consent_photo,
         attendee_code, is_early_bird, status
       ) VALUES ($1,$2,$3,$4,$5,$6, NULL, 'Ninguna', $7, false, $8,
-        (SELECT COUNT(*) < 20 FROM event_registrations), 'pending')`,
+        (SELECT COUNT(*) < 20 FROM event_registrations), 'pending') RETURNING id`,
       [input.full_name, input.phone, input.email.toLowerCase(), input.role, city, input.preferred_language, input.consent_contact, code]
     );
+    const newId = insertResult.rows[0]?.id;
     sendPendingEmail(input.email, input.full_name, code).catch(console.error);
     notifyOwnerNewRegistration(input.full_name, input.role, input.email, code, {
-      phone: input.phone, city, preferred_language: input.preferred_language,
+      id: newId, phone: input.phone, city, preferred_language: input.preferred_language,
       years_in_business: null, brokerage_name: null, business_name: null, units_managed: null,
       referral_source: "No especificado", dietary_restriction: "Ninguna",
     }).catch(console.error);
@@ -419,9 +461,13 @@ export const eventoRouter = router({
         input.consent_contact, input.consent_photo ?? false, code
       ]
     );
+    const insertResult2 = await pool.query(
+      `SELECT id FROM event_registrations WHERE attendee_code = $1`, [code]
+    );
+    const newId2 = insertResult2.rows[0]?.id;
     sendPendingEmail(input.email, input.full_name, code).catch(console.error);
     notifyOwnerNewRegistration(input.full_name, input.role, input.email, code, {
-      phone: input.phone, city, preferred_language: input.preferred_language,
+      id: newId2, phone: input.phone, city, preferred_language: input.preferred_language,
       years_in_business: input.years_in_business ?? null,
       brokerage_name: input.brokerage_name ?? null,
       business_name: input.business_name ?? null,

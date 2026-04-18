@@ -214,14 +214,14 @@ export default function AdminEventoPage() {
             <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {data.total}
             </p>
-            <p className="text-white/30 text-xs">de 50 cupos</p>
+            <p className="text-white/30 text-xs">de 150 cupos</p>
           </div>
           <div className="p-4 rounded-xl bg-white/5 border border-white/10">
             <p className="text-white/40 text-xs">Early Birds</p>
             <p className="text-3xl font-black text-[#D4AF37] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {data.earlyBird}
             </p>
-            <p className="text-white/30 text-xs">de 20 cupos</p>
+            <p className="text-white/30 text-xs">de 50 cupos</p>
           </div>
           {Object.entries(data.byRole as Record<string, number>).slice(0, 2).map(([role, count]) => (
             <div key={role} className="p-4 rounded-xl bg-white/5 border border-white/10">
@@ -298,6 +298,7 @@ export default function AdminEventoPage() {
                   <th className="text-left px-4 py-3 text-white/40 font-medium">Código</th>
                   <th className="text-left px-4 py-3 text-white/40 font-medium">Nombre</th>
                   <th className="text-left px-4 py-3 text-white/40 font-medium hidden sm:table-cell">Email</th>
+                  <th className="text-left px-4 py-3 text-white/40 font-medium hidden xl:table-cell">Teléfono</th>
                   <th className="text-left px-4 py-3 text-white/40 font-medium">Rol</th>
                   <th className="text-left px-4 py-3 text-white/40 font-medium hidden lg:table-cell">Ciudad</th>
                   <th className="text-left px-4 py-3 text-white/40 font-medium hidden lg:table-cell">Referido</th>
@@ -308,7 +309,7 @@ export default function AdminEventoPage() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-12 text-white/30">
+                    <td colSpan={9} className="text-center py-12 text-white/30">
                       No hay registros que coincidan con los filtros
                     </td>
                   </tr>
@@ -327,6 +328,9 @@ export default function AdminEventoPage() {
                       </td>
                       <td className="px-4 py-3 text-white font-medium">{r.full_name}</td>
                       <td className="px-4 py-3 text-white/60 hidden sm:table-cell">{r.email}</td>
+                      <td className="px-4 py-3 text-white/60 hidden xl:table-cell">
+                        <a href={`tel:${r.phone}`} className="hover:text-[#D4AF37] transition-colors" onClick={(e) => e.stopPropagation()}>{r.phone}</a>
+                      </td>
                       <td className="px-4 py-3">
                         <span
                           className="px-2 py-0.5 rounded-full text-xs font-medium"
