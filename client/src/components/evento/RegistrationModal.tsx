@@ -180,7 +180,7 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
     if (errors[field]) setErrors((prev) => { const e = { ...prev }; delete e[field]; return e; });
   };
 
-  const registerMutation = trpc.evento.register.useMutation({
+  const registerMutation = trpc.evento.registerFull.useMutation({
     onSuccess: (data) => {
       setSuccessCode(data.code);
       setStep("success");
@@ -241,7 +241,7 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
       full_name: form.full_name,
       phone: form.phone,
       email: form.email,
-      role: form.role as string,
+      role: form.role as "Contratista" | "Property Manager" | "Realtor" | "Otro profesional de la industria",
       city: form.city === "Otra" ? form.city_other : form.city,
       preferred_language: form.preferred_language,
       business_name: form.business_name || null,
@@ -279,10 +279,10 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
           className="text-2xl font-bold text-white mb-2"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          ¡Estás dentro!
+          ¡Solicitud recibida!
         </h3>
         <p className="text-white/60 text-sm mb-6">
-          Tu lugar está confirmado para La Noche Chyrris — 29 de mayo, 2026
+          Tu solicitud está en revisión. Te contactaremos en 24-48 horas para confirmar tu lugar en La Noche Chyrris — 22 de Mayo, 2026
         </p>
         <div
           className="inline-block px-8 py-4 rounded-xl border-2 border-[#D4AF37] mb-6"
@@ -684,7 +684,7 @@ export default function RegistrationModal({ open, onClose, inline = false }: Reg
           >
             Confirmar mi Lugar
           </DialogTitle>
-          <p className="text-white/50 text-sm mt-1">La Noche Chyrris · 29 de Mayo, 2026 · Solano County</p>
+          <p className="text-white/50 text-sm mt-1">La Noche Chyrris · 22 de Mayo, 2026 · Solano County</p>
         </div>
         <div className="px-6 py-6">
           <FormContent onSuccess={handleSuccess} />

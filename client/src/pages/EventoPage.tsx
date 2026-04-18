@@ -2,6 +2,12 @@ import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
+// Event constants
+const EVENT_DATE = "Viernes 22 de Mayo, 2026";
+const EVENT_TIME = "7:00 PM – 10:00 PM";
+const EVENT_VENUE = "Fairfield Community Center";
+const EVENT_ADDRESS = "1000 Kentucky St, Fairfield, CA 94533";
+
 const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/noche-chyrris-hero_73b82ad9.jpg";
 const GELASIO_PHOTO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/gelasio-photo_3fe4ac74.png";
 
@@ -74,6 +80,7 @@ const initialForm: FormData = {
 function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) {
   const [form, setForm] = useState<FormData>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [step, setStep] = useState<1 | 2>(1);
 
   const register = trpc.evento.register.useMutation({
     onSuccess: (data) => onSuccess(data.code),
@@ -96,6 +103,19 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
     set(field, arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
   };
 
+  const validateStep1 = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!form.full_name || form.full_name.length < 3) e.full_name = "Ingresa tu nombre completo";
+    if (!form.phone) e.phone = "Ingresa tu teléfono";
+    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Ingresa un email válido";
+    if (!form.role) e.role = "Selecciona tu rol";
+    if (!form.city) e.city = "Selecciona tu ciudad";
+    if (form.city === "Otra" && !form.city_other) e.city_other = "Escribe tu ciudad";
+    if (!form.consent_contact) e.consent_contact = "Necesitamos tu autorización para contactarte";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!form.full_name || form.full_name.length < 3) e.full_name = "Ingresa tu nombre completo";
@@ -104,44 +124,24 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
     if (!form.role) e.role = "Selecciona tu rol";
     if (!form.city) e.city = "Selecciona tu ciudad";
     if (form.city === "Otra" && !form.city_other) e.city_other = "Escribe tu ciudad";
-    if (!form.preferred_language) e.preferred_language = "Selecciona tu idioma";
-
-    if (form.role === "Contratista") {
-      if (!form.business_name) e.business_name = "Ingresa el nombre de tu negocio";
-      if (form.trade_types.length === 0) e.trade_types = "Selecciona al menos un tipo de trabajo";
-      if (!form.has_cslb_license) e.has_cslb_license = "Selecciona una opción";
-      if (!form.years_in_business) e.years_in_business = "Selecciona los años en el negocio";
-      if (!form.team_size) e.team_size = "Selecciona el tamaño de tu equipo";
-    }
-    if (form.role === "Property Manager") {
-      if (!form.business_name) e.business_name = "Ingresa el nombre de tu empresa";
-      if (!form.units_managed) e.units_managed = "Selecciona el número de unidades";
-      if (form.property_types.length === 0) e.property_types = "Selecciona al menos un tipo";
-      if (!form.years_in_business) e.years_in_business = "Selecciona los años en el negocio";
-      if (!form.has_real_estate_license) e.has_real_estate_license = "Selecciona una opción";
-      if (!form.current_pm_software) e.current_pm_software = "Selecciona tu software actual";
-    }
-    if (form.role === "Realtor") {
-      if (!form.brokerage_name) e.brokerage_name = "Ingresa el nombre de tu brokerage";
-      if (!form.years_in_business) e.years_in_business = "Selecciona los años en el negocio";
-      if (!form.also_property_manager) e.also_property_manager = "Selecciona una opción";
-      if (form.service_areas.length === 0) e.service_areas = "Selecciona al menos un área";
-    }
-    if (form.role === "Otro profesional de la industria") {
-      if (!form.profession_description) e.profession_description = "Describe tu profesión";
-    }
-    if (!form.referral_source) e.referral_source = "¿Cómo te enteraste del evento?";
-    if (!form.dietary_restriction) e.dietary_restriction = "Selecciona una opción";
     if (!form.consent_contact) e.consent_contact = "Necesitamos tu autorización para contactarte";
-
     setErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  const handleStep1 = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep1()) {
+      toast.error("Por favor completa los campos requeridos");
+      return;
+    }
+    setStep(2);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error("Por favor completa todos los campos requeridos");
+      toast.error("Por favor completa los campos requeridos");
       return;
     }
 
@@ -149,7 +149,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
       full_name: form.full_name.trim(),
       phone: form.phone.trim(),
       email: form.email.trim(),
-      role: form.role,
+      role: form.role as "Contratista" | "Property Manager" | "Realtor" | "Otro profesional de la industria",
       city: form.city === "Otra" ? form.city_other : form.city,
       preferred_language: form.preferred_language,
       business_name: form.business_name || null,
@@ -182,6 +182,27 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
     register.mutate(payload);
   };
 
+  const handleSkipStep2 = () => {
+    // Submit with only step 1 data
+    const payload = {
+      full_name: form.full_name.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      role: form.role as "Contratista" | "Property Manager" | "Realtor" | "Otro profesional de la industria",
+      city: form.city === "Otra" ? form.city_other : form.city,
+      preferred_language: form.preferred_language || "Español",
+      business_name: null, trade_types: null, has_cslb_license: null, cslb_license_number: null,
+      years_in_business: null, team_size: null, current_estimating_tool: null, units_managed: null,
+      property_types: null, has_real_estate_license: null, current_pm_software: null,
+      brokerage_name: null, dre_license_number: null, also_property_manager: null,
+      service_areas: null, profession_description: null,
+      referral_source: "No especificado", referral_name: null,
+      dietary_restriction: "Ninguna",
+      consent_contact: form.consent_contact, consent_photo: false,
+    };
+    register.mutate(payload);
+  };
+
   const inputClass = (field: string) =>
     `w-full px-4 py-3 rounded-xl bg-white/5 border ${errors[field] ? "border-red-500/60" : "border-white/10"} text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-colors`;
 
@@ -190,382 +211,153 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
   const checkboxClass = "w-4 h-4 rounded border-white/20 bg-white/5 accent-[#D4AF37] cursor-pointer";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Common fields */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Nombre completo *</label>
-          <input className={inputClass("full_name")} value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder="Tu nombre completo" />
-          {errors.full_name && <p className={errorClass}>{errors.full_name}</p>}
-        </div>
-        <div>
-          <label className={labelClass}>Teléfono (USA) *</label>
-          <input className={inputClass("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="(707) 555-0100" type="tel" />
-          {errors.phone && <p className={errorClass}>{errors.phone}</p>}
-        </div>
+    <div className="space-y-6">
+      {/* Step indicator */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-black ${step === 1 ? 'bg-[#D4AF37] text-[#080C14]' : 'bg-[#D4AF37]/20 text-[#D4AF37]'}`}>1</div>
+        <div className="flex-1 h-px bg-white/10" />
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-black ${step === 2 ? 'bg-[#D4AF37] text-[#080C14]' : 'bg-white/10 text-white/30'}`}>2</div>
       </div>
 
-      <div>
-        <label className={labelClass}>Email *</label>
-        <input className={inputClass("email")} value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="tu@email.com" type="email" />
-        {errors.email && <p className={errorClass}>{errors.email}</p>}
-      </div>
+      {step === 1 && (
+      <form onSubmit={handleStep1} className="space-y-5">
+        <p className="text-white/50 text-xs text-center">Paso 1 de 2 — Información básica</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>Nombre completo *</label>
+            <input className={inputClass("full_name")} value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder="Tu nombre completo" />
+            {errors.full_name && <p className={errorClass}>{errors.full_name}</p>}
+          </div>
+          <div>
+            <label className={labelClass}>Teléfono (USA) *</label>
+            <input className={inputClass("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="(707) 555-0100" type="tel" />
+            {errors.phone && <p className={errorClass}>{errors.phone}</p>}
+          </div>
+        </div>
+
         <div>
-          <label className={labelClass}>¿Cuál es tu rol? *</label>
-          <select className={inputClass("role") + " bg-[#0D1220]"} value={form.role} onChange={(e) => set("role", e.target.value)}>
-            <option value="">Selecciona tu rol</option>
-            <option>Contratista</option>
-            <option>Property Manager</option>
-            <option>Realtor</option>
-            <option>Otro profesional de la industria</option>
-          </select>
-          {errors.role && <p className={errorClass}>{errors.role}</p>}
+          <label className={labelClass}>Email *</label>
+          <input className={inputClass("email")} value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="tu@email.com" type="email" />
+          {errors.email && <p className={errorClass}>{errors.email}</p>}
         </div>
-        <div>
-          <label className={labelClass}>Ciudad *</label>
-          <select className={inputClass("city") + " bg-[#0D1220]"} value={form.city} onChange={(e) => set("city", e.target.value)}>
-            <option value="">Selecciona tu ciudad</option>
-            {CITIES.map((c) => <option key={c}>{c}</option>)}
-          </select>
-          {errors.city && <p className={errorClass}>{errors.city}</p>}
-        </div>
-      </div>
 
-      {form.city === "Otra" && (
-        <div>
-          <label className={labelClass}>¿Cuál ciudad? *</label>
-          <input className={inputClass("city_other")} value={form.city_other} onChange={(e) => set("city_other", e.target.value)} placeholder="Escribe tu ciudad" />
-          {errors.city_other && <p className={errorClass}>{errors.city_other}</p>}
-        </div>
-      )}
-
-      <div>
-        <label className={labelClass}>Idioma preferido *</label>
-        <div className="flex gap-4">
-          {["Español", "English", "Bilingüe"].map((lang) => (
-            <label key={lang} className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="lang" value={lang} checked={form.preferred_language === lang} onChange={() => set("preferred_language", lang)} className="accent-[#D4AF37]" />
-              <span className="text-white/70 text-sm">{lang}</span>
-            </label>
-          ))}
-        </div>
-        {errors.preferred_language && <p className={errorClass}>{errors.preferred_language}</p>}
-      </div>
-
-      {/* Contractor fields */}
-      {form.role === "Contratista" && (
-        <div className="space-y-4 p-4 rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/5">
-          <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-wider">Información del contratista</p>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Nombre de tu negocio *</label>
-            <input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: García Roofing & Construction" />
-            {errors.business_name && <p className={errorClass}>{errors.business_name}</p>}
-          </div>
-
-          <div>
-            <label className={labelClass}>Tipo de trabajo (selecciona todos los que apliquen) *</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-              {TRADE_TYPES.map((t) => (
-                <label key={t} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.trade_types.includes(t)} onChange={() => toggleMulti("trade_types", t)} className={checkboxClass} />
-                  <span className="text-white/70 text-sm">{t}</span>
-                </label>
-              ))}
-            </div>
-            {form.trade_types.includes("Otro") && (
-              <input className={inputClass("trade_other") + " mt-2"} value={form.trade_other} onChange={(e) => set("trade_other", e.target.value)} placeholder="Especifica el tipo de trabajo" />
-            )}
-            {errors.trade_types && <p className={errorClass}>{errors.trade_types}</p>}
-          </div>
-
-          <div>
-            <label className={labelClass}>Licencia CSLB *</label>
-            <div className="flex flex-col gap-2">
-              {["Sí, tengo licencia CSLB", "No tengo licencia", "En trámite"].map((opt) => (
-                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="cslb" value={opt} checked={form.has_cslb_license === opt} onChange={() => set("has_cslb_license", opt)} className="accent-[#D4AF37]" />
-                  <span className="text-white/70 text-sm">{opt}</span>
-                </label>
-              ))}
-            </div>
-            {errors.has_cslb_license && <p className={errorClass}>{errors.has_cslb_license}</p>}
-          </div>
-
-          {form.has_cslb_license === "Sí, tengo licencia CSLB" && (
-            <div>
-              <label className={labelClass}>Número de licencia CSLB</label>
-              <input className={inputClass("cslb_license_number")} value={form.cslb_license_number} onChange={(e) => set("cslb_license_number", e.target.value)} placeholder="Ej: 1234567" />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Años en el negocio *</label>
-              <select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}>
-                <option value="">Selecciona</option>
-                {YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}
-              </select>
-              {errors.years_in_business && <p className={errorClass}>{errors.years_in_business}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Tamaño de tu equipo *</label>
-              <select className={inputClass("team_size") + " bg-[#0D1220]"} value={form.team_size} onChange={(e) => set("team_size", e.target.value)}>
-                <option value="">Selecciona</option>
-                <option>Solo yo</option>
-                <option>2-5 personas</option>
-                <option>6-10 personas</option>
-                <option>Más de 10</option>
-              </select>
-              {errors.team_size && <p className={errorClass}>{errors.team_size}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>¿Qué usas actualmente para hacer estimados?</label>
-            <select className={inputClass("current_estimating_tool") + " bg-[#0D1220]"} value={form.current_estimating_tool} onChange={(e) => set("current_estimating_tool", e.target.value)}>
-              <option value="">Selecciona (opcional)</option>
-              <option>Papel y lápiz</option>
-              <option>Excel</option>
-              <option>Otra app</option>
-              <option>No uso nada específico</option>
+            <label className={labelClass}>¿Cuál es tu rol? *</label>
+            <select className={inputClass("role") + " bg-[#0D1220]"} value={form.role} onChange={(e) => set("role", e.target.value)}>
+              <option value="">Selecciona tu rol</option>
+              <option>Contratista</option>
+              <option>Property Manager</option>
+              <option>Realtor</option>
+              <option>Otro profesional de la industria</option>
             </select>
+            {errors.role && <p className={errorClass}>{errors.role}</p>}
           </div>
-        </div>
-      )}
-
-      {/* Property Manager fields */}
-      {form.role === "Property Manager" && (
-        <div className="space-y-4 p-4 rounded-xl border border-[#00D4FF]/20 bg-[#00D4FF]/5">
-          <p className="text-[#00D4FF] text-sm font-bold uppercase tracking-wider">Información del Property Manager</p>
-
           <div>
-            <label className={labelClass}>Nombre de tu empresa *</label>
-            <input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: Solano Property Management" />
-            {errors.business_name && <p className={errorClass}>{errors.business_name}</p>}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Unidades que administras *</label>
-              <select className={inputClass("units_managed") + " bg-[#0D1220]"} value={form.units_managed} onChange={(e) => set("units_managed", e.target.value)}>
-                <option value="">Selecciona</option>
-                <option>1-10</option>
-                <option>11-25</option>
-                <option>26-50</option>
-                <option>51-100</option>
-                <option>Más de 100</option>
-              </select>
-              {errors.units_managed && <p className={errorClass}>{errors.units_managed}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Años en el negocio *</label>
-              <select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}>
-                <option value="">Selecciona</option>
-                {YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}
-              </select>
-              {errors.years_in_business && <p className={errorClass}>{errors.years_in_business}</p>}
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Tipo de propiedades *</label>
-            <div className="flex flex-wrap gap-3 mt-2">
-              {["Single-family", "Multi-family", "Comercial", "Mixto"].map((t) => (
-                <label key={t} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.property_types.includes(t)} onChange={() => toggleMulti("property_types", t)} className={checkboxClass} />
-                  <span className="text-white/70 text-sm">{t}</span>
-                </label>
-              ))}
-            </div>
-            {errors.property_types && <p className={errorClass}>{errors.property_types}</p>}
-          </div>
-
-          <div>
-            <label className={labelClass}>¿Tienes licencia de bienes raíces? *</label>
-            <div className="flex gap-4">
-              {["Sí", "No"].map((opt) => (
-                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="rl" value={opt} checked={form.has_real_estate_license === opt} onChange={() => set("has_real_estate_license", opt)} className="accent-[#00D4FF]" />
-                  <span className="text-white/70 text-sm">{opt}</span>
-                </label>
-              ))}
-            </div>
-            {errors.has_real_estate_license && <p className={errorClass}>{errors.has_real_estate_license}</p>}
-          </div>
-
-          <div>
-            <label className={labelClass}>Software de PM actual *</label>
-            <select className={inputClass("current_pm_software") + " bg-[#0D1220]"} value={form.current_pm_software} onChange={(e) => set("current_pm_software", e.target.value)}>
-              <option value="">Selecciona</option>
-              <option>AppFolio</option>
-              <option>Buildium</option>
-              <option>Yardi</option>
-              <option>Propertyware</option>
-              <option>Rent Manager</option>
-              <option>Excel/manual</option>
-              <option>Ninguna</option>
-              <option>Otra</option>
+            <label className={labelClass}>Ciudad *</label>
+            <select className={inputClass("city") + " bg-[#0D1220]"} value={form.city} onChange={(e) => set("city", e.target.value)}>
+              <option value="">Selecciona tu ciudad</option>
+              {CITIES.map((c) => <option key={c}>{c}</option>)}
             </select>
-            {errors.current_pm_software && <p className={errorClass}>{errors.current_pm_software}</p>}
+            {errors.city && <p className={errorClass}>{errors.city}</p>}
           </div>
         </div>
-      )}
 
-      {/* Realtor fields */}
-      {form.role === "Realtor" && (
-        <div className="space-y-4 p-4 rounded-xl border border-[#A78BFA]/20 bg-[#A78BFA]/5">
-          <p className="text-[#A78BFA] text-sm font-bold uppercase tracking-wider">Información del Realtor</p>
-
+        {form.city === "Otra" && (
           <div>
-            <label className={labelClass}>Brokerage *</label>
-            <input className={inputClass("brokerage_name")} value={form.brokerage_name} onChange={(e) => set("brokerage_name", e.target.value)} placeholder="Ej: Keller Williams, RE/MAX..." />
-            {errors.brokerage_name && <p className={errorClass}>{errors.brokerage_name}</p>}
+            <label className={labelClass}>¿Cuál ciudad? *</label>
+            <input className={inputClass("city_other")} value={form.city_other} onChange={(e) => set("city_other", e.target.value)} placeholder="Escribe tu ciudad" />
+            {errors.city_other && <p className={errorClass}>{errors.city_other}</p>}
           </div>
+        )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Años en el negocio *</label>
-              <select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}>
-                <option value="">Selecciona</option>
-                {YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}
-              </select>
-              {errors.years_in_business && <p className={errorClass}>{errors.years_in_business}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Número DRE (opcional)</label>
-              <input className={inputClass("dre_license_number")} value={form.dre_license_number} onChange={(e) => set("dre_license_number", e.target.value)} placeholder="Ej: 01234567" />
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>¿También haces property management? *</label>
-            <div className="flex gap-4">
-              {["Sí", "No"].map((opt) => (
-                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="apm" value={opt} checked={form.also_property_manager === opt} onChange={() => set("also_property_manager", opt)} className="accent-[#A78BFA]" />
-                  <span className="text-white/70 text-sm">{opt}</span>
-                </label>
-              ))}
-            </div>
-            {errors.also_property_manager && <p className={errorClass}>{errors.also_property_manager}</p>}
-          </div>
-
-          <div>
-            <label className={labelClass}>Áreas de servicio *</label>
-            <div className="flex flex-wrap gap-3 mt-2">
-              {["Solano", "Contra Costa", "Napa", "Sacramento", "Marin", "Alameda", "Otras"].map((a) => (
-                <label key={a} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.service_areas.includes(a)} onChange={() => toggleMulti("service_areas", a)} className={checkboxClass} />
-                  <span className="text-white/70 text-sm">{a}</span>
-                </label>
-              ))}
-            </div>
-            {errors.service_areas && <p className={errorClass}>{errors.service_areas}</p>}
-          </div>
+        <div className="p-4 rounded-xl bg-white/3 border border-white/10">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={form.consent_contact} onChange={(e) => set("consent_contact", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
+            <span className="text-white/70 text-sm leading-relaxed">
+              Autorizo que Chyrris me contacte por teléfono y email para confirmar mi asistencia y enviarme información del evento. *
+            </span>
+          </label>
+          {errors.consent_contact && <p className={errorClass}>{errors.consent_contact}</p>}
         </div>
+
+        <button
+          type="submit"
+          className="w-full py-4 rounded-2xl font-black text-lg text-[#080C14] transition-all"
+          style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}
+        >
+          Solicitar mi Invitación →
+        </button>
+        <p className="text-center text-white/30 text-xs">Gratis · Sin tarjeta de crédito · Cupo limitado a 150 personas</p>
+      </form>
       )}
 
-      {/* Other professional */}
-      {form.role === "Otro profesional de la industria" && (
-        <div className="space-y-4 p-4 rounded-xl border border-[#6EE7B7]/20 bg-[#6EE7B7]/5">
-          <p className="text-[#6EE7B7] text-sm font-bold uppercase tracking-wider">Tu profesión</p>
-          <div>
-            <label className={labelClass}>Describe brevemente tu profesión *</label>
-            <input className={inputClass("profession_description")} value={form.profession_description} onChange={(e) => set("profession_description", e.target.value.slice(0, 100))} placeholder="Ej: Arquitecto independiente, Inspector de propiedades..." maxLength={100} />
-            <p className="text-white/30 text-xs mt-1">{form.profession_description.length}/100 caracteres</p>
-            {errors.profession_description && <p className={errorClass}>{errors.profession_description}</p>}
-          </div>
+      {step === 2 && (
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <p className="text-white/50 text-xs text-center">Paso 2 de 2 — Completa tu perfil (opcional)</p>
+        <div className="p-4 rounded-xl bg-[#D4AF37]/5 border border-[#D4AF37]/20">
+          <p className="text-[#D4AF37] text-sm font-bold mb-1">Hola {form.full_name.split(' ')[0]}! 👋</p>
+          <p className="text-white/60 text-sm">Tu solicitud ya fue recibida. Completar tu perfil nos ayuda a preparar mejor el evento. Es opcional — puedes saltarte este paso.</p>
         </div>
-      )}
 
-      {/* Final common fields */}
-      {form.role && (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>¿Cómo te enteraste del evento? *</label>
-              <select className={inputClass("referral_source") + " bg-[#0D1220]"} value={form.referral_source} onChange={(e) => set("referral_source", e.target.value)}>
-                <option value="">Selecciona</option>
-                <option>Invitación directa de Gelasio</option>
-                <option>Un amigo/colega me invitó</option>
-                <option>Home Depot</option>
-                <option>Redes sociales</option>
-                <option>Otro</option>
-              </select>
-              {errors.referral_source && <p className={errorClass}>{errors.referral_source}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Restricción alimentaria *</label>
-              <select className={inputClass("dietary_restriction") + " bg-[#0D1220]"} value={form.dietary_restriction} onChange={(e) => set("dietary_restriction", e.target.value)}>
-                <option value="">Selecciona</option>
-                <option>Ninguna</option>
-                <option>Vegetariano</option>
-                <option>Vegano</option>
-                <option>Sin gluten</option>
-                <option>Otra</option>
-              </select>
-              {errors.dietary_restriction && <p className={errorClass}>{errors.dietary_restriction}</p>}
-            </div>
+        {form.role === "Contratista" && (
+          <div className="space-y-4 p-4 rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/5">
+            <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-wider">Sobre tu negocio</p>
+            <div><label className={labelClass}>Nombre del negocio</label><input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: García Roofing & Construction" /></div>
+            <div><label className={labelClass}>Tipo de trabajo</label><div className="grid grid-cols-2 gap-2 mt-1">{TRADE_TYPES.slice(0,8).map((t) => (<label key={t} className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.trade_types.includes(t)} onChange={() => toggleMulti("trade_types", t)} className={checkboxClass} /><span className="text-white/70 text-sm">{t}</span></label>))}</div></div>
+            <div><label className={labelClass}>Años en el negocio</label><select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}><option value="">Selecciona</option>{YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}</select></div>
           </div>
+        )}
 
-          {form.referral_source === "Un amigo/colega me invitó" && (
-            <div>
-              <label className={labelClass}>Nombre de quien te invitó</label>
-              <input className={inputClass("referral_name")} value={form.referral_name} onChange={(e) => set("referral_name", e.target.value)} placeholder="Nombre de tu colega" />
-            </div>
-          )}
-
-          {form.dietary_restriction === "Otra" && (
-            <div>
-              <label className={labelClass}>Especifica tu restricción alimentaria</label>
-              <input className={inputClass("dietary_other")} value={form.dietary_other} onChange={(e) => set("dietary_other", e.target.value)} placeholder="Describe tu restricción" />
-            </div>
-          )}
-
-          <div className="space-y-3 p-4 rounded-xl bg-white/3 border border-white/10">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" checked={form.consent_contact} onChange={(e) => set("consent_contact", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
-              <span className="text-white/70 text-sm leading-relaxed">
-                Autorizo que Chyrris me contacte por teléfono y email para confirmar mi asistencia y enviarme información del evento. *
-              </span>
-            </label>
-            {errors.consent_contact && <p className={errorClass}>{errors.consent_contact}</p>}
-
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" checked={form.consent_photo} onChange={(e) => set("consent_photo", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
-              <span className="text-white/70 text-sm leading-relaxed">
-                Autorizo el uso de fotos generales del evento para redes sociales y materiales de marketing de Chyrris. (Opcional)
-              </span>
-            </label>
+        {form.role === "Property Manager" && (
+          <div className="space-y-4 p-4 rounded-xl border border-[#00D4FF]/20 bg-[#00D4FF]/5">
+            <p className="text-[#00D4FF] text-sm font-bold uppercase tracking-wider">Sobre tu empresa</p>
+            <div><label className={labelClass}>Nombre de la empresa</label><input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: Solano Property Group" /></div>
+            <div><label className={labelClass}>Unidades que manejas</label><select className={inputClass("units_managed") + " bg-[#0D1220]"} value={form.units_managed} onChange={(e) => set("units_managed", e.target.value)}><option value="">Selecciona</option>{["1-10","11-25","26-50","51-100","Más de 100"].map((u) => <option key={u}>{u}</option>)}</select></div>
+            <div><label className={labelClass}>Software actual</label><select className={inputClass("current_pm_software") + " bg-[#0D1220]"} value={form.current_pm_software} onChange={(e) => set("current_pm_software", e.target.value)}><option value="">Selecciona</option>{["AppFolio","Buildium","Propertyware","Rent Manager","Excel/Google Sheets","Ninguno","Otro"].map((s) => <option key={s}>{s}</option>)}</select></div>
           </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={register.isPending}
-            className="w-full py-4 rounded-2xl font-black text-lg text-[#080C14] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}
-          >
-            {register.isPending ? "Procesando..." : "Confirmar mi Lugar →"}
+        {form.role === "Realtor" && (
+          <div className="space-y-4 p-4 rounded-xl border border-[#A78BFA]/20 bg-[#A78BFA]/5">
+            <p className="text-[#A78BFA] text-sm font-bold uppercase tracking-wider">Sobre tu brokerage</p>
+            <div><label className={labelClass}>Nombre del brokerage</label><input className={inputClass("brokerage_name")} value={form.brokerage_name} onChange={(e) => set("brokerage_name", e.target.value)} placeholder="Ej: Keller Williams Fairfield" /></div>
+            <div><label className={labelClass}>Años en el negocio</label><select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}><option value="">Selecciona</option>{YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}</select></div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label className={labelClass}>¿Cómo te enteraste?</label><select className={inputClass("referral_source") + " bg-[#0D1220]"} value={form.referral_source} onChange={(e) => set("referral_source", e.target.value)}><option value="">Selecciona</option>{["Invitación directa de Gelasio","Un amigo/colega me invitó","Home Depot","Redes sociales","Otro"].map((r) => <option key={r}>{r}</option>)}</select></div>
+          <div><label className={labelClass}>Restricción alimentaria</label><select className={inputClass("dietary_restriction") + " bg-[#0D1220]"} value={form.dietary_restriction} onChange={(e) => set("dietary_restriction", e.target.value)}><option value="">Ninguna</option>{["Ninguna","Vegetariano","Vegano","Sin gluten","Otra"].map((d) => <option key={d}>{d}</option>)}</select></div>
+        </div>
+
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" checked={form.consent_photo} onChange={(e) => set("consent_photo", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
+          <span className="text-white/70 text-sm leading-relaxed">Autorizo el uso de fotos del evento para redes sociales de Chyrris. (Opcional)</span>
+        </label>
+
+        <div className="flex gap-3">
+          <button type="button" onClick={handleSkipStep2} disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-bold text-white/60 border border-white/10 hover:border-white/20 transition-colors text-sm">
+            {register.isPending ? "Enviando..." : "Saltar este paso"}
           </button>
-
-          <p className="text-center text-white/30 text-xs">
-            Gratis · Sin tarjeta de crédito · Puedes cancelar con 48h de anticipación
-          </p>
-        </>
+          <button type="submit" disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-black text-[#080C14] transition-all disabled:opacity-60" style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}>
+            {register.isPending ? "Enviando..." : "Completar perfil →"}
+          </button>
+        </div>
+      </form>
       )}
-    </form>
+    </div>
   );
 }
+
 
 function SuccessScreen({ code, onClose }: { code: string; onClose: () => void }) {
   return (
     <div className="text-center py-8">
       <div className="text-6xl mb-4">🎉</div>
       <h3 className="text-2xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-        ¡Tu lugar está confirmado!
+        ¡Solicitud recibida!
       </h3>
       <p className="text-white/60 mb-6">Revisa tu email — te enviamos todos los detalles.</p>
 
@@ -582,8 +374,8 @@ function SuccessScreen({ code, onClose }: { code: string; onClose: () => void })
 
       <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-left mb-6">
         <p className="text-white/80 text-sm font-medium mb-2">📅 Detalles del evento</p>
-        <p className="text-white/60 text-sm">Viernes 29 de Mayo, 2026</p>
-        <p className="text-white/60 text-sm">5:30 PM · Solano County, California</p>
+        <p className="text-white/60 text-sm">{EVENT_DATE}</p>
+        <p className="text-white/60 text-sm">{EVENT_TIME} · Solano County, California</p>
         <p className="text-white/40 text-xs mt-2">La dirección exacta se confirma 7 días antes por email.</p>
       </div>
 
@@ -623,10 +415,10 @@ export default function EventoPage() {
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div>
             <p className="text-white font-bold text-sm">La Noche Chyrris</p>
-            <p className="text-white/40 text-xs">29 de Mayo · Solano County</p>
+            <p className="text-white/40 text-xs">22 de Mayo · Solano County</p>
           </div>
           <button onClick={openModal} className={goldBtn + " text-sm px-6 py-3"} style={goldBtnStyle}>
-            Confirmar mi Lugar
+            Solicitar mi Invitación
           </button>
         </div>
       </div>
@@ -670,9 +462,9 @@ export default function EventoPage() {
 
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             {[
-              { icon: "📅", text: "Viernes 29 de Mayo, 2026" },
+              { icon: "📅", text: EVENT_DATE },
               { icon: "📍", text: "Solano County, California" },
-              { icon: "🎟", text: "Pocos lugares disponibles" },
+              { icon: "🎟", text: "150 cupos exclusivos" },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-white/80" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <span>{item.icon}</span>
@@ -682,7 +474,7 @@ export default function EventoPage() {
           </div>
 
           <button onClick={openModal} className={goldBtn + " text-xl px-10 py-5 shadow-2xl"} style={goldBtnStyle}>
-            Confirmar mi Lugar →
+            Solicitar mi Invitación →
           </button>
 
           <p className="text-white/40 text-sm mt-4">
@@ -775,10 +567,10 @@ export default function EventoPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { time: "5:30 PM", title: "Llegada y networking", desc: "Café, botanas, bebidas. 30 minutos para conocer a otros profesionales del condado. Credenciales con QR para intercambio rápido de contactos.", icon: "🤝" },
-              { time: "6:00 PM", title: "La ponencia", desc: "Gelasio Reynoso comparte por qué llevó años construyendo una plataforma específicamente para la industria latina de construction y property management. 20 minutos, puro contenido real.", icon: "🎤" },
-              { time: "6:25 PM", title: "Demo en vivo", desc: "Un estimado profesional generado en 99 segundos. Un contrato firmado digitalmente frente a ustedes. El proceso que hoy te toma 2 horas, ejecutado en menos de 5 minutos.", icon: "⚡" },
-              { time: "6:50 PM", title: "Tu perfil en la red", desc: "Mesa de registro con iPads. Creas tu perfil en LeadPrime Network ahí mismo. Sales del evento con 3-5 conexiones reales ya guardadas en tu teléfono.", icon: "📱" },
+              { time: "7:00 PM", title: "Llegada y networking", desc: "Café, botanas, bebidas. 30 minutos para conocer a otros profesionales del condado. Credenciales con QR para intercambio rápido de contactos.", icon: "🤝" },
+              { time: "7:30 PM", title: "La ponencia", desc: "Gelasio Sánchez comparte por qué llevó años construyendo una plataforma específicamente para la industria latina de construction y property management. 20 minutos, puro contenido real.", icon: "🎤" },
+              { time: "7:55 PM", title: "Demo en vivo", desc: "Un estimado profesional generado en 99 segundos. Un contrato firmado digitalmente frente a ustedes. El proceso que hoy te toma 2 horas, ejecutado en menos de 5 minutos.", icon: "⚡" },
+              { time: "8:20 PM", title: "Tu perfil en la red", desc: "Mesa de registro con iPads. Creas tu perfil en LeadPrime Network ahí mismo. Sales del evento con 3-5 conexiones reales ya guardadas en tu teléfono.", icon: "📱" },
             ].map((item, i) => (
               <div key={i} className="relative p-5 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="text-3xl mb-3">{item.icon}</div>
@@ -897,10 +689,10 @@ export default function EventoPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div className="relative">
               <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(212,175,55,0.2)" }}>
-                <img src={GELASIO_PHOTO} alt="Gelasio Reynoso" className="w-full object-cover" style={{ maxHeight: "500px", objectPosition: "top" }} />
+                <img src={GELASIO_PHOTO} alt="Gelasio Sánchez" className="w-full object-cover" style={{ maxHeight: "500px", objectPosition: "top" }} />
               </div>
               <div className="absolute -bottom-4 -right-4 px-4 py-2 rounded-xl" style={{ background: "rgba(8,12,20,0.95)", border: "1px solid rgba(212,175,55,0.3)" }}>
-                <p className="text-[#D4AF37] text-xs font-bold">Gelasio Reynoso</p>
+                <p className="text-[#D4AF37] text-xs font-bold">Gelasio Sánchez</p>
                 <p className="text-white/40 text-xs">Founder, Chyrris</p>
               </div>
             </div>
@@ -908,15 +700,15 @@ export default function EventoPage() {
             <div>
               <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-4">Sobre el host</p>
               <div className="space-y-4 text-white/70 leading-relaxed">
-                <p>"Me llamo Gelasio Reynoso. Soy el founder de Chyrris, la compañía madre detrás de LeadPrime y Owl Fenc.</p>
+                <p>"Me llamo Gelasio Sánchez. Soy el founder de Chyrris, la compañía madre detrás de LeadPrime y Owl Fenc.</p>
                 <p>Llevo años viendo cómo la industria de construction y property management en el Bay Area opera con herramientas que no fueron hechas para nosotros — caras, complicadas, en inglés, y diseñadas para corporaciones que manejan 500 propiedades, no para el plomero independiente o el PM que maneja 30 unidades en Fairfield.</p>
                 <p>Por eso construí Chyrris. Y por eso los invito esta noche. Creo que el contratista latino y el property manager local del condado merecen herramientas tan buenas como las que tienen los grandes, pero diseñadas para como realmente trabajamos y en el idioma que hablamos.</p>
                 <p>Si vienes esa noche, te prometo dos cosas: vas a salir con contactos reales que van a mover tu negocio, y vas a tener herramientas que te van a cambiar cómo trabajas. Lo demás es bonus."</p>
               </div>
-              <p className="text-white/50 text-sm mt-4 italic">Nos vemos el 29 de mayo. — Gelasio</p>
+              <p className="text-white/50 text-sm mt-4 italic">Nos vemos el 22 de mayo. — Gelasio</p>
 
               <button onClick={openModal} className={goldBtn + " mt-6"} style={goldBtnStyle}>
-                Confirmar mi Lugar →
+                Solicitar mi Invitación →
               </button>
             </div>
           </div>
@@ -939,7 +731,7 @@ export default function EventoPage() {
               { q: "¿Es un evento para venderme algo?", a: "Es un evento para mostrarte dos productos que creemos que te van a ayudar. Los puedes usar, ignorar, o cancelar después. No te pedimos tarjeta de crédito ni información de pago en ningún momento del evento." },
               { q: "¿Tengo que hablar inglés?", a: "El evento es en español. Si vienes con alguien que solo habla inglés, también es bienvenido — los productos funcionan en ambos idiomas." },
               { q: "¿Puedo llevar a un colega o pareja?", a: "Sí, pero cada persona debe registrarse por separado por tema de cupo y comida." },
-              { q: "¿Dónde exactamente va a ser?", a: "El venue específico se confirma 7 días antes del evento por email a todos los registrados. Va a ser en Solano County, fácilmente accesible desde I-80." },
+              { q: "¿Dónde exactamente va a ser?", a: "Fairfield Community Center, 1000 Kentucky St, Fairfield, CA 94533. Fácilmente accesible desde I-80. Hay estacionamiento disponible." },
               { q: "¿Qué pasa si me registro y no puedo ir?", a: "Avísanos con al menos 48 horas de anticipación para darle tu lugar a alguien de la lista de espera. Respetamos el tiempo de todos." },
               { q: "¿Puedo ir si no soy de Solano/Contra Costa/Napa?", a: "Sí, siempre que el cupo lo permita. Prioridad de registro es para residentes de esos 3 condados, pero si vienes de Sacramento, Marin o Alameda y hay lugar, eres bienvenido." },
               { q: "¿Habrá WiFi disponible en el evento?", a: "Sí, y te vamos a ayudar a configurar tu cuenta de LeadPrime y/o Owl Fenc directamente en tu teléfono durante el tiempo de networking." },
@@ -956,9 +748,9 @@ export default function EventoPage() {
           <div className="text-center mb-10">
             <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">Registro</p>
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Confirma tu lugar ahora
+              Solicita tu Invitación
             </h2>
-            <p className="text-white/50">Gratis · Solo por invitación · Cupo limitado</p>
+            <p className="text-white/50">Gratis · Solo por invitación · 150 cupos exclusivos</p>
           </div>
 
           {successCode ? (
@@ -1015,7 +807,7 @@ export default function EventoPage() {
                   <h2 className="text-2xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     Confirma tu lugar
                   </h2>
-                  <p className="text-white/40 text-sm mt-1">La Noche Chyrris · 29 de Mayo, 2026</p>
+                  <p className="text-white/40 text-sm mt-1">La Noche Chyrris · 22 de Mayo, 2026</p>
                 </div>
                 <RegistrationForm onSuccess={handleSuccess} />
               </>

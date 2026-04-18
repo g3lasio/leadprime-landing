@@ -35,9 +35,23 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
+  pending: "#F59E0B",
+  approved: "#22C55E",
   confirmed: "#22C55E",
+  rejected: "#EF4444",
+  waitlist: "#A78BFA",
   cancelled: "#EF4444",
   attended: "#D4AF37",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pendiente",
+  approved: "Aprobado",
+  confirmed: "Confirmado",
+  rejected: "Rechazado",
+  waitlist: "Lista espera",
+  cancelled: "Cancelado",
+  attended: "Asistió",
 };
 
 function downloadCSV(registrations: Registration[]) {
@@ -265,7 +279,11 @@ export default function AdminEventoPage() {
             className="px-4 py-2 rounded-lg bg-[#0D1220] border border-white/10 text-white text-sm focus:outline-none"
           >
             <option value="all">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="approved">Aprobados</option>
             <option value="confirmed">Confirmados</option>
+            <option value="rejected">Rechazados</option>
+            <option value="waitlist">Lista espera</option>
             <option value="cancelled">Cancelados</option>
             <option value="attended">Asistieron</option>
           </select>
@@ -330,27 +348,61 @@ export default function AdminEventoPage() {
                             background: `${STATUS_COLORS[r.status] || "#fff"}15`,
                           }}
                         >
-                          {r.status}
+                          {STATUS_LABELS[r.status] || r.status}
                         </span>
                       </td>
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex gap-1">
-                          {r.status !== "attended" && (
+                        <div className="flex gap-1 flex-wrap">
+                          {r.status === "pending" && (
+                            <>
+                              <button
+                                onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "approved" })}
+                                className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+                                title="Aprobar"
+                              >
+                                ✓ Aprobar
+                              </button>
+                              <button
+                                onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "rejected" })}
+                                className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                                title="Rechazar"
+                              >
+                                ✕ Rechazar
+                              </button>
+                              <button
+                                onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "waitlist" })}
+                                className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                                title="Lista de espera"
+                              >
+                                ⏳ Espera
+                              </button>
+                            </>
+                          )}
+                          {r.status === "approved" && (
                             <button
                               onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "attended" })}
                               className="px-2 py-1 rounded text-xs bg-[#D4AF37]/20 text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-colors"
-                              title="Marcar como asistió"
+                              title="Marcar asistencia"
                             >
-                              ✓
+                              ✓ Asistió
                             </button>
                           )}
-                          {r.status !== "cancelled" && (
+                          {(r.status === "approved" || r.status === "confirmed") && (
                             <button
                               onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "cancelled" })}
                               className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
                               title="Cancelar"
                             >
-                              ✕
+                              Cancelar
+                            </button>
+                          )}
+                          {(r.status === "rejected" || r.status === "waitlist" || r.status === "cancelled") && (
+                            <button
+                              onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "pending" })}
+                              className="px-2 py-1 rounded text-xs bg-white/10 text-white/60 hover:bg-white/20 transition-colors"
+                              title="Mover a pendiente"
+                            >
+                              ↺ Pendiente
                             </button>
                           )}
                         </div>
@@ -416,29 +468,51 @@ export default function AdminEventoPage() {
               ))}
             </div>
 
-            <div className="flex gap-2 mt-6">
-              {selectedReg.status !== "attended" && (
-                <button
-                  onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "attended" })}
-                  className="flex-1 py-2 rounded-lg text-sm font-bold bg-[#D4AF37]/20 text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-colors"
-                >
-                  Marcar como asistió
-                </button>
+            <div className="flex flex-wrap gap-2 mt-6">
+              {selectedReg.status === "pending" && (
+                <>
+                  <button
+                    onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "approved" })}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+                  >
+                    ✓ Aprobar
+                  </button>
+                  <button
+                    onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "rejected" })}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                  >
+                    ✕ Rechazar
+                  </button>
+                  <button
+                    onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "waitlist" })}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                  >
+                    ⏳ Lista espera
+                  </button>
+                </>
               )}
-              {selectedReg.status !== "cancelled" && (
-                <button
-                  onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "cancelled" })}
-                  className="flex-1 py-2 rounded-lg text-sm font-bold bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                >
-                  Cancelar registro
-                </button>
+              {selectedReg.status === "approved" && (
+                <>
+                  <button
+                    onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "attended" })}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-[#D4AF37]/20 text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-colors"
+                  >
+                    ✓ Marcar asistencia
+                  </button>
+                  <button
+                    onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "cancelled" })}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </>
               )}
-              {selectedReg.status !== "confirmed" && (
+              {(selectedReg.status === "rejected" || selectedReg.status === "waitlist" || selectedReg.status === "cancelled") && (
                 <button
-                  onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "confirmed" })}
-                  className="flex-1 py-2 rounded-lg text-sm font-bold bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+                  onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "pending" })}
+                  className="flex-1 py-2 rounded-lg text-sm font-bold bg-white/10 text-white/60 hover:bg-white/20 transition-colors"
                 >
-                  Restaurar
+                  ↺ Mover a pendiente
                 </button>
               )}
             </div>
