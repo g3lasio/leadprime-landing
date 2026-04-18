@@ -555,4 +555,99 @@ export const eventoRouter = router({
       }
       return { success: true, updated: input.ids.length };
     }),
+
+  // Check-in: scan QR code on event day, mark attendee as attended
+  checkIn: publicProcedure
+    .input(z.object({
+      pin: z.string(),
+      code: z.string(), // attendee_code (with or without LNC- prefix)
+    }))
+    .mutation(async ({ input }) => {
+      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
+      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      const pool = getPool();
+      // Normalize code: strip LNC- prefix if present
+      const rawCode = input.code.trim().toUpperCase().replace(/^LNC-?/, "");
+      const reg = await pool.query(
+        "SELECT id, full_name, role, city, status, attendee_code FROM event_registrations WHERE UPPER(attendee_code) = $1",
+        [rawCode]
+      );
+      if (reg.rows.length === 0) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Código no encontrado. Verifica el código e intenta de nuevo." });
+      }
+      const attendee = reg.rows[0];
+      if (attendee.status === "attended") {
+        // Already checked in — return info but flag as duplicate
+        return {
+          success: true,
+          alreadyCheckedIn: true,
+          attendee: {
+            id: attendee.id,
+            full_name: attendee.full_name,
+            role: attendee.role,
+            city: attendee.city,
+            code: attendee.attendee_code,
+            status: attendee.status,
+          },
+        };
+      }
+      if (attendee.status !== "approved" && attendee.status !== "confirmed") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Este asistente tiene estado "${attendee.status}" — solo se pueden registrar asistentes aprobados.`,
+        });
+      }
+      // Mark as attended and record check-in time
+      await pool.query(
+        "UPDATE event_registrations SET status = 'attended', checked_in_at = NOW() WHERE id = $1",
+        [attendee.id]
+      );
+      return {
+        success: true,
+        alreadyCheckedIn: false,
+        attendee: {
+          id: attendee.id,
+          full_name: attendee.full_name,
+          role: attendee.role,
+          city: attendee.city,
+          code: attendee.attendee_code,
+          status: "attended",
+        },
+      };
+    }),
+
+  // Attendance stats: for the check-in dashboard
+  attendanceStats: publicProcedure
+    .input(z.object({ pin: z.string() }))
+    .query(async ({ input }) => {
+      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
+      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      const pool = getPool();
+      const stats = await pool.query(`
+        SELECT
+          COUNT(*) FILTER (WHERE status IN ('approved','confirmed','attended')) AS total_approved,
+          COUNT(*) FILTER (WHERE status = 'attended') AS total_attended,
+          COUNT(*) FILTER (WHERE status = 'pending') AS total_pending
+        FROM event_registrations
+      `);
+      const recentCheckins = await pool.query(`
+        SELECT full_name, role, city, attendee_code, checked_in_at
+        FROM event_registrations
+        WHERE status = 'attended'
+        ORDER BY checked_in_at DESC
+        LIMIT 50
+      `);
+      return {
+        totalApproved: parseInt(stats.rows[0].total_approved) || 0,
+        totalAttended: parseInt(stats.rows[0].total_attended) || 0,
+        totalPending: parseInt(stats.rows[0].total_pending) || 0,
+        recentCheckins: recentCheckins.rows.map((r: { full_name: string; role: string; city: string; attendee_code: string; checked_in_at: string }) => ({
+          full_name: r.full_name,
+          role: r.role,
+          city: r.city,
+          code: r.attendee_code,
+          checked_in_at: r.checked_in_at,
+        })),
+      };
+    }),
 });

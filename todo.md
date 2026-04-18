@@ -81,3 +81,15 @@
 - [ ] Generate QR code per attendee code on approval
 - [ ] Send exclusive invitation email with QR code image on approval
 - [ ] Update "Early Birds" label and cupos in admin stats to reflect 150 total
+
+## Check-in System — Día del Evento (Apr 18, 2026)
+
+- [x] Add tRPC procedure: evento.checkIn — scan QR code, mark attendee as "attended", return attendee info
+- [x] Add tRPC procedure: evento.attendanceStats — return total approved, total attended, check-in list
+- [x] Build /admin/evento/checkin page with QR scanner (html5-qrcode library)
+- [x] Camera scan mode: scan QR → show attendee name/role/city with success/error feedback
+- [x] Manual entry fallback: type code manually (LNC-XXXXXX)
+- [x] Attendance progress bar: X/Y checked in, percentage, live update
+- [x] Checked-in list: scrollable list of attendees who have arrived (name, role, time)
+- [x] Add "Check-in" nav link in AdminEventoPage
+- [x] Prevent double check-in: if already "attended", show warning not error

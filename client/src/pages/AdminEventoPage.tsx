@@ -189,7 +189,14 @@ export default function AdminEventoPage() {
             </h1>
             <p className="text-white/40 text-sm">{data.total} registros totales</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
+            <a
+              href="/admin/evento/checkin"
+              className="px-4 py-2 rounded-lg text-sm font-black transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 100%)", color: "#080C14" }}
+            >
+              📷 Check-in
+            </a>
             <button
               onClick={() => downloadCSV(data.registrations)}
               className="px-4 py-2 rounded-lg text-sm font-bold border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors"
