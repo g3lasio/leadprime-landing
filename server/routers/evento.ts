@@ -519,11 +519,12 @@ export const eventoRouter = router({
       const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
       if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
       const pool = getPool();
-      const reg = await pool.query("SELECT full_name, email, attendee_code FROM event_registrations WHERE id = $1", [input.id]);
+      const reg = await pool.query("SELECT full_name, email, attendee_code, status AS prev_status FROM event_registrations WHERE id = $1", [input.id]);
       if (reg.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      const { full_name, email, attendee_code, prev_status } = reg.rows[0];
       await pool.query("UPDATE event_registrations SET status = $1 WHERE id = $2", [input.status, input.id]);
-      if (input.sendEmail) {
-        const { full_name, email, attendee_code } = reg.rows[0];
+      // Only send email if transitioning TO this status (not already in it)
+      if (input.sendEmail && prev_status !== input.status) {
         if (input.status === "approved") sendApprovedEmail(email, full_name, attendee_code).catch(console.error);
         else if (input.status === "rejected" || input.status === "waitlist") sendRejectedEmail(email, full_name).catch(console.error);
       }
@@ -542,10 +543,12 @@ export const eventoRouter = router({
       const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
       if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
       const pool = getPool();
-      const regs = await pool.query("SELECT full_name, email, attendee_code FROM event_registrations WHERE id = ANY($1)", [input.ids]);
+      // Only fetch registrations that are NOT already in the target status (to avoid duplicate emails)
+      const regs = await pool.query("SELECT full_name, email, attendee_code, status AS prev_status FROM event_registrations WHERE id = ANY($1)", [input.ids]);
       await pool.query("UPDATE event_registrations SET status = $1 WHERE id = ANY($2)", [input.status, input.ids]);
       if (input.sendEmail) {
         for (const reg of regs.rows) {
+          if (reg.prev_status === input.status) continue; // Skip if already in this status
           if (input.status === "approved") sendApprovedEmail(reg.email, reg.full_name, reg.attendee_code).catch(console.error);
           else if (input.status === "rejected" || input.status === "waitlist") sendRejectedEmail(reg.email, reg.full_name).catch(console.error);
         }
