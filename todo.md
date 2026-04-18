@@ -35,7 +35,7 @@
 - [x] Fix notification recipient: change from gelasio@chyrris.com to info@owlfenc.com
 - [x] Update notification recipient to mervin@owlfenc.com (info@owlfenc.com had issues)
 - [x] Confirm event date — VIERNES 22 de Mayo, 2026
-- [ ] Add more cities to the registration form dropdown if needed
+- [x] Add more cities to the registration form dropdown if needed (current cities sufficient for Solano/Napa/Contra Costa)
 - [x] Improve owner notification email to include all fields: phone, city, brokerage, years in business, referral source, dietary restriction, language
 
 ## Actualizaciones Evento La Noche Chyrris (Apr 17, 2026)
