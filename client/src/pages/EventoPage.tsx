@@ -298,9 +298,9 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           className="w-full py-4 rounded-2xl font-black text-lg text-[#080C14] transition-all"
           style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}
         >
-          Solicitar mi Invitación →
+          Solicitar Acceso Privado →
         </button>
-        <p className="text-center text-white/30 text-xs">Gratis · Sin tarjeta de crédito · Cupo limitado a 150 personas</p>
+        <p className="text-center text-white/30 text-xs">Solicitud sujeta a aprobación · Sin tarjeta de crédito · Cupo limitado a 150 personas</p>
       </form>
       )}
 
@@ -472,7 +472,7 @@ export default function EventoPage() {
 
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", color: "#D4AF37" }}>
-            Evento privado · Alto perfil · Solo por invitación
+            Acceso privado · Alto perfil · Solo por invitación
           </div>
 
           <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white mb-4 leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -498,11 +498,11 @@ export default function EventoPage() {
           </div>
 
           <button onClick={openModal} className={goldBtn + " text-xl px-10 py-5 shadow-2xl"} style={goldBtnStyle}>
-            Solicitar mi Invitación →
+            Solicitar Acceso Privado →
           </button>
 
           <p className="text-white/40 text-sm mt-4">
-            Acceso por invitación · General contractors, contratistas locales y property managers en una misma sala
+            Acceso privado exclusivo por invitación · Solicitud sujeta a aprobación por cupo y perfil profesional
           </p>
         </div>
 
@@ -664,7 +664,7 @@ export default function EventoPage() {
                 title: "60 días de LeadPrime Pro + 50% off Network Elite",
                 value: "Valor real: $452.50 en 5 meses",
                 features: [
-                  "60 días de LeadPrime Pro gratis ($30 de valor)",
+                  "60 días de LeadPrime Pro incluidos ($30 de valor)",
                   "3 meses de Network Elite al 50% después",
                   "Government Projects access",
                   "Business Financing & 0% Credit Lines",
@@ -701,7 +701,7 @@ export default function EventoPage() {
 
           <div className="mt-8 p-5 rounded-2xl text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <p className="text-white/60 text-sm italic leading-relaxed">
-              "Los beneficios se activan el día del evento al crear tu perfil en LeadPrime Network. Todos los regalos son reales, sin letra pequeña, sin trucos. Si no quieres usarlos, no los uses — pero están ahí para ti."
+              "Los beneficios se activan el día del evento al crear tu perfil en LeadPrime Network. Todos los beneficios son reales y se entregan a asistentes confirmados, sin letra pequeña ni trucos. Si no quieres usarlos, no los uses — pero están ahí para ti."
             </p>
           </div>
         </div>
@@ -732,7 +732,7 @@ export default function EventoPage() {
               <p className="text-white/50 text-sm mt-4 italic">Nos vemos el 2 de julio. — Gelasio</p>
 
               <button onClick={openModal} className={goldBtn + " mt-6"} style={goldBtnStyle}>
-                Solicitar mi Invitación →
+                Solicitar Acceso Privado →
               </button>
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function EventoPage() {
 
           <div className="space-y-3">
             {[
-              { q: "¿Tengo que pagar algo?", a: "Por ahora el acceso se maneja por invitación y sin cobro al registrarte. Mi recomendación estratégica es usar aprobación manual, cupo limitado y, si se desea filtrar seriedad, considerar un depósito reembolsable o una donación opcional." },
+              { q: "¿Tengo que pagar algo?", a: "El evento se manejará como acceso privado exclusivo por invitación. No es un registro abierto: cada solicitud se revisa por cupo, perfil profesional y relevancia para mantener una sala de alto nivel entre contratistas, general contractors y property managers." },
               { q: "¿Es un evento para venderme algo?", a: "No es una presentación masiva de ventas. Es un evento ejecutivo para construir relaciones, mostrar tecnología útil y abrir oportunidades entre quienes administran propiedades y quienes ejecutan trabajos de calidad." },
               { q: "¿Tengo que hablar inglés?", a: "El evento es en español. Si vienes con alguien que solo habla inglés, también es bienvenido — los productos funcionan en ambos idiomas." },
               { q: "¿Puedo llevar a un invitado?", a: "Sí. En el formulario puedes incluir el nombre y perfil de tu invitado. Por capacidad y calidad del networking, el invitado queda sujeto a confirmación junto con tu solicitud." },
@@ -772,9 +772,9 @@ export default function EventoPage() {
           <div className="text-center mb-10">
             <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">Registro</p>
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Solicita tu Invitación
+              Solicita Acceso Privado
             </h2>
-            <p className="text-white/50">Gratis · Solo por invitación · Cupo curado y limitado</p>
+            <p className="text-white/50">Acceso privado exclusivo · Solo por invitación · Cupo curado y limitado</p>
           </div>
 
           {successCode ? (

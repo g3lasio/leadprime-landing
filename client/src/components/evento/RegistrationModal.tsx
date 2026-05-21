@@ -649,11 +649,11 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
           fontFamily: "'Space Grotesk', sans-serif",
         }}
       >
-        {registerMutation.isPending ? "Confirmando..." : "Confirmar mi Lugar — Es Gratis"}
+        {registerMutation.isPending ? "Confirmando..." : "Solicitar Acceso Privado"}
       </button>
 
       <p className="text-center text-white/30 text-xs">
-        Sin tarjeta de crédito · Sin compromisos · Cancelas cuando quieras
+        Solicitud sujeta a aprobación · Cupo curado y limitado · Sin tarjeta de crédito
       </p>
     </form>
   );
