@@ -282,7 +282,7 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
           ¡Solicitud recibida!
         </h3>
         <p className="text-white/60 text-sm mb-6">
-          Tu solicitud está en revisión. Te contactaremos en 24-48 horas para confirmar tu lugar en La Noche Chyrris — 22 de Mayo, 2026
+          Tu solicitud está en revisión. Te contactaremos en 24-48 horas para confirmar tu lugar en LeadPrime Networking — 2 de Julio, 2026
         </p>
         <div
           className="inline-block px-8 py-4 rounded-xl border-2 border-[#D4AF37] mb-6"
@@ -684,7 +684,7 @@ export default function RegistrationModal({ open, onClose, inline = false }: Reg
           >
             Confirmar mi Lugar
           </DialogTitle>
-          <p className="text-white/50 text-sm mt-1">La Noche Chyrris · 22 de Mayo, 2026 · Solano County</p>
+          <p className="text-white/50 text-sm mt-1">LeadPrime Networking · 2 de Julio, 2026 · Fairfield, CA</p>
         </div>
         <div className="px-6 py-6">
           <FormContent onSuccess={handleSuccess} />

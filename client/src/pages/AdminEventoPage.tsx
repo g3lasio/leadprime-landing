@@ -24,6 +24,9 @@ type Registration = {
   attendee_code: string;
   is_early_bird: boolean;
   status: string;
+  bringing_guest: boolean;
+  guest_name: string | null;
+  guest_role: string | null;
   created_at: string;
 };
 
@@ -59,14 +62,14 @@ function downloadCSV(registrations: Registration[]) {
     "Código", "Nombre", "Email", "Teléfono", "Rol", "Ciudad", "Idioma",
     "Negocio", "Tipo de trabajo", "Años en negocio", "Equipo",
     "Unidades", "Brokerage", "Referido por", "Nombre referido",
-    "Dieta", "Foto OK", "Early Bird", "Estado", "Fecha registro"
+    "Dieta", "Invitado", "Perfil invitado", "Foto OK", "Early Bird", "Estado", "Fecha registro"
   ];
 
   const rows = registrations.map((r) => [
     r.attendee_code, r.full_name, r.email, r.phone, r.role, r.city, r.preferred_language,
     r.business_name ?? "", r.trade_types ?? "", r.years_in_business ?? "", r.team_size ?? "",
     r.units_managed ?? "", r.brokerage_name ?? "", r.referral_source, r.referral_name ?? "",
-    r.dietary_restriction, r.consent_photo ? "Sí" : "No",
+    r.dietary_restriction, r.guest_name ?? (r.bringing_guest ? "Sí" : ""), r.guest_role ?? "", r.consent_photo ? "Sí" : "No",
     r.is_early_bird ? "Sí" : "No", r.status,
     new Date(r.created_at).toLocaleString("es-US"),
   ]);
@@ -79,7 +82,7 @@ function downloadCSV(registrations: Registration[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `noche-chyrris-registros-${new Date().toISOString().split("T")[0]}.csv`;
+  a.download = `leadprime-networking-registros-${new Date().toISOString().split("T")[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -123,7 +126,7 @@ export default function AdminEventoPage() {
             >
               Admin Dashboard
             </h1>
-            <p className="text-white/40 text-sm mt-2">La Noche Chyrris</p>
+            <p className="text-white/40 text-sm mt-2">LeadPrime Networking</p>
           </div>
 
           <form onSubmit={handlePinSubmit} className="space-y-4">
@@ -185,7 +188,7 @@ export default function AdminEventoPage() {
               className="text-2xl font-black text-white"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Admin — La Noche Chyrris
+              Admin — LeadPrime Networking
             </h1>
             <p className="text-white/40 text-sm">{data.total} registros totales</p>
           </div>

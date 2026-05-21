@@ -213,7 +213,7 @@ export default function CheckInPage() {
             <h1 className="text-2xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Check-in
             </h1>
-            <p className="text-white/40 text-sm mt-1">La Noche Chyrris · 22 de Mayo, 2026</p>
+            <p className="text-white/40 text-sm mt-1">LeadPrime Networking · 2 de Julio, 2026</p>
           </div>
           <form onSubmit={handlePinSubmit} className="space-y-4">
             <div>
@@ -268,7 +268,7 @@ export default function CheckInPage() {
           </a>
           <span className="text-white/20">|</span>
           <h1 className="text-white font-black text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            🌙 Check-in · La Noche Chyrris
+            ◆ Check-in · LeadPrime Networking
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -441,7 +441,7 @@ export default function CheckInPage() {
                     type="text"
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-                    placeholder="LNC-XXXXXX o XXXXXX"
+                    placeholder="LPN-XXXXXX o XXXXXX"
                     className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-mono text-sm focus:outline-none focus:border-[#D4AF37]/50 transition-colors placeholder-white/20"
                     autoFocus
                     autoComplete="off"
@@ -503,7 +503,7 @@ export default function CheckInPage() {
                     📍 {lastScan.result.attendee.city}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-white/5 text-white/40">
-                    LNC-{lastScan.result.attendee.code}
+                    LPN-{lastScan.result.attendee.code}
                   </span>
                 </div>
                 <p className="text-white/30 text-xs mt-2">
@@ -538,7 +538,7 @@ export default function CheckInPage() {
                     <p className="text-white/40 text-xs truncate">{r.role} · {r.city}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-white/30 text-xs font-mono">LNC-{r.code}</p>
+                    <p className="text-white/30 text-xs font-mono">LPN-{r.code}</p>
                     {r.checked_in_at && (
                       <p className="text-white/20 text-xs">
                         {new Date(r.checked_in_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}

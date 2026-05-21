@@ -68,7 +68,7 @@ export default function EventoNavbar({ onRegisterClick }: EventoNavbarProps) {
               fontFamily: "'Space Grotesk', sans-serif",
             }}
           >
-            Confirmar mi Lugar
+            Solicitar acceso
           </button>
         </div>
       </div>

@@ -18,12 +18,23 @@ function getPool() {
 }
 
 // Event constants
-const EVENT_DATE = "Viernes 22 de Mayo, 2026";
-const EVENT_TIME = "7:00 PM – 10:00 PM";
-const EVENT_VENUE = "Fairfield Community Center";
-const EVENT_ADDRESS = "1000 Kentucky St, Fairfield, CA 94533";
+const EVENT_NAME = "LeadPrime Networking";
+const EVENT_DATE = "Jueves 2 de Julio, 2026";
+const EVENT_TIME = "7:00 PM – 8:30 PM";
+const EVENT_VENUE = "Fairfield, California";
+const EVENT_ADDRESS = "1000 Webster Street, Fairfield, CA 94533";
 
 // Generate a unique 6-char attendee code
+async function ensureEventRegistrationColumns() {
+  const pool = getPool();
+  await pool.query(`
+    ALTER TABLE event_registrations
+      ADD COLUMN IF NOT EXISTS bringing_guest BOOLEAN DEFAULT false,
+      ADD COLUMN IF NOT EXISTS guest_name TEXT,
+      ADD COLUMN IF NOT EXISTS guest_role TEXT
+  `);
+}
+
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -39,18 +50,18 @@ async function sendPendingEmail(email: string, name: string, code: string) {
 <head><meta charset="utf-8"></head>
 <body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;">
   <div style="text-align:center;margin-bottom:32px;">
-    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">La Noche Chyrris</h1>
+    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">LeadPrime Networking</h1>
     <p style="color:rgba(255,255,255,0.5);margin-top:8px;">Solicitud recibida</p>
   </div>
   <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:32px;margin-bottom:24px;">
     <p style="color:rgba(255,255,255,0.8);font-size:16px;margin-top:0;">Hola <strong style="color:#fff;">${name}</strong>,</p>
     <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
-      Recibimos tu solicitud para <strong style="color:#D4AF37;">La Noche Chyrris</strong>. 
+      Recibimos tu solicitud para <strong style="color:#D4AF37;">LeadPrime Networking</strong>. 
       El equipo Chyrris revisará tu perfil y te confirmaremos en las próximas <strong style="color:#fff;">48 horas</strong> si recibes acceso al evento.
     </p>
     <div style="text-align:center;margin:32px 0;padding:24px;background:rgba(212,175,55,0.1);border-radius:12px;border:1px solid rgba(212,175,55,0.3);">
       <p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Tu código de aplicación</p>
-      <p style="color:#D4AF37;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">LNC-${code}</p>
+      <p style="color:#D4AF37;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">LPN-${code}</p>
     </div>
     <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
       <strong style="color:#fff;">📅 Fecha:</strong> ${EVENT_DATE}<br>
@@ -64,7 +75,7 @@ async function sendPendingEmail(email: string, name: string, code: string) {
       Si tienes preguntas, contáctanos en <a href="mailto:info@chyrris.com" style="color:#D4AF37;">info@chyrris.com</a>
     </p>
   </div>
-  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · Owl Fenc LLC · Todos los derechos reservados</p>
+  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · LeadPrime · Owl Fenc LLC · Todos los derechos reservados</p>
 </body>
 </html>`;
   try {
@@ -72,9 +83,9 @@ async function sendPendingEmail(email: string, name: string, code: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "La Noche Chyrris <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <noreply@owlfenc.com>",
         to: [email],
-        subject: `📋 Solicitud recibida — La Noche Chyrris | Código: LNC-${code}`,
+        subject: `📋 Solicitud recibida — LeadPrime Networking | Código: LPN-${code}`,
         html,
       }),
     });
@@ -107,18 +118,18 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
 <head><meta charset="utf-8"></head>
 <body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;">
   <div style="text-align:center;margin-bottom:32px;">
-    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">La Noche Chyrris</h1>
+    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">LeadPrime Networking</h1>
     <p style="color:rgba(255,255,255,0.5);margin-top:8px;">¡Fuiste aprobado!</p>
   </div>
   <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:32px;margin-bottom:24px;">
     <p style="color:rgba(255,255,255,0.8);font-size:16px;margin-top:0;">Hola <strong style="color:#fff;">${name}</strong>,</p>
     <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
-      🎉 <strong style="color:#D4AF37;">¡Felicidades!</strong> Fuiste aprobado para <strong style="color:#D4AF37;">La Noche Chyrris</strong>. 
+      🎉 <strong style="color:#D4AF37;">¡Felicidades!</strong> Fuiste aprobado para <strong style="color:#D4AF37;">LeadPrime Networking</strong>. 
       Tu lugar está confirmado — te esperamos esa noche.
     </p>
     <div style="text-align:center;margin:32px 0;padding:24px;background:rgba(212,175,55,0.1);border-radius:12px;border:1px solid rgba(212,175,55,0.3);">
       <p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Tu código de asistente</p>
-      <p style="color:#D4AF37;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">LNC-${code}</p>
+      <p style="color:#D4AF37;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">LPN-${code}</p>
       <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:8px 0 0;">Guarda este código — lo necesitarás para el check-in</p>
     </div>
     {{QR_PLACEHOLDER}}
@@ -131,27 +142,27 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
   </div>
   <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:20px;margin-bottom:24px;">
     <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0;line-height:1.6;">
-      El evento es gratuito. Llega puntual — el networking empieza a las 7:00 PM. 
+      Llega puntual — el networking privado empieza a las 7:00 PM y cierra formalmente a las 8:30 PM. 
       Si tienes preguntas, contáctanos en <a href="mailto:info@chyrris.com" style="color:#D4AF37;">info@chyrris.com</a>
     </p>
   </div>
-  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · Owl Fenc LLC · Todos los derechos reservados</p>
+  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · LeadPrime · Owl Fenc LLC · Todos los derechos reservados</p>
 </body>
 </html>`;
   try {
     // Generate QR code with the attendee code
-    const qrDataUrl = await generateQRDataUrl(`LNC-${code}`);
+    const qrDataUrl = await generateQRDataUrl(`LPN-${code}`);
     const qrHtml = qrDataUrl
-      ? `<div style="text-align:center;margin:24px 0;"><p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;">Tu QR de entrada</p><img src="${qrDataUrl}" alt="QR Code LNC-${code}" style="width:160px;height:160px;border-radius:12px;" /><p style="color:rgba(255,255,255,0.4);font-size:11px;margin:8px 0 0;">Presenta este QR en la entrada del evento</p></div>`
+      ? `<div style="text-align:center;margin:24px 0;"><p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;">Tu QR de entrada</p><img src="${qrDataUrl}" alt="QR Code LPN-${code}" style="width:160px;height:160px;border-radius:12px;" /><p style="color:rgba(255,255,255,0.4);font-size:11px;margin:8px 0 0;">Presenta este QR en la entrada del evento</p></div>`
       : '';
     const finalHtml = html.replace('{{QR_PLACEHOLDER}}', qrHtml);
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "La Noche Chyrris <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <noreply@owlfenc.com>",
         to: [email],
-        subject: `🎉 ¡Aprobado! Tu lugar en La Noche Chyrris está confirmado — LNC-${code}`,
+        subject: `🎉 ¡Aprobado! Tu lugar en LeadPrime Networking está confirmado — LPN-${code}`,
         html: finalHtml,
       }),
     });
@@ -169,12 +180,12 @@ async function sendRejectedEmail(email: string, name: string) {
 <head><meta charset="utf-8"></head>
 <body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;">
   <div style="text-align:center;margin-bottom:32px;">
-    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">La Noche Chyrris</h1>
+    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">LeadPrime Networking</h1>
   </div>
   <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px;margin-bottom:24px;">
     <p style="color:rgba(255,255,255,0.8);font-size:16px;margin-top:0;">Hola <strong style="color:#fff;">${name}</strong>,</p>
     <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
-      Gracias por tu interés en <strong style="color:#D4AF37;">La Noche Chyrris</strong>. 
+      Gracias por tu interés en <strong style="color:#D4AF37;">LeadPrime Networking</strong>. 
       En este momento el evento está al límite de capacidad y no podemos confirmar tu lugar para esta edición.
     </p>
     <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
@@ -186,7 +197,7 @@ async function sendRejectedEmail(email: string, name: string) {
       Si tienes preguntas, contáctanos en <a href="mailto:info@chyrris.com" style="color:#D4AF37;">info@chyrris.com</a>
     </p>
   </div>
-  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · Owl Fenc LLC · Todos los derechos reservados</p>
+  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · LeadPrime · Owl Fenc LLC · Todos los derechos reservados</p>
 </body>
 </html>`;
   try {
@@ -194,9 +205,9 @@ async function sendRejectedEmail(email: string, name: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "La Noche Chyrris <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <noreply@owlfenc.com>",
         to: [email],
-        subject: `La Noche Chyrris — Actualización de tu solicitud`,
+        subject: `LeadPrime Networking — Actualización de tu solicitud`,
         html,
       }),
     });
@@ -216,6 +227,9 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
   units_managed?: string | null;
   referral_source: string;
   dietary_restriction: string;
+  bringing_guest?: boolean | null;
+  guest_name?: string | null;
+  guest_role?: string | null;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   const forgeApiUrl = process.env.BUILT_IN_FORGE_API_URL;
@@ -243,10 +257,10 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          from: "La Noche Chyrris <noreply@owlfenc.com>",
+          from: "LeadPrime Networking <noreply@owlfenc.com>",
           to: ["mervin@owlfenc.com"],
-          subject: `🎟 Nueva solicitud: ${name} (${role}) — La Noche Chyrris`,
-          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎟 Nueva solicitud — La Noche Chyrris</h2><p style="color:orange;font-weight:bold;">Estado: PENDIENTE — requiere aprobación manual</p>${actionButtons}<table style="width:100%;border-collapse:collapse;margin-top:16px;">
+          subject: `🎟 Nueva solicitud: ${name} (${role}) — LeadPrime Networking`,
+          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎟 Nueva solicitud — LeadPrime Networking</h2><p style="color:orange;font-weight:bold;">Estado: PENDIENTE — requiere aprobación manual</p>${actionButtons}<table style="width:100%;border-collapse:collapse;margin-top:16px;">
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);width:40%">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr>
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Email</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${email}</td></tr>
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Teléfono</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.phone}</td></tr>
@@ -257,8 +271,9 @@ ${extra.brokerage_name ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px
 ${extra.business_name ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Empresa</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.business_name}</td></tr>` : ''}
 ${extra.units_managed ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Unidades</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.units_managed}</td></tr>` : ''}
 ${extra.years_in_business ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Años en negocio</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.years_in_business}</td></tr>` : ''}
+${extra.bringing_guest ? `<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Invitado</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.guest_name || 'Sí, sin nombre'}${extra.guest_role ? ' · ' + extra.guest_role : ''}</td></tr>` : ''}
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">Referido por</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">${extra.referral_source}</td></tr>
-<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;">Código</td><td style="color:#D4AF37;padding:8px 0;font-weight:900;font-size:20px;letter-spacing:2px;">LNC-${code}</td></tr>
+<tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;">Código</td><td style="color:#D4AF37;padding:8px 0;font-weight:900;font-size:20px;letter-spacing:2px;">LPN-${code}</td></tr>
 </table><p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:32px;">Aprobar/rechazar en: <a href="https://lead-prime.chyrris.com/admin/evento" style="color:#D4AF37;">lead-prime.chyrris.com/admin/evento</a></p></body></html>`,
         }),
       });
@@ -274,7 +289,7 @@ ${extra.years_in_business ? `<tr><td style="color:rgba(255,255,255,0.5);padding:
         headers: { Authorization: `Bearer ${forgeApiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           title: `🎟 Nueva solicitud: ${name}`,
-          content: `${name} (${role}) solicitó asistir a La Noche Chyrris.\nEmail: ${email}\nCódigo: LNC-${code}\nEstado: PENDIENTE`,
+          content: `${name} (${role}) solicitó asistir a LeadPrime Networking.\nEmail: ${email}\nCódigo: LPN-${code}\nEstado: PENDIENTE`,
         }),
       });
     } catch (e) { console.error("[Evento] Failed to send Manus notification:", e); }
@@ -312,6 +327,9 @@ const registerFullInput = z.object({
   referral_source: z.string().nullable().optional(),
   referral_name: z.string().nullable().optional(),
   dietary_restriction: z.string().nullable().optional(),
+  bringing_guest: z.boolean().optional().default(false),
+  guest_name: z.string().max(100).nullable().optional(),
+  guest_role: z.string().max(100).nullable().optional(),
 });
 
 const step1Input = z.object({
@@ -323,6 +341,9 @@ const step1Input = z.object({
   city_other: z.string().optional(),
   preferred_language: z.string().default("Español"),
   consent_contact: z.boolean(),
+  bringing_guest: z.boolean().optional().default(false),
+  guest_name: z.string().max(100).nullable().optional(),
+  guest_role: z.string().max(100).nullable().optional(),
 });
 
 // Step 2 schema: optional profile completion
@@ -348,12 +369,16 @@ const step2Input = z.object({
   referral_name: z.string().nullable().optional(),
   dietary_restriction: z.string().nullable().optional(),
   consent_photo: z.boolean().optional(),
+  bringing_guest: z.boolean().optional().default(false),
+  guest_name: z.string().max(100).nullable().optional(),
+  guest_role: z.string().max(100).nullable().optional(),
 });
 
 export const eventoRouter = router({
   // Step 1: Register with minimal info — creates pending registration
   register: publicProcedure.input(step1Input).mutation(async ({ input }) => {
     const pool = getPool();
+    await ensureEventRegistrationColumns();
     const existing = await pool.query("SELECT id FROM event_registrations WHERE email = $1", [input.email.toLowerCase()]);
     if (existing.rows.length > 0) {
       throw new TRPCError({ code: "CONFLICT", message: "Este email ya está registrado. Si tienes dudas, contáctanos en info@chyrris.com" });
@@ -376,10 +401,10 @@ export const eventoRouter = router({
       `INSERT INTO event_registrations (
         full_name, phone, email, role, city, preferred_language,
         referral_source, dietary_restriction, consent_contact, consent_photo,
-        attendee_code, is_early_bird, status
-      ) VALUES ($1,$2,$3,$4,$5,$6, NULL, 'Ninguna', $7, false, $8,
+        bringing_guest, guest_name, guest_role, attendee_code, is_early_bird, status
+      ) VALUES ($1,$2,$3,$4,$5,$6, NULL, 'Ninguna', $7, false, $8, $9, $10, $11,
         (SELECT COUNT(*) < 20 FROM event_registrations), 'pending') RETURNING id`,
-      [input.full_name, input.phone, input.email.toLowerCase(), input.role, city, input.preferred_language, input.consent_contact, code]
+      [input.full_name, input.phone, input.email.toLowerCase(), input.role, city, input.preferred_language, input.consent_contact, input.bringing_guest ?? false, input.guest_name ?? null, input.guest_role ?? null, code]
     );
     const newId = insertResult.rows[0]?.id;
     sendPendingEmail(input.email, input.full_name, code).catch(console.error);
@@ -387,6 +412,7 @@ export const eventoRouter = router({
       id: newId, phone: input.phone, city, preferred_language: input.preferred_language,
       years_in_business: null, brokerage_name: null, business_name: null, units_managed: null,
       referral_source: "No especificado", dietary_restriction: "Ninguna",
+      bringing_guest: input.bringing_guest ?? false, guest_name: input.guest_name ?? null, guest_role: input.guest_role ?? null,
     }).catch(console.error);
     return { success: true, code };
   }),
@@ -394,6 +420,7 @@ export const eventoRouter = router({
   // Step 2: Complete profile (optional)
   completeProfile: publicProcedure.input(step2Input).mutation(async ({ input }) => {
     const pool = getPool();
+    await ensureEventRegistrationColumns();
     const existing = await pool.query("SELECT id FROM event_registrations WHERE attendee_code = $1", [input.code]);
     if (existing.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Código no encontrado" });
     await pool.query(
@@ -407,15 +434,17 @@ export const eventoRouter = router({
         dre_license_number = COALESCE($13, dre_license_number), also_property_manager = COALESCE($14, also_property_manager),
         service_areas = COALESCE($15, service_areas), profession_description = COALESCE($16, profession_description),
         referral_source = COALESCE($17, referral_source), referral_name = COALESCE($18, referral_name),
-        dietary_restriction = COALESCE($19, dietary_restriction), consent_photo = COALESCE($20, consent_photo)
-      WHERE attendee_code = $21`,
+        dietary_restriction = COALESCE($19, dietary_restriction), consent_photo = COALESCE($20, consent_photo),
+        bringing_guest = COALESCE($21, bringing_guest), guest_name = COALESCE($22, guest_name), guest_role = COALESCE($23, guest_role)
+      WHERE attendee_code = $24`,
       [input.business_name ?? null, input.trade_types ?? null, input.has_cslb_license ?? null,
        input.cslb_license_number ?? null, input.years_in_business ?? null, input.team_size ?? null,
        input.current_estimating_tool ?? null, input.units_managed ?? null, input.property_types ?? null,
        input.has_real_estate_license ?? null, input.current_pm_software ?? null, input.brokerage_name ?? null,
        input.dre_license_number ?? null, input.also_property_manager ?? null, input.service_areas ?? null,
        input.profession_description ?? null, input.referral_source ?? null, input.referral_name ?? null,
-       input.dietary_restriction ?? null, input.consent_photo ?? null, input.code]
+       input.dietary_restriction ?? null, input.consent_photo ?? null,
+       input.bringing_guest ?? null, input.guest_name ?? null, input.guest_role ?? null, input.code]
     );
     return { success: true };
   }),
@@ -423,6 +452,7 @@ export const eventoRouter = router({
   // Full registration in one step (used by RegistrationModal)
   registerFull: publicProcedure.input(registerFullInput).mutation(async ({ input }) => {
     const pool = getPool();
+    await ensureEventRegistrationColumns();
     const existing = await pool.query("SELECT id FROM event_registrations WHERE email = $1", [input.email.toLowerCase()]);
     if (existing.rows.length > 0) {
       throw new TRPCError({ code: "CONFLICT", message: "Este email ya está registrado. Si tienes dudas, contáctanos en info@chyrris.com" });
@@ -448,8 +478,8 @@ export const eventoRouter = router({
         property_types, has_real_estate_license, current_pm_software, brokerage_name,
         dre_license_number, also_property_manager, service_areas, profession_description,
         referral_source, referral_name, dietary_restriction,
-        consent_contact, consent_photo, attendee_code, is_early_bird, status
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,
+        consent_contact, consent_photo, bringing_guest, guest_name, guest_role, attendee_code, is_early_bird, status
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,
         (SELECT COUNT(*) < 20 FROM event_registrations), 'pending')`,
       [
         input.full_name, input.phone, input.email.toLowerCase(), input.role, city, input.preferred_language,
@@ -458,7 +488,7 @@ export const eventoRouter = router({
         input.property_types ?? null, input.has_real_estate_license ?? null, input.current_pm_software ?? null, input.brokerage_name ?? null,
         input.dre_license_number ?? null, input.also_property_manager ?? null, input.service_areas ?? null, input.profession_description ?? null,
         input.referral_source ?? null, input.referral_name ?? null, input.dietary_restriction ?? "Ninguna",
-        input.consent_contact, input.consent_photo ?? false, code
+        input.consent_contact, input.consent_photo ?? false, input.bringing_guest ?? false, input.guest_name ?? null, input.guest_role ?? null, code
       ]
     );
     const insertResult2 = await pool.query(
@@ -474,6 +504,7 @@ export const eventoRouter = router({
       units_managed: input.units_managed ?? null,
       referral_source: input.referral_source ?? "No especificado",
       dietary_restriction: input.dietary_restriction ?? "Ninguna",
+      bringing_guest: input.bringing_guest ?? false, guest_name: input.guest_name ?? null, guest_role: input.guest_role ?? null,
     }).catch(console.error);
     return { success: true, code };
   }),
@@ -486,11 +517,13 @@ export const eventoRouter = router({
       const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
       if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
       const pool = getPool();
+      await ensureEventRegistrationColumns();
       const result = await pool.query(
         `SELECT id, full_name, phone, email, role, city, preferred_language,
           business_name, trade_types, years_in_business, team_size,
           units_managed, brokerage_name, referral_source, referral_name,
           dietary_restriction, consent_contact, consent_photo,
+          bringing_guest, guest_name, guest_role,
           attendee_code, is_early_bird, status, created_at
         FROM event_registrations ORDER BY created_at DESC`
       );
@@ -560,14 +593,14 @@ export const eventoRouter = router({
   checkIn: publicProcedure
     .input(z.object({
       pin: z.string(),
-      code: z.string(), // attendee_code (with or without LNC- prefix)
+      code: z.string(), // attendee_code (with or without LPN- prefix)
     }))
     .mutation(async ({ input }) => {
       const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
       if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
       const pool = getPool();
-      // Normalize code: strip LNC- prefix if present
-      const rawCode = input.code.trim().toUpperCase().replace(/^LNC-?/, "");
+      // Normalize code: strip LPN- prefix if present
+      const rawCode = input.code.trim().toUpperCase().replace(/^LPN-?/, "").replace(/^LNC-?/, "");
       const reg = await pool.query(
         "SELECT id, full_name, role, city, status, attendee_code FROM event_registrations WHERE UPPER(attendee_code) = $1",
         [rawCode]

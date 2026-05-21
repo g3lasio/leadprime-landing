@@ -3,10 +3,11 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 // Event constants
-const EVENT_DATE = "Viernes 22 de Mayo, 2026";
-const EVENT_TIME = "7:00 PM – 10:00 PM";
-const EVENT_VENUE = "Fairfield Community Center";
-const EVENT_ADDRESS = "1000 Kentucky St, Fairfield, CA 94533";
+const EVENT_NAME = "LeadPrime Networking";
+const EVENT_DATE = "Jueves 2 de Julio, 2026";
+const EVENT_TIME = "7:00 PM – 8:30 PM";
+const EVENT_VENUE = "Fairfield, California";
+const EVENT_ADDRESS = "1000 Webster Street, Fairfield, CA 94533";
 
 const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/noche-chyrris-hero_73b82ad9.jpg";
 const GELASIO_PHOTO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/gelasio-photo_3fe4ac74.png";
@@ -63,6 +64,9 @@ type FormData = {
   dietary_other: string;
   consent_contact: boolean;
   consent_photo: boolean;
+  bringing_guest: boolean;
+  guest_name: string;
+  guest_role: string;
 };
 
 const initialForm: FormData = {
@@ -75,6 +79,7 @@ const initialForm: FormData = {
   profession_description: "",
   referral_source: "", referral_name: "", dietary_restriction: "", dietary_other: "",
   consent_contact: false, consent_photo: false,
+  bringing_guest: false, guest_name: "", guest_role: "",
 };
 
 function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) {
@@ -82,7 +87,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState<1 | 2>(1);
 
-  const register = trpc.evento.register.useMutation({
+  const register = trpc.evento.registerFull.useMutation({
     onSuccess: (data) => onSuccess(data.code),
     onError: (e) => {
       if (e.message.includes("ya está registrado")) {
@@ -177,6 +182,9 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
         : form.dietary_restriction,
       consent_contact: form.consent_contact,
       consent_photo: form.consent_photo,
+      bringing_guest: form.bringing_guest,
+      guest_name: form.bringing_guest ? form.guest_name.trim() || null : null,
+      guest_role: form.bringing_guest ? form.guest_role || null : null,
     };
 
     register.mutate(payload);
@@ -199,6 +207,9 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
       referral_source: "No especificado", referral_name: null,
       dietary_restriction: "Ninguna",
       consent_contact: form.consent_contact, consent_photo: false,
+      bringing_guest: form.bringing_guest,
+      guest_name: form.bringing_guest ? form.guest_name.trim() || null : null,
+      guest_role: form.bringing_guest ? form.guest_role || null : null,
     };
     register.mutate(payload);
   };
@@ -276,7 +287,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={form.consent_contact} onChange={(e) => set("consent_contact", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
             <span className="text-white/70 text-sm leading-relaxed">
-              Autorizo que Chyrris me contacte por teléfono y email para confirmar mi asistencia y enviarme información del evento. *
+              Autorizo que LeadPrime me contacte por teléfono, SMS y email para confirmar mi asistencia y enviarme información exclusiva del evento. *
             </span>
           </label>
           {errors.consent_contact && <p className={errorClass}>{errors.consent_contact}</p>}
@@ -298,7 +309,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
         <p className="text-white/50 text-xs text-center">Paso 2 de 2 — Completa tu perfil (opcional)</p>
         <div className="p-4 rounded-xl bg-[#D4AF37]/5 border border-[#D4AF37]/20">
           <p className="text-[#D4AF37] text-sm font-bold mb-1">Hola {form.full_name.split(' ')[0]}! 👋</p>
-          <p className="text-white/60 text-sm">Tu solicitud ya fue recibida. Completar tu perfil nos ayuda a preparar mejor el evento. Es opcional — puedes saltarte este paso.</p>
+          <p className="text-white/60 text-sm">Ya tenemos tus datos principales. Completar este perfil nos ayuda a curar mejor las conexiones de la noche. Es opcional — puedes saltarte este paso.</p>
         </div>
 
         {form.role === "Contratista" && (
@@ -332,6 +343,19 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           <div><label className={labelClass}>Restricción alimentaria</label><select className={inputClass("dietary_restriction") + " bg-[#0D1220]"} value={form.dietary_restriction} onChange={(e) => set("dietary_restriction", e.target.value)}><option value="">Ninguna</option>{["Ninguna","Vegetariano","Vegano","Sin gluten","Otra"].map((d) => <option key={d}>{d}</option>)}</select></div>
         </div>
 
+        <div className="p-4 rounded-xl bg-white/3 border border-white/10 space-y-3">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" checked={form.bringing_guest} onChange={(e) => set("bringing_guest", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
+            <span className="text-white/70 text-sm leading-relaxed">Quiero incluir un invitado en mi solicitud. El invitado también queda sujeto a aprobación por capacidad y perfil profesional.</span>
+          </label>
+          {form.bringing_guest && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div><label className={labelClass}>Nombre del invitado</label><input className={inputClass("guest_name")} value={form.guest_name} onChange={(e) => set("guest_name", e.target.value)} placeholder="Nombre completo" /></div>
+              <div><label className={labelClass}>Perfil del invitado</label><select className={inputClass("guest_role") + " bg-[#0D1220]"} value={form.guest_role} onChange={(e) => set("guest_role", e.target.value)}><option value="">Selecciona</option>{["Contratista","Property Manager","Realtor","Inversionista","Dueño de negocio","Acompañante"].map((r) => <option key={r}>{r}</option>)}</select></div>
+            </div>
+          )}
+        </div>
+
         <label className="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" checked={form.consent_photo} onChange={(e) => set("consent_photo", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
           <span className="text-white/70 text-sm leading-relaxed">Autorizo el uso de fotos del evento para redes sociales de Chyrris. (Opcional)</span>
@@ -357,7 +381,7 @@ function SuccessScreen({ code, onClose }: { code: string; onClose: () => void })
     <div className="text-center py-8">
       <div className="text-6xl mb-4">🎉</div>
       <h3 className="text-2xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-        ¡Solicitud recibida!
+        ¡Solicitud recibida
       </h3>
       <p className="text-white/60 mb-6">Revisa tu email — te enviamos todos los detalles.</p>
 
@@ -373,10 +397,10 @@ function SuccessScreen({ code, onClose }: { code: string; onClose: () => void })
       </p>
 
       <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-left mb-6">
-        <p className="text-white/80 text-sm font-medium mb-2">📅 Detalles del evento</p>
-        <p className="text-white/60 text-sm">{EVENT_DATE}</p>
-        <p className="text-white/60 text-sm">{EVENT_TIME} · Solano County, California</p>
-        <p className="text-white/40 text-xs mt-2">La dirección exacta se confirma 7 días antes por email.</p>
+        <p className="text-white/80 text-sm font-medium mb-2">Detalles del evento</p>
+        <p className="text-white/60 text-sm">{EVENT_NAME}</p>
+        <p className="text-white/60 text-sm">{EVENT_DATE} · {EVENT_TIME}</p>
+        <p className="text-white/60 text-sm">{EVENT_VENUE} · {EVENT_ADDRESS}</p>
       </div>
 
       <button onClick={onClose} className="text-white/40 text-sm hover:text-white/60 transition-colors">
@@ -414,8 +438,8 @@ export default function EventoPage() {
       >
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <div>
-            <p className="text-white font-bold text-sm">La Noche Chyrris</p>
-            <p className="text-white/40 text-xs">22 de Mayo · Solano County</p>
+            <p className="text-white font-bold text-sm">LeadPrime Networking</p>
+            <p className="text-white/40 text-xs">2 de Julio · Fairfield, CA</p>
           </div>
           <button onClick={openModal} className={goldBtn + " text-sm px-6 py-3"} style={goldBtnStyle}>
             Solicitar mi Invitación
@@ -428,10 +452,10 @@ export default function EventoPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[#D4AF37] text-sm" style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)" }}>C</div>
-            <span className="text-white font-bold text-sm">Chyrris</span>
+            <span className="text-white font-bold text-sm">LeadPrime</span>
           </div>
           <button onClick={openModal} className="px-4 py-2 rounded-xl text-sm font-bold text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/10 transition-colors">
-            Confirmar Lugar
+            Solicitar acceso
           </button>
         </div>
       </nav>
@@ -448,23 +472,23 @@ export default function EventoPage() {
 
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", color: "#D4AF37" }}>
-            Primera Reunión · Solo por Invitación
+            Evento privado · Alto perfil · Solo por invitación
           </div>
 
           <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white mb-4 leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            La Noche<br />
-            <span style={{ WebkitTextStroke: "2px #D4AF37", color: "transparent" }}>Chyrris</span>
+            LeadPrime<br />
+            <span style={{ WebkitTextStroke: "2px #D4AF37", color: "transparent" }}>Networking</span>
           </h1>
 
           <p className="text-xl sm:text-2xl text-white/70 mb-8 font-medium">
-            Contratistas y Property Managers<br />del Norte de California
+            General contractors, contratistas locales y property managers<br />del área de Fairfield y Bay Area
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             {[
               { icon: "📅", text: EVENT_DATE },
-              { icon: "📍", text: "Solano County, California" },
-              { icon: "🎟", text: "150 cupos exclusivos" },
+              { icon: "📍", text: "1000 Webster Street, Fairfield" },
+              { icon: "🎟", text: "Cupo curado y limitado" },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-white/80" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <span>{item.icon}</span>
@@ -478,7 +502,7 @@ export default function EventoPage() {
           </button>
 
           <p className="text-white/40 text-sm mt-4">
-            Gratis · Incluye comida y bebidas · 90 minutos que pueden cambiar tu negocio
+            Acceso por invitación · General contractors, contratistas locales y property managers en una misma sala
           </p>
         </div>
 
@@ -549,7 +573,7 @@ export default function EventoPage() {
 
           <div className="text-center mt-12">
             <p className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Por eso estamos organizando esta noche.
+              Por eso LeadPrime Networking junta a quienes hacen el trabajo con quienes necesitan contratistas confiables.
             </p>
           </div>
         </div>
@@ -561,16 +585,16 @@ export default function EventoPage() {
           <div className="text-center mb-12">
             <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">El programa</p>
             <h2 className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Qué va a pasar esa noche
+              Una agenda enfocada en conexiones reales
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { time: "7:00 PM", title: "Llegada y networking", desc: "Café, botanas, bebidas. 30 minutos para conocer a otros profesionales del condado. Credenciales con QR para intercambio rápido de contactos.", icon: "🤝" },
-              { time: "7:30 PM", title: "La ponencia", desc: "Gelasio Sánchez comparte por qué llevó años construyendo una plataforma específicamente para la industria latina de construction y property management. 20 minutos, puro contenido real.", icon: "🎤" },
-              { time: "7:55 PM", title: "Demo en vivo", desc: "Un estimado profesional generado en 99 segundos. Un contrato firmado digitalmente frente a ustedes. El proceso que hoy te toma 2 horas, ejecutado en menos de 5 minutos.", icon: "⚡" },
-              { time: "8:20 PM", title: "Tu perfil en la red", desc: "Mesa de registro con iPads. Creas tu perfil en LeadPrime Network ahí mismo. Sales del evento con 3-5 conexiones reales ya guardadas en tu teléfono.", icon: "📱" },
+              { time: "7:00 PM", title: "Recepción privada", desc: "Check-in, credenciales y primera ronda de networking curado entre general contractors, contratistas especializados y property managers del área.", icon: "🤝" },
+              { time: "7:25 PM", title: "Industry briefing", desc: "Gelasio Sánchez presenta la visión de LeadPrime: cómo conectar demanda real de property managers con contratistas confiables usando tecnología y relaciones de alto nivel.", icon: "🎤" },
+              { time: "7:50 PM", title: "Demo ejecutiva", desc: "LeadPrime y Owl Fenc en acción: seguimiento de leads, propuestas, estimados y contratos digitales diseñados para negocios de servicio que quieren operar como empresas serias.", icon: "⚡" },
+              { time: "8:15 PM", title: "Conexiones estratégicas", desc: "Cierre con introducciones dirigidas y próximos pasos para que cada asistente salga con oportunidades reales, no solo tarjetas de presentación.", icon: "📱" },
             ].map((item, i) => (
               <div key={i} className="relative p-5 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="text-3xl mb-3">{item.icon}</div>
@@ -583,8 +607,8 @@ export default function EventoPage() {
 
           <div className="mt-6 p-4 rounded-xl text-center" style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.15)" }}>
             <p className="text-white/60 text-sm">
-              <span className="text-[#D4AF37] font-bold">7:30 PM — Después del cierre:</span>{" "}
-              Continuamos conversaciones 1:1 con quien quiera quedarse. Los mejores acuerdos siempre se cierran en la segunda hora.
+              <span className="text-[#D4AF37] font-bold">8:30 PM — Cierre formal:</span>{" "}
+              La intención es respetar el tiempo de todos y terminar fuerte. Si surgen conversaciones privadas después, que sean entre personas con interés real.
             </p>
           </div>
         </div>
@@ -702,10 +726,10 @@ export default function EventoPage() {
               <div className="space-y-4 text-white/70 leading-relaxed">
                 <p>"Me llamo Gelasio Sánchez. Soy el founder de Chyrris, la compañía madre detrás de LeadPrime y Owl Fenc.</p>
                 <p>Llevo años viendo cómo la industria de construction y property management en el Bay Area opera con herramientas que no fueron hechas para nosotros — caras, complicadas, en inglés, y diseñadas para corporaciones que manejan 500 propiedades, no para el plomero independiente o el PM que maneja 30 unidades en Fairfield.</p>
-                <p>Por eso construí Chyrris. Y por eso los invito esta noche. Creo que el contratista latino y el property manager local del condado merecen herramientas tan buenas como las que tienen los grandes, pero diseñadas para como realmente trabajamos y en el idioma que hablamos.</p>
+                <p>Por eso construí Chyrris y LeadPrime. Y por eso los invito a este networking privado. Creo que el contratista latino y el property manager local del condado merecen herramientas tan buenas como las que tienen los grandes, pero diseñadas para como realmente trabajamos y en el idioma que hablamos.</p>
                 <p>Si vienes esa noche, te prometo dos cosas: vas a salir con contactos reales que van a mover tu negocio, y vas a tener herramientas que te van a cambiar cómo trabajas. Lo demás es bonus."</p>
               </div>
-              <p className="text-white/50 text-sm mt-4 italic">Nos vemos el 22 de mayo. — Gelasio</p>
+              <p className="text-white/50 text-sm mt-4 italic">Nos vemos el 2 de julio. — Gelasio</p>
 
               <button onClick={openModal} className={goldBtn + " mt-6"} style={goldBtnStyle}>
                 Solicitar mi Invitación →
@@ -727,11 +751,11 @@ export default function EventoPage() {
 
           <div className="space-y-3">
             {[
-              { q: "¿Tengo que pagar algo?", a: "No. El evento es completamente gratuito, incluyendo comida y bebidas. Los regalos (60 días de Owl Fenc o LeadPrime) tampoco tienen costo para los asistentes." },
-              { q: "¿Es un evento para venderme algo?", a: "Es un evento para mostrarte dos productos que creemos que te van a ayudar. Los puedes usar, ignorar, o cancelar después. No te pedimos tarjeta de crédito ni información de pago en ningún momento del evento." },
+              { q: "¿Tengo que pagar algo?", a: "Por ahora el acceso se maneja por invitación y sin cobro al registrarte. Mi recomendación estratégica es usar aprobación manual, cupo limitado y, si se desea filtrar seriedad, considerar un depósito reembolsable o una donación opcional." },
+              { q: "¿Es un evento para venderme algo?", a: "No es una presentación masiva de ventas. Es un evento ejecutivo para construir relaciones, mostrar tecnología útil y abrir oportunidades entre quienes administran propiedades y quienes ejecutan trabajos de calidad." },
               { q: "¿Tengo que hablar inglés?", a: "El evento es en español. Si vienes con alguien que solo habla inglés, también es bienvenido — los productos funcionan en ambos idiomas." },
-              { q: "¿Puedo llevar a un colega o pareja?", a: "Sí, pero cada persona debe registrarse por separado por tema de cupo y comida." },
-              { q: "¿Dónde exactamente va a ser?", a: "Fairfield Community Center, 1000 Kentucky St, Fairfield, CA 94533. Fácilmente accesible desde I-80. Hay estacionamiento disponible." },
+              { q: "¿Puedo llevar a un invitado?", a: "Sí. En el formulario puedes incluir el nombre y perfil de tu invitado. Por capacidad y calidad del networking, el invitado queda sujeto a confirmación junto con tu solicitud." },
+              { q: "¿Dónde exactamente va a ser?", a: "El evento será en 1000 Webster Street, Fairfield, CA 94533. Es una ubicación céntrica para reunir contratistas, general contractors y property managers del área." },
               { q: "¿Qué pasa si me registro y no puedo ir?", a: "Avísanos con al menos 48 horas de anticipación para darle tu lugar a alguien de la lista de espera. Respetamos el tiempo de todos." },
               { q: "¿Puedo ir si no soy de Solano/Contra Costa/Napa?", a: "Sí, siempre que el cupo lo permita. Prioridad de registro es para residentes de esos 3 condados, pero si vienes de Sacramento, Marin o Alameda y hay lugar, eres bienvenido." },
               { q: "¿Habrá WiFi disponible en el evento?", a: "Sí, y te vamos a ayudar a configurar tu cuenta de LeadPrime y/o Owl Fenc directamente en tu teléfono durante el tiempo de networking." },
@@ -750,7 +774,7 @@ export default function EventoPage() {
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Solicita tu Invitación
             </h2>
-            <p className="text-white/50">Gratis · Solo por invitación · 150 cupos exclusivos</p>
+            <p className="text-white/50">Gratis · Solo por invitación · Cupo curado y limitado</p>
           </div>
 
           {successCode ? (
@@ -764,7 +788,7 @@ export default function EventoPage() {
       {/* SECTION 8: Footer */}
       <footer className="py-12 px-4 border-t border-white/10">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Chyrris</div>
+          <div className="text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>LeadPrime</div>
           <p className="text-white/40 text-sm mb-6">Chyrris es la compañía madre de LeadPrime y Owl Fenc</p>
 
           <div className="flex justify-center gap-6 mb-6">
@@ -805,9 +829,9 @@ export default function EventoPage() {
               <>
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Confirma tu lugar
+                    Solicita acceso a LeadPrime Networking
                   </h2>
-                  <p className="text-white/40 text-sm mt-1">La Noche Chyrris · 22 de Mayo, 2026</p>
+                  <p className="text-white/40 text-sm mt-1">LeadPrime Networking · 2 de Julio, 2026</p>
                 </div>
                 <RegistrationForm onSuccess={handleSuccess} />
               </>

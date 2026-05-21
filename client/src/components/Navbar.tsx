@@ -58,14 +58,14 @@ export default function Navbar() {
                 {item.label}
               </button>
             ))}
-            {/* La Noche Chyrris event link */}
+            {/* LeadPrime Networking event link */}
             <a
               href="/evento"
               className="text-sm font-semibold text-[#D4AF37] hover:text-[#F5D060] transition-colors duration-200 flex items-center gap-1.5"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              <span>🌙</span>
-              <span>La Noche Chyrris</span>
+              <span>◆</span>
+              <span>LeadPrime Networking</span>
             </a>
           </div>
 
@@ -128,8 +128,8 @@ export default function Navbar() {
                 href="/evento"
                 className="text-left text-sm font-semibold text-[#D4AF37] hover:text-[#F5D060] transition-colors py-1 flex items-center gap-1.5"
               >
-                <span>🌙</span>
-                <span>La Noche Chyrris</span>
+                <span>◆</span>
+                <span>LeadPrime Networking</span>
               </a>
               <a
                 href="https://leadprime.chyrris.com"
