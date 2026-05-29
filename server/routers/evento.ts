@@ -83,7 +83,7 @@ async function sendPendingEmail(email: string, name: string, code: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `📋 Solicitud recibida — LeadPrime Networking | Código: LPN-${code}`,
         html,
@@ -160,7 +160,7 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `🎉 ¡Aprobado! Tu lugar en LeadPrime Networking está confirmado — LPN-${code}`,
         html: finalHtml,
@@ -205,7 +205,7 @@ async function sendRejectedEmail(email: string, name: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `LeadPrime Networking — Actualización de tu solicitud`,
         html,
@@ -215,7 +215,7 @@ async function sendRejectedEmail(email: string, name: string) {
   } catch (e) { console.error("[Evento] Failed to send rejected email:", e); }
 }
 
-// Notify owner: email to mervin@owlfenc.com with approve/reject action buttons
+// Notify owner: email to mervin@chyrris.com with approve/reject action buttons
 async function notifyOwnerNewRegistration(name: string, role: string, email: string, code: string, extra: {
   id?: number;
   phone: string;
@@ -257,8 +257,8 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          from: "LeadPrime Networking <noreply@owlfenc.com>",
-          to: ["mervin@owlfenc.com"],
+          from: "LeadPrime Networking <evento@chyrris.com>",
+          to: ["mervin@chyrris.com"],
           subject: `🎟 Nueva solicitud: ${name} (${role}) — LeadPrime Networking`,
           html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎟 Nueva solicitud — LeadPrime Networking</h2><p style="color:orange;font-weight:bold;">Estado: PENDIENTE — requiere aprobación manual</p>${actionButtons}<table style="width:100%;border-collapse:collapse;margin-top:16px;">
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);width:40%">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr>
@@ -647,6 +647,18 @@ export const eventoRouter = router({
           status: "attended",
         },
       };
+    }),
+
+  // Admin: delete a single registration (for test cleanup)
+  adminDelete: publicProcedure
+    .input(z.object({ pin: z.string(), id: z.number() }))
+    .mutation(async ({ input }) => {
+      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
+      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      const pool = getPool();
+      const result = await pool.query("DELETE FROM event_registrations WHERE id = $1 RETURNING id", [input.id]);
+      if (result.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      return { success: true };
     }),
 
   // Attendance stats: for the check-in dashboard

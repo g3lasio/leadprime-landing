@@ -95,7 +95,7 @@ async function sendApprovedEmailDirect(email: string, name: string, code: string
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `🎉 ¡Aprobado! Tu lugar en LeadPrime Networking está confirmado — LPN-${code}`,
         html,

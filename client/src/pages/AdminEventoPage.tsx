@@ -94,6 +94,7 @@ export default function AdminEventoPage() {
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
   const { data, isLoading, error, refetch } = trpc.evento.adminList.useQuery(
     { pin: enteredPin },
@@ -105,6 +106,16 @@ export default function AdminEventoPage() {
       toast.success("Estado actualizado");
       refetch();
       setSelectedReg(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const deleteReg = trpc.evento.adminDelete.useMutation({
+    onSuccess: () => {
+      toast.success("Registro eliminado");
+      refetch();
+      setSelectedReg(null);
+      setDeleteConfirmId(null);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -419,6 +430,30 @@ export default function AdminEventoPage() {
                               ↺ Pendiente
                             </button>
                           )}
+                          {deleteConfirmId === r.id ? (
+                            <>
+                              <button
+                                onClick={() => deleteReg.mutate({ pin: enteredPin, id: r.id })}
+                                className="px-2 py-1 rounded text-xs bg-red-600/40 text-red-300 hover:bg-red-600/60 transition-colors font-bold"
+                              >
+                                ¿Seguro?
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="px-2 py-1 rounded text-xs bg-white/10 text-white/50 hover:bg-white/20 transition-colors"
+                              >
+                                No
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => setDeleteConfirmId(r.id)}
+                              className="px-2 py-1 rounded text-xs bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                              title="Eliminar registro"
+                            >
+                              🗑
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -527,6 +562,32 @@ export default function AdminEventoPage() {
                   className="flex-1 py-2 rounded-lg text-sm font-bold bg-white/10 text-white/60 hover:bg-white/20 transition-colors"
                 >
                   ↺ Mover a pendiente
+                </button>
+              )}
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-white/10">
+              {deleteConfirmId === selectedReg.id ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => deleteReg.mutate({ pin: enteredPin, id: selectedReg.id })}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-red-600/30 text-red-300 hover:bg-red-600/50 transition-colors"
+                  >
+                    Confirmar eliminación
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirmId(null)}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-white/10 text-white/60 hover:bg-white/20 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setDeleteConfirmId(selectedReg.id)}
+                  className="w-full py-2 rounded-lg text-sm font-bold bg-red-500/10 text-red-400/70 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                >
+                  🗑 Eliminar registro
                 </button>
               )}
             </div>
