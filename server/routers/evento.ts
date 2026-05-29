@@ -83,7 +83,7 @@ async function sendPendingEmail(email: string, name: string, code: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `📋 Solicitud recibida — LeadPrime Networking | Código: LPN-${code}`,
         html,
@@ -160,7 +160,7 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `🎉 ¡Aprobado! Tu lugar en LeadPrime Networking está confirmado — LPN-${code}`,
         html: finalHtml,
@@ -205,7 +205,7 @@ async function sendRejectedEmail(email: string, name: string) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: "LeadPrime Networking <noreply@owlfenc.com>",
+        from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
         subject: `LeadPrime Networking — Actualización de tu solicitud`,
         html,
@@ -257,8 +257,8 @@ async function notifyOwnerNewRegistration(name: string, role: string, email: str
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          from: "LeadPrime Networking <noreply@owlfenc.com>",
-          to: ["mervin@owlfenc.com"],
+          from: "LeadPrime Networking <evento@chyrris.com>",
+          to: ["mervin@chyrris.com"],
           subject: `🎟 Nueva solicitud: ${name} (${role}) — LeadPrime Networking`,
           html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;"><h2 style="color:#D4AF37;">🎟 Nueva solicitud — LeadPrime Networking</h2><p style="color:orange;font-weight:bold;">Estado: PENDIENTE — requiere aprobación manual</p>${actionButtons}<table style="width:100%;border-collapse:collapse;margin-top:16px;">
 <tr><td style="color:rgba(255,255,255,0.5);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);width:40%">Nombre</td><td style="color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><strong>${name}</strong></td></tr>
