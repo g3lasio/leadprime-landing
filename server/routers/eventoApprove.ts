@@ -53,51 +53,83 @@ async function generateQRDataUrl(text: string): Promise<string> {
 async function sendApprovedEmailDirect(email: string, name: string, code: string) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
-  const qrDataUrl = await generateQRDataUrl(`LPN-${code}`);
-  const qrHtml = qrDataUrl
-    ? `<div style="text-align:center;margin:24px 0;"><p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 12px;">Tu QR de entrada</p><img src="${qrDataUrl}" alt="QR Code LPN-${code}" style="width:160px;height:160px;border-radius:12px;" /><p style="color:rgba(255,255,255,0.4);font-size:11px;margin:8px 0 0;">Presenta este QR en la entrada del evento</p></div>`
-    : "";
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:40px 20px;max-width:600px;margin:0 auto;">
-  <div style="text-align:center;margin-bottom:32px;">
-    <h1 style="font-size:32px;font-weight:900;color:#D4AF37;margin:0;">LeadPrime Networking</h1>
-    <p style="color:rgba(255,255,255,0.5);margin-top:8px;">¡Fuiste aprobado!</p>
-  </div>
-  <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:16px;padding:32px;margin-bottom:24px;">
-    <p style="color:rgba(255,255,255,0.8);font-size:16px;margin-top:0;">Hola <strong style="color:#fff;">${name}</strong>,</p>
-    <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
-      🎉 <strong style="color:#D4AF37;">¡Felicidades!</strong> Fuiste aprobado para <strong style="color:#D4AF37;">LeadPrime Networking</strong>.
-      Tu lugar está confirmado — te esperamos esa noche.
-    </p>
-    <div style="text-align:center;margin:32px 0;padding:24px;background:rgba(212,175,55,0.1);border-radius:12px;border:1px solid rgba(212,175,55,0.3);">
-      <p style="color:rgba(255,255,255,0.5);font-size:12px;text-transform:uppercase;letter-spacing:2px;margin:0 0 8px;">Tu código de asistente</p>
-      <p style="color:#D4AF37;font-size:36px;font-weight:900;letter-spacing:4px;margin:0;">LPN-${code}</p>
-      <p style="color:rgba(255,255,255,0.4);font-size:12px;margin:8px 0 0;">Guarda este código — lo necesitarás para el check-in</p>
-    </div>
-    ${qrHtml}
-    <p style="color:rgba(255,255,255,0.7);line-height:1.6;">
-      <strong style="color:#fff;">📅 Fecha:</strong> ${EVENT_DATE}<br>
-      <strong style="color:#fff;">📍 Venue:</strong> ${EVENT_VENUE}<br>
-      <strong style="color:#fff;">📌 Dirección:</strong> ${EVENT_ADDRESS}<br>
-      <strong style="color:#fff;">🕖 Hora:</strong> ${EVENT_TIME}
-    </p>
-  </div>
-  <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:20px;margin-bottom:24px;">
-    <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0;line-height:1.6;">
-      Llega puntual — el networking privado empieza a las 7:00 PM y cierra formalmente a las 8:30 PM.
-      Si tienes preguntas, contáctanos en <a href="mailto:info@chyrris.com" style="color:#D4AF37;">info@chyrris.com</a>
-    </p>
-  </div>
-  <p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">© 2026 Chyrris · Owl Fenc LLC · Todos los derechos reservados</p>
-</body></html>`;
   try {
+    const qrDataUrl = await generateQRDataUrl(`LPN-${code}`);
+    const qrBlock = qrDataUrl
+      ? `<div style="text-align:center;margin:24px 0 8px;">
+          <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;">Escanea para entrar</p>
+          <img src="${qrDataUrl}" alt="QR LPN-${code}" style="width:180px;height:180px;border-radius:16px;border:2px solid rgba(212,175,55,0.4);" />
+          <p style="color:rgba(255,255,255,0.35);font-size:11px;margin:8px 0 0;">Presenta este QR en la entrada</p>
+        </div>`
+      : "";
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:32px 20px;max-width:600px;margin:0 auto;">
+
+  <div style="text-align:center;margin-bottom:28px;">
+    <p style="color:rgba(255,255,255,0.3);font-size:12px;text-transform:uppercase;letter-spacing:3px;margin:0 0 8px;">Chyrris · Evento Privado</p>
+    <h1 style="font-size:30px;font-weight:900;color:#D4AF37;margin:0;">LeadPrime Networking</h1>
+    <p style="color:rgba(255,255,255,0.4);margin-top:6px;font-size:14px;">${EVENT_DATE} · ${EVENT_VENUE}</p>
+  </div>
+
+  <div style="background:linear-gradient(135deg,rgba(212,175,55,0.12),rgba(212,175,55,0.04));border:1px solid rgba(212,175,55,0.35);border-radius:20px;padding:32px;margin-bottom:20px;text-align:center;">
+    <p style="font-size:44px;margin:0 0 10px;">🔥</p>
+    <h2 style="font-size:26px;font-weight:900;color:#fff;margin:0 0 6px;">¡Estás dentro, ${name}!</h2>
+    <p style="color:rgba(255,255,255,0.6);font-size:15px;line-height:1.6;margin:0 0 28px;">Tu lugar en LeadPrime Networking está <strong style="color:#D4AF37;">confirmado</strong>. Esta noche va a ser diferente.</p>
+    <div style="background:rgba(0,0,0,0.35);border-radius:14px;padding:18px 24px;display:inline-block;margin:0 auto;">
+      <p style="color:rgba(255,255,255,0.35);font-size:10px;text-transform:uppercase;letter-spacing:3px;margin:0 0 4px;">Tu pase de entrada</p>
+      <p style="color:#D4AF37;font-size:42px;font-weight:900;letter-spacing:5px;margin:0;line-height:1.1;">LPN-${code}</p>
+    </div>
+    ${qrBlock}
+  </div>
+
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:22px 24px;margin-bottom:20px;">
+    <p style="color:#D4AF37;font-size:10px;text-transform:uppercase;letter-spacing:2px;margin:0 0 14px;font-weight:700;">Detalles del evento</p>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;width:32px;">📅</td><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;width:80px;">Fecha</td><td style="color:#fff;padding:5px 0;font-size:14px;font-weight:600;">${EVENT_DATE}</td></tr>
+      <tr><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;">🕖</td><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;">Hora</td><td style="color:#fff;padding:5px 0;font-size:14px;font-weight:600;">${EVENT_TIME}</td></tr>
+      <tr><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;">📍</td><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;">Lugar</td><td style="color:#fff;padding:5px 0;font-size:14px;font-weight:600;">${EVENT_VENUE}</td></tr>
+      <tr><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;">📌</td><td style="color:rgba(255,255,255,0.45);padding:5px 0;font-size:14px;">Dirección</td><td style="color:#fff;padding:5px 0;font-size:14px;">${EVENT_ADDRESS}</td></tr>
+    </table>
+  </div>
+
+  <div style="border-left:3px solid #D4AF37;padding:16px 20px;margin-bottom:20px;background:rgba(212,175,55,0.05);border-radius:0 12px 12px 0;">
+    <p style="color:#fff;font-size:17px;font-weight:700;line-height:1.5;margin:0;font-style:italic;">"El siguiente nivel de tu negocio empieza con las personas correctas en el cuarto correcto."</p>
+    <p style="color:rgba(255,255,255,0.35);font-size:13px;margin:8px 0 0;">Ven listo para conectar, aprender y crecer 🚀</p>
+  </div>
+
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:22px 24px;margin-bottom:20px;">
+    <p style="color:#D4AF37;font-size:10px;text-transform:uppercase;letter-spacing:2px;margin:0 0 16px;font-weight:700;">Antes de llegar — léelo 👇</p>
+    <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;">
+      <span style="font-size:22px;flex-shrink:0;">🔒</span>
+      <div><p style="color:#fff;font-size:14px;font-weight:700;margin:0 0 3px;">Evento privado — sin QR no hay entrada</p><p style="color:rgba(255,255,255,0.45);font-size:13px;margin:0;">Nadie entra sin estar registrado. Guarda este email o el código LPN-${code}.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;">
+      <span style="font-size:22px;flex-shrink:0;">👥</span>
+      <div><p style="color:#fff;font-size:14px;font-weight:700;margin:0 0 3px;">¿Traes invitado? Regístralo antes</p><p style="color:rgba(255,255,255,0.45);font-size:13px;margin:0;">Cada persona necesita su propio registro. Sin registro no puede entrar.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;">
+      <span style="font-size:22px;flex-shrink:0;">📱</span>
+      <div><p style="color:#fff;font-size:14px;font-weight:700;margin:0 0 3px;">Lleva tu tablet o teléfono móvil</p><p style="color:rgba(255,255,255,0.45);font-size:13px;margin:0;">Habrá contenido interactivo esa noche — tu dispositivo te va a servir.</p></div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start;">
+      <span style="font-size:22px;flex-shrink:0;">⏰</span>
+      <div><p style="color:#fff;font-size:14px;font-weight:700;margin:0 0 3px;">Llega puntual — 7:00 PM</p><p style="color:rgba(255,255,255,0.45);font-size:13px;margin:0;">El networking abre a las 7 PM en punto y cierra formalmente a las 8:30 PM.</p></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:16px;margin-bottom:20px;">
+    <p style="color:rgba(255,255,255,0.4);font-size:13px;margin:0;">¿Tienes preguntas? <a href="mailto:info@chyrris.com" style="color:#D4AF37;font-weight:600;">info@chyrris.com</a></p>
+  </div>
+  <p style="text-align:center;color:rgba(255,255,255,0.15);font-size:12px;">© 2026 Chyrris · LeadPrime · Todos los derechos reservados</p>
+</body></html>`;
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: "LeadPrime Networking <evento@chyrris.com>",
         to: [email],
-        subject: `🎉 ¡Aprobado! Tu lugar en LeadPrime Networking está confirmado — LPN-${code}`,
+        subject: `🎉 ¡Estás dentro! Tu invitación a LeadPrime Networking — LPN-${code}`,
         html,
       }),
     });

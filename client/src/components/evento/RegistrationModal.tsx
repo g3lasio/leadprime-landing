@@ -57,8 +57,6 @@ interface FormData {
   // Common final
   referral_source: string;
   referral_name: string;
-  dietary_restriction: string;
-  dietary_other: string;
   consent_contact: boolean;
   consent_photo: boolean;
 }
@@ -71,7 +69,7 @@ const INITIAL: FormData = {
   property_types: [], has_real_estate_license: "", current_pm_software: "",
   brokerage_name: "", dre_license_number: "", also_property_manager: "",
   service_areas: [], profession_description: "", referral_source: "",
-  referral_name: "", dietary_restriction: "", dietary_other: "",
+  referral_name: "",
   consent_contact: false, consent_photo: false,
 };
 
@@ -228,7 +226,6 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
       if (!form.profession_description) e.profession_description = "Describe tu profesión";
     }
     if (!form.referral_source) e.referral_source = "¿Cómo te enteraste?";
-    if (!form.dietary_restriction) e.dietary_restriction = "Requerido";
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -262,7 +259,7 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
       profession_description: form.profession_description || null,
       referral_source: form.referral_source,
       referral_name: form.referral_name || null,
-      dietary_restriction: form.dietary_restriction === "Otra" ? form.dietary_other : form.dietary_restriction,
+      dietary_restriction: "Ninguna",
       consent_contact: form.consent_contact,
       consent_photo: form.consent_photo,
     });
@@ -279,13 +276,13 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
           className="text-2xl font-bold text-white mb-2"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          ¡Solicitud recibida!
+          ¡Listo, ya casi estás dentro!
         </h3>
-        <p className="text-white/60 text-sm mb-6">
-          Tu solicitud está en revisión. Te contactaremos en 24-48 horas para confirmar tu lugar en LeadPrime Networking — 2 de Julio, 2026
+        <p className="text-white/60 text-sm mb-4">
+          Recibimos tu solicitud para LeadPrime Networking — <strong className="text-white">2 de Julio, 2026</strong>
         </p>
         <div
-          className="inline-block px-8 py-4 rounded-xl border-2 border-[#D4AF37] mb-6"
+          className="inline-block px-8 py-4 rounded-xl border-2 border-[#D4AF37] mb-4"
           style={{ background: "rgba(212,175,55,0.1)" }}
         >
           <p className="text-white/50 text-xs mb-1">Tu código de asistente</p>
@@ -293,11 +290,14 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
             className="text-3xl font-bold text-[#D4AF37]"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            {successCode}
+            LPN-{successCode}
           </p>
         </div>
+        <p className="text-white/70 text-sm mb-2">
+          📧 En unos minutos recibirás tu <strong className="text-white">invitación oficial con código QR</strong> al email que registraste.
+        </p>
         <p className="text-white/40 text-xs">
-          Revisa tu email — te enviamos la confirmación con todos los detalles.
+          Revisa también tu carpeta de spam si no la ves llegar.
         </p>
       </div>
     );
@@ -585,26 +585,6 @@ function FormContent({ onSuccess }: { onSuccess: (code: string) => void }) {
             <div>
               <FieldLabel>Nombre de quien te invitó</FieldLabel>
               <TextInput value={form.referral_name} onChange={set("referral_name")} placeholder="Nombre de tu colega" />
-            </div>
-          )}
-
-          <div>
-            <FieldLabel required>Restricción alimentaria</FieldLabel>
-            <SelectInput value={form.dietary_restriction} onChange={set("dietary_restriction")}>
-              <option value="">Selecciona...</option>
-              <option>Ninguna</option>
-              <option>Vegetariano</option>
-              <option>Vegano</option>
-              <option>Sin gluten</option>
-              <option>Otra</option>
-            </SelectInput>
-            {err("dietary_restriction")}
-          </div>
-
-          {form.dietary_restriction === "Otra" && (
-            <div>
-              <FieldLabel>¿Cuál restricción?</FieldLabel>
-              <TextInput value={form.dietary_other} onChange={set("dietary_other")} placeholder="Describe tu restricción" />
             </div>
           )}
 
