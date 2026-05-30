@@ -16,9 +16,52 @@ const CITIES = [
 ];
 
 const TRADE_TYPES = [
-  "Plomería", "Electricidad", "Roofing", "Fencing", "Handyman general",
-  "Carpintería", "Pintura", "Pisos/Flooring", "Jardinería/Landscaping",
-  "Concreto", "HVAC", "Remodelación", "Drywall", "Otro",
+  // Estructura y fundación
+  "Excavación / Earthwork",
+  "Fundaciones y cimentaciones",
+  "Concreto y hormigón",
+  "Framing / Enmarcado",
+  "Acero estructural",
+  // Exterior
+  "Roofing / Techos",
+  "Fencing / Cercas",
+  "Siding / Revestimiento exterior",
+  "Stucco / Aplanado",
+  "Puertas y ventanas",
+  "Garage doors / Puertas de garaje",
+  "Decks y patios",
+  "Driveways y concreto decorativo",
+  // Interior
+  "Drywall",
+  "Pintura interior",
+  "Pintura exterior",
+  "Pisos / Flooring",
+  "Tile / Azulejo",
+  "Carpintería interior / Trim",
+  "Gabinetes de cocina y baño",
+  "Countertops / Encimeras",
+  "Closets y almacenamiento",
+  // Sistemas
+  "Plomería / Plumbing",
+  "Electricidad",
+  "HVAC / Aire acondicionado",
+  "Gas y calefacción",
+  "Solar / Energía solar",
+  "Seguridad y cámaras",
+  "Insulation / Aislamiento",
+  // Remodelación
+  "Remodelación general",
+  "Cocinas / Kitchen remodel",
+  "Baños / Bathroom remodel",
+  "Adiciones y ampliaciones",
+  "ADU / Casitas",
+  // Especialidades
+  "Landscaping / Jardinería",
+  "Demolición",
+  "Waterproofing / Impermeabilización",
+  "Pool / Albercas",
+  "Handyman general",
+  "Otro",
 ];
 
 const YEARS_OPTIONS = ["Menos de 1 año", "1-3 años", "4-7 años", "8-15 años", "Más de 15 años"];
