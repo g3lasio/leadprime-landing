@@ -93,7 +93,7 @@ async function generateQRDataUrl(text: string): Promise<string> {
     return await QRCode.toDataURL(text, {
       width: 200,
       margin: 2,
-      color: { dark: '#D4AF37', light: '#080C14' },
+      color: { dark: '#0a1628', light: '#ffffff' },
       errorCorrectionLevel: 'M',
     });
   } catch (e) {
@@ -111,8 +111,10 @@ async function sendApprovedEmail(email: string, name: string, code: string) {
     const qrBlock = qrDataUrl
       ? `<div style="text-align:center;margin:24px 0 8px;">
           <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;">Escanea para entrar</p>
-          <img src="${qrDataUrl}" alt="QR LPN-${code}" style="width:180px;height:180px;border-radius:16px;border:2px solid rgba(212,175,55,0.4);" />
-          <p style="color:rgba(255,255,255,0.35);font-size:11px;margin:8px 0 0;">Presenta este QR en la entrada</p>
+          <div style="display:inline-block;background:#ffffff;padding:12px;border-radius:16px;border:3px solid rgba(212,175,55,0.5);">
+            <img src="${qrDataUrl}" alt="QR LPN-${code}" style="width:180px;height:180px;display:block;" />
+          </div>
+          <p style="color:rgba(255,255,255,0.35);font-size:11px;margin:10px 0 0;">Presenta este QR en la entrada del evento</p>
         </div>`
       : '';
     const html = `<!DOCTYPE html>
