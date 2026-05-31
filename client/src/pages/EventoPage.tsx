@@ -18,10 +18,13 @@ const CITIES = [
   "Pittsburg", "Antioch", "Otra",
 ];
 
-const TRADE_TYPES = [
-  "Plomería", "Electricidad", "Roofing", "Fencing", "Handyman general",
-  "Carpintería", "Pintura", "Pisos/Flooring", "Jardinería/Landscaping",
-  "Concreto", "HVAC", "Remodelación", "Drywall", "Otro",
+const TRADE_TYPES: { category: string; items: string[] }[] = [
+  { category: "Estructura y fundación", items: ["Excavación / Earthwork", "Fundaciones y cimentaciones", "Concreto y hormigón", "Framing / Enmarcado", "Acero estructural"] },
+  { category: "Exterior", items: ["Roofing / Techos", "Fencing / Cercas", "Siding / Revestimiento exterior", "Stucco / Aplanado", "Puertas y ventanas", "Garage doors / Puertas de garaje", "Decks y patios", "Driveways y concreto decorativo"] },
+  { category: "Interior", items: ["Drywall", "Pintura interior", "Pintura exterior", "Pisos / Flooring", "Tile / Azulejo", "Carpintería interior / Trim", "Gabinetes de cocina y baño", "Countertops / Encimeras", "Closets y almacenamiento"] },
+  { category: "Sistemas", items: ["Plomería / Plumbing", "Electricidad", "HVAC / Aire acondicionado", "Gas y calefacción", "Solar / Energía solar", "Seguridad y cámaras", "Insulation / Aislamiento"] },
+  { category: "Remodelación", items: ["Remodelación general", "Cocinas / Kitchen remodel", "Baños / Bathroom remodel", "Adiciones y ampliaciones", "ADU / Casitas"] },
+  { category: "Especialidades", items: ["Landscaping / Jardinería", "Demolición", "Waterproofing / Impermeabilización", "Pool / Albercas", "Handyman general", "Otro"] },
 ];
 
 const YEARS_OPTIONS = [
@@ -60,8 +63,6 @@ type FormData = {
   // Common final
   referral_source: string;
   referral_name: string;
-  dietary_restriction: string;
-  dietary_other: string;
   consent_contact: boolean;
   consent_photo: boolean;
   bringing_guest: boolean;
@@ -77,7 +78,7 @@ const initialForm: FormData = {
   units_managed: "", property_types: [], has_real_estate_license: "", current_pm_software: "",
   brokerage_name: "", dre_license_number: "", also_property_manager: "", service_areas: [],
   profession_description: "",
-  referral_source: "", referral_name: "", dietary_restriction: "", dietary_other: "",
+  referral_source: "", referral_name: "",
   consent_contact: false, consent_photo: false,
   bringing_guest: false, guest_name: "", guest_role: "",
 };
@@ -177,9 +178,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
       profession_description: form.profession_description || null,
       referral_source: form.referral_source,
       referral_name: form.referral_name || null,
-      dietary_restriction: form.dietary_restriction === "Otra" && form.dietary_other
-        ? form.dietary_other
-        : form.dietary_restriction,
+      dietary_restriction: "Ninguna",
       consent_contact: form.consent_contact,
       consent_photo: form.consent_photo,
       bringing_guest: form.bringing_guest,
@@ -316,7 +315,28 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           <div className="space-y-4 p-4 rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/5">
             <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-wider">Sobre tu negocio</p>
             <div><label className={labelClass}>Nombre del negocio</label><input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: García Roofing & Construction" /></div>
-            <div><label className={labelClass}>Tipo de trabajo</label><div className="grid grid-cols-2 gap-2 mt-1">{TRADE_TYPES.slice(0,8).map((t) => (<label key={t} className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.trade_types.includes(t)} onChange={() => toggleMulti("trade_types", t)} className={checkboxClass} /><span className="text-white/70 text-sm">{t}</span></label>))}</div></div>
+            <div>
+              <label className={labelClass}>Especialidad(es) — selecciona todas las que aplican</label>
+              <div className="max-h-64 overflow-y-auto space-y-3 mt-1 pr-1">
+                {TRADE_TYPES.map((group) => (
+                  <div key={group.category}>
+                    <p className="text-white/30 text-xs uppercase tracking-wider mb-1.5 font-semibold">{group.category}</p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {group.items.map((t) => (
+                        <label key={t} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer transition-colors text-xs ${form.trade_types.includes(t) ? "border-[#D4AF37]/60 bg-[#D4AF37]/10 text-[#D4AF37]" : "border-white/10 bg-white/3 text-white/60 hover:border-white/20"}`}>
+                          <input type="checkbox" checked={form.trade_types.includes(t)} onChange={() => toggleMulti("trade_types", t)} className="hidden" />
+                          {form.trade_types.includes(t) && <span className="flex-shrink-0">✓</span>}
+                          {t}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {form.trade_types.includes("Otro") && (
+                <input className={inputClass("trade_other") + " mt-2"} value={form.trade_other} onChange={(e) => set("trade_other", e.target.value)} placeholder="Describe tu especialidad..." />
+              )}
+            </div>
             <div><label className={labelClass}>Años en el negocio</label><select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}><option value="">Selecciona</option>{YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}</select></div>
           </div>
         )}
@@ -338,9 +358,12 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label className={labelClass}>¿Cómo te enteraste?</label><select className={inputClass("referral_source") + " bg-[#0D1220]"} value={form.referral_source} onChange={(e) => set("referral_source", e.target.value)}><option value="">Selecciona</option>{["Invitación directa de Gelasio","Un amigo/colega me invitó","Home Depot","Redes sociales","Otro"].map((r) => <option key={r}>{r}</option>)}</select></div>
-          <div><label className={labelClass}>Restricción alimentaria</label><select className={inputClass("dietary_restriction") + " bg-[#0D1220]"} value={form.dietary_restriction} onChange={(e) => set("dietary_restriction", e.target.value)}><option value="">Ninguna</option>{["Ninguna","Vegetariano","Vegano","Sin gluten","Otra"].map((d) => <option key={d}>{d}</option>)}</select></div>
+        <div>
+          <label className={labelClass}>¿Cómo te enteraste?</label>
+          <select className={inputClass("referral_source") + " bg-[#0D1220]"} value={form.referral_source} onChange={(e) => set("referral_source", e.target.value)}>
+            <option value="">Selecciona</option>
+            {["Invitación directa de Gelasio","Un amigo/colega me invitó","Home Depot","Redes sociales","Otro"].map((r) => <option key={r}>{r}</option>)}
+          </select>
         </div>
 
         <div className="p-4 rounded-xl bg-white/3 border border-white/10 space-y-3">
