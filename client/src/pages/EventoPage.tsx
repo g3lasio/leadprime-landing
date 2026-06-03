@@ -384,12 +384,17 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           <span className="text-white/70 text-sm leading-relaxed">Autorizo el uso de fotos del evento para redes sociales de Chyrris. (Opcional)</span>
         </label>
 
-        <div className="flex gap-3">
-          <button type="button" onClick={handleSkipStep2} disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-bold text-white/60 border border-white/10 hover:border-white/20 transition-colors text-sm">
-            {register.isPending ? "Enviando..." : "Saltar este paso"}
-          </button>
-          <button type="submit" disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-black text-[#080C14] transition-all disabled:opacity-60" style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}>
-            {register.isPending ? "Enviando..." : "Completar perfil →"}
+        <div className="space-y-2">
+          <div className="flex gap-3">
+            <button type="button" onClick={handleSkipStep2} disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-bold text-white/60 border border-white/10 hover:border-white/20 transition-colors text-sm">
+              {register.isPending ? "Enviando..." : "Saltar este paso"}
+            </button>
+            <button type="submit" disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-black text-[#080C14] transition-all disabled:opacity-60" style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}>
+              {register.isPending ? "Enviando..." : "Completar perfil →"}
+            </button>
+          </div>
+          <button type="button" onClick={() => setStep(1)} disabled={register.isPending} className="w-full py-2.5 rounded-2xl text-sm text-white/35 hover:text-white/55 transition-colors">
+            ← Volver al paso anterior
           </button>
         </div>
       </form>

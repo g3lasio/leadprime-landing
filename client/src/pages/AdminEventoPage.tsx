@@ -95,6 +95,7 @@ export default function AdminEventoPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedReg, setSelectedReg] = useState<Registration | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [editContact, setEditContact] = useState<{ id: number; full_name: string; email: string } | null>(null);
 
   const { data, isLoading, error, refetch } = trpc.evento.adminList.useQuery(
     { pin: enteredPin },
@@ -116,6 +117,16 @@ export default function AdminEventoPage() {
       refetch();
       setSelectedReg(null);
       setDeleteConfirmId(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const updateContact = trpc.evento.adminUpdateContact.useMutation({
+    onSuccess: () => {
+      toast.success("Contacto actualizado");
+      refetch();
+      setEditContact(null);
+      setSelectedReg(null);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -516,6 +527,53 @@ export default function AdminEventoPage() {
                 </div>
               ))}
             </div>
+
+            {/* Edit name/email */}
+            {editContact && editContact.id === selectedReg.id ? (
+              <div className="mt-4 p-4 rounded-xl bg-white/5 border border-[#D4AF37]/20 space-y-3">
+                <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-wider">Editar nombre y email</p>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1">Nombre completo</label>
+                  <input
+                    type="text"
+                    value={editContact.full_name}
+                    onChange={(e) => setEditContact({ ...editContact, full_name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editContact.email}
+                    onChange={(e) => setEditContact({ ...editContact, email: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#D4AF37]/50"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateContact.mutate({ pin: enteredPin, id: editContact.id, full_name: editContact.full_name, email: editContact.email })}
+                    disabled={updateContact.isPending}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-[#D4AF37]/20 text-[#D4AF37] hover:bg-[#D4AF37]/30 transition-colors disabled:opacity-50"
+                  >
+                    {updateContact.isPending ? "Guardando..." : "Guardar cambios"}
+                  </button>
+                  <button
+                    onClick={() => setEditContact(null)}
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-white/10 text-white/60 hover:bg-white/20 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setEditContact({ id: selectedReg.id, full_name: selectedReg.full_name, email: selectedReg.email })}
+                className="w-full mt-4 py-2 rounded-lg text-sm font-bold bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70 border border-white/10 transition-colors"
+              >
+                ✏ Editar nombre / email
+              </button>
+            )}
 
             <div className="flex flex-wrap gap-2 mt-6">
               {selectedReg.status === "pending" && (

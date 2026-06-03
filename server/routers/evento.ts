@@ -722,6 +722,33 @@ export const eventoRouter = router({
       return { success: true };
     }),
 
+  // Admin: update name/email for a registration
+  adminUpdateContact: publicProcedure
+    .input(z.object({
+      pin: z.string(),
+      id: z.number(),
+      full_name: z.string().min(2).max(100),
+      email: z.string().email(),
+    }))
+    .mutation(async ({ input }) => {
+      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
+      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      const pool = getPool();
+      const conflict = await pool.query(
+        "SELECT id FROM event_registrations WHERE LOWER(email) = LOWER($1) AND id != $2",
+        [input.email, input.id]
+      );
+      if (conflict.rows.length > 0) {
+        throw new TRPCError({ code: "CONFLICT", message: "Este email ya está registrado por otro asistente" });
+      }
+      const result = await pool.query(
+        "UPDATE event_registrations SET full_name = $1, email = $2 WHERE id = $3 RETURNING id",
+        [input.full_name, input.email.toLowerCase(), input.id]
+      );
+      if (result.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      return { success: true };
+    }),
+
   // Attendance stats: for the check-in dashboard
   attendanceStats: publicProcedure
     .input(z.object({ pin: z.string() }))
