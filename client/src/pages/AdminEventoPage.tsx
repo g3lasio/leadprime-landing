@@ -131,6 +131,11 @@ export default function AdminEventoPage() {
     onError: (e) => toast.error(e.message),
   });
 
+  const resendInvitation = trpc.evento.adminResendInvitation.useMutation({
+    onSuccess: () => toast.success("Invitación reenviada con QR"),
+    onError: (e) => toast.error(e.message),
+  });
+
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setEnteredPin(pin);
@@ -624,7 +629,14 @@ export default function AdminEventoPage() {
               )}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-white/10">
+            <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+              <button
+                onClick={() => resendInvitation.mutate({ pin: enteredPin, id: selectedReg.id })}
+                disabled={resendInvitation.isPending}
+                className="w-full py-2 rounded-lg text-sm font-bold bg-blue-500/10 text-blue-400/80 hover:bg-blue-500/20 hover:text-blue-400 border border-blue-500/20 transition-colors disabled:opacity-50"
+              >
+                {resendInvitation.isPending ? "Enviando..." : "📧 Reenviar invitación con QR"}
+              </button>
               {deleteConfirmId === selectedReg.id ? (
                 <div className="flex gap-2">
                   <button

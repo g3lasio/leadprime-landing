@@ -749,6 +749,23 @@ export const eventoRouter = router({
       return { success: true };
     }),
 
+  // Admin: resend invitation email with QR code
+  adminResendInvitation: publicProcedure
+    .input(z.object({ pin: z.string(), id: z.number() }))
+    .mutation(async ({ input }) => {
+      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
+      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      const pool = getPool();
+      const reg = await pool.query(
+        "SELECT full_name, email, attendee_code FROM event_registrations WHERE id = $1",
+        [input.id]
+      );
+      if (reg.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      const { full_name, email, attendee_code } = reg.rows[0];
+      await sendApprovedEmail(email, full_name, attendee_code);
+      return { success: true };
+    }),
+
   // Attendance stats: for the check-in dashboard
   attendanceStats: publicProcedure
     .input(z.object({ pin: z.string() }))
