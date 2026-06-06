@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerEventoApproveRoute } from "../routers/eventoApprove.js";
+import { registerQRRoute } from "../routers/qrRoute.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -38,6 +39,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Evento approve-by-link route (used in owner notification emails)
   registerEventoApproveRoute(app);
+  // Self-hosted QR code PNG endpoint — used in invitation emails
+  registerQRRoute(app);
   // tRPC API
   app.use(
     "/api/trpc",

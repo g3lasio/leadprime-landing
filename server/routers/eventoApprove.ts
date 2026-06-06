@@ -40,8 +40,8 @@ async function sendApprovedEmailDirect(email: string, name: string, code: string
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
   try {
-    // Use hosted QR API — base64 data URIs are blocked by all major email clients
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`LPN-${code}`)}&bgcolor=ffffff&color=0a1628&margin=10&ecc=M`;
+    // Self-hosted QR endpoint — regular https image URL, works in all email clients
+    const qrUrl = `https://lead-prime.chyrris.com/api/qr/${code}`;
     const qrBlock = `<div style="text-align:center;margin:24px 0 8px;">
           <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;">Escanea para entrar</p>
           <div style="display:inline-block;background:#ffffff;padding:12px;border-radius:16px;border:3px solid rgba(212,175,55,0.5);">
