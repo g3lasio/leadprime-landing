@@ -6,6 +6,7 @@
 import type { Express } from "express";
 import pkg from "pg";
 const { Pool } = pkg;
+import QRCode from "qrcode";
 
 const EVENT_NAME = "LeadPrime Networking";
 const EVENT_DATE = "Jueves 2 de Julio, 2026";
@@ -40,12 +41,19 @@ async function sendApprovedEmailDirect(email: string, name: string, code: string
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
   try {
-    // Self-hosted QR endpoint — regular https image URL, works in all email clients
-    const qrUrl = `https://lead-prime.chyrris.com/api/qr/${code}`;
+    // Generate QR as PNG buffer — embed as CID inline attachment so ALL email clients
+    // (Gmail, Outlook, Apple Mail) display it without blocking external URLs
+    const qrBuffer = await QRCode.toBuffer(`LPN-${code}`, {
+      width: 250,
+      margin: 2,
+      color: { dark: "#0a1628", light: "#ffffff" },
+      errorCorrectionLevel: "M",
+    });
+    const qrCid = `qr_${code}`;
     const qrBlock = `<div style="text-align:center;margin:24px 0 8px;">
           <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;">Escanea para entrar</p>
           <div style="display:inline-block;background:#ffffff;padding:12px;border-radius:16px;border:3px solid rgba(212,175,55,0.5);">
-            <img src="${qrUrl}" alt="QR LPN-${code}" style="width:180px;height:180px;display:block;" />
+            <img src="cid:${qrCid}" alt="QR LPN-${code}" style="width:180px;height:180px;display:block;" />
           </div>
           <p style="color:rgba(255,255,255,0.35);font-size:11px;margin:10px 0 0;">Presenta este QR en la entrada del evento</p>
         </div>`;
@@ -118,6 +126,13 @@ async function sendApprovedEmailDirect(email: string, name: string, code: string
         to: [email],
         subject: `🎉 ¡Estás dentro! Tu invitación a LeadPrime Networking — LPN-${code}`,
         html,
+        attachments: [{
+          filename: `qr-${code}.png`,
+          content: qrBuffer.toString("base64"),
+          content_type: "image/png",
+          content_id: qrCid,
+          inline: true,
+        }],
       }),
     });
     if (!res.ok) console.error("[Approve] Resend approved email error:", await res.text());
