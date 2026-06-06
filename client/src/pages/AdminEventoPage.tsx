@@ -12,6 +12,7 @@ type Registration = {
   preferred_language: string;
   business_name: string | null;
   trade_types: string | null;
+  website: string | null;
   years_in_business: string | null;
   team_size: string | null;
   units_managed: string | null;
@@ -60,14 +61,14 @@ const STATUS_LABELS: Record<string, string> = {
 function downloadCSV(registrations: Registration[]) {
   const headers = [
     "Código", "Nombre", "Email", "Teléfono", "Rol", "Ciudad", "Idioma",
-    "Negocio", "Tipo de trabajo", "Años en negocio", "Equipo",
+    "Negocio", "Licencia CSLB", "Website", "Años en negocio", "Equipo",
     "Unidades", "Brokerage", "Referido por", "Nombre referido",
     "Dieta", "Invitado", "Perfil invitado", "Foto OK", "Early Bird", "Estado", "Fecha registro"
   ];
 
   const rows = registrations.map((r) => [
     r.attendee_code, r.full_name, r.email, r.phone, r.role, r.city, r.preferred_language,
-    r.business_name ?? "", r.trade_types ?? "", r.years_in_business ?? "", r.team_size ?? "",
+    r.business_name ?? "", r.trade_types ?? "", r.website ?? "", r.years_in_business ?? "", r.team_size ?? "",
     r.units_managed ?? "", r.brokerage_name ?? "", r.referral_source, r.referral_name ?? "",
     r.dietary_restriction, r.guest_name ?? (r.bringing_guest ? "Sí" : ""), r.guest_role ?? "", r.consent_photo ? "Sí" : "No",
     r.is_early_bird ? "Sí" : "No", r.status,
@@ -513,7 +514,8 @@ export default function AdminEventoPage() {
                 ["Ciudad", selectedReg.city],
                 ["Idioma", selectedReg.preferred_language],
                 selectedReg.business_name && ["Negocio", selectedReg.business_name],
-                selectedReg.trade_types && ["Tipo de trabajo", selectedReg.trade_types],
+                selectedReg.trade_types && ["Licencia CSLB", selectedReg.trade_types],
+                selectedReg.website && ["Website", selectedReg.website],
                 selectedReg.years_in_business && ["Años en negocio", selectedReg.years_in_business],
                 selectedReg.team_size && ["Equipo", selectedReg.team_size],
                 selectedReg.units_managed && ["Unidades", selectedReg.units_managed],

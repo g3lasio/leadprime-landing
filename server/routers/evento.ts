@@ -31,7 +31,8 @@ async function ensureEventRegistrationColumns() {
     ALTER TABLE event_registrations
       ADD COLUMN IF NOT EXISTS bringing_guest BOOLEAN DEFAULT false,
       ADD COLUMN IF NOT EXISTS guest_name TEXT,
-      ADD COLUMN IF NOT EXISTS guest_role TEXT
+      ADD COLUMN IF NOT EXISTS guest_role TEXT,
+      ADD COLUMN IF NOT EXISTS website TEXT
   `);
 }
 
@@ -339,6 +340,7 @@ const registerFullInput = z.object({
   consent_photo: z.boolean().optional(),
   business_name: z.string().nullable().optional(),
   trade_types: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
   has_cslb_license: z.string().nullable().optional(),
   cslb_license_number: z.string().nullable().optional(),
   years_in_business: z.string().nullable().optional(),
@@ -471,24 +473,25 @@ export const eventoRouter = router({
     await pool.query(
       `UPDATE event_registrations SET
         business_name = COALESCE($1, business_name), trade_types = COALESCE($2, trade_types),
-        has_cslb_license = COALESCE($3, has_cslb_license), cslb_license_number = COALESCE($4, cslb_license_number),
-        years_in_business = COALESCE($5, years_in_business), team_size = COALESCE($6, team_size),
-        current_estimating_tool = COALESCE($7, current_estimating_tool), units_managed = COALESCE($8, units_managed),
-        property_types = COALESCE($9, property_types), has_real_estate_license = COALESCE($10, has_real_estate_license),
-        current_pm_software = COALESCE($11, current_pm_software), brokerage_name = COALESCE($12, brokerage_name),
-        dre_license_number = COALESCE($13, dre_license_number), also_property_manager = COALESCE($14, also_property_manager),
-        service_areas = COALESCE($15, service_areas), profession_description = COALESCE($16, profession_description),
-        referral_source = COALESCE($17, referral_source), referral_name = COALESCE($18, referral_name),
-        dietary_restriction = COALESCE($19, dietary_restriction), consent_photo = COALESCE($20, consent_photo),
-        bringing_guest = COALESCE($21, bringing_guest), guest_name = COALESCE($22, guest_name), guest_role = COALESCE($23, guest_role)
-      WHERE attendee_code = $24`,
-      [input.business_name ?? null, input.trade_types ?? null, input.has_cslb_license ?? null,
-       input.cslb_license_number ?? null, input.years_in_business ?? null, input.team_size ?? null,
-       input.current_estimating_tool ?? null, input.units_managed ?? null, input.property_types ?? null,
-       input.has_real_estate_license ?? null, input.current_pm_software ?? null, input.brokerage_name ?? null,
-       input.dre_license_number ?? null, input.also_property_manager ?? null, input.service_areas ?? null,
-       input.profession_description ?? null, input.referral_source ?? null, input.referral_name ?? null,
-       input.dietary_restriction ?? null, input.consent_photo ?? null,
+        website = COALESCE($3, website),
+        has_cslb_license = COALESCE($4, has_cslb_license), cslb_license_number = COALESCE($5, cslb_license_number),
+        years_in_business = COALESCE($6, years_in_business), team_size = COALESCE($7, team_size),
+        current_estimating_tool = COALESCE($8, current_estimating_tool), units_managed = COALESCE($9, units_managed),
+        property_types = COALESCE($10, property_types), has_real_estate_license = COALESCE($11, has_real_estate_license),
+        current_pm_software = COALESCE($12, current_pm_software), brokerage_name = COALESCE($13, brokerage_name),
+        dre_license_number = COALESCE($14, dre_license_number), also_property_manager = COALESCE($15, also_property_manager),
+        service_areas = COALESCE($16, service_areas), profession_description = COALESCE($17, profession_description),
+        referral_source = COALESCE($18, referral_source), referral_name = COALESCE($19, referral_name),
+        dietary_restriction = COALESCE($20, dietary_restriction), consent_photo = COALESCE($21, consent_photo),
+        bringing_guest = COALESCE($22, bringing_guest), guest_name = COALESCE($23, guest_name), guest_role = COALESCE($24, guest_role)
+      WHERE attendee_code = $25`,
+      [input.business_name ?? null, input.trade_types ?? null, input.website ?? null,
+       input.has_cslb_license ?? null, input.cslb_license_number ?? null, input.years_in_business ?? null,
+       input.team_size ?? null, input.current_estimating_tool ?? null, input.units_managed ?? null,
+       input.property_types ?? null, input.has_real_estate_license ?? null, input.current_pm_software ?? null,
+       input.brokerage_name ?? null, input.dre_license_number ?? null, input.also_property_manager ?? null,
+       input.service_areas ?? null, input.profession_description ?? null, input.referral_source ?? null,
+       input.referral_name ?? null, input.dietary_restriction ?? null, input.consent_photo ?? null,
        input.bringing_guest ?? null, input.guest_name ?? null, input.guest_role ?? null, input.code]
     );
     return { success: true };
@@ -518,17 +521,17 @@ export const eventoRouter = router({
     await pool.query(
       `INSERT INTO event_registrations (
         full_name, phone, email, role, city, preferred_language,
-        business_name, trade_types, has_cslb_license, cslb_license_number,
+        business_name, trade_types, website, has_cslb_license, cslb_license_number,
         years_in_business, team_size, current_estimating_tool, units_managed,
         property_types, has_real_estate_license, current_pm_software, brokerage_name,
         dre_license_number, also_property_manager, service_areas, profession_description,
         referral_source, referral_name, dietary_restriction,
         consent_contact, consent_photo, bringing_guest, guest_name, guest_role, attendee_code, is_early_bird, status
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,
         (SELECT COUNT(*) < 20 FROM event_registrations), 'pending')`,
       [
         input.full_name, input.phone, input.email.toLowerCase(), input.role, city, input.preferred_language,
-        input.business_name ?? null, input.trade_types ?? null, input.has_cslb_license ?? null, input.cslb_license_number ?? null,
+        input.business_name ?? null, input.trade_types ?? null, input.website ?? null, input.has_cslb_license ?? null, input.cslb_license_number ?? null,
         input.years_in_business ?? null, input.team_size ?? null, input.current_estimating_tool ?? null, input.units_managed ?? null,
         input.property_types ?? null, input.has_real_estate_license ?? null, input.current_pm_software ?? null, input.brokerage_name ?? null,
         input.dre_license_number ?? null, input.also_property_manager ?? null, input.service_areas ?? null, input.profession_description ?? null,
@@ -581,7 +584,7 @@ export const eventoRouter = router({
       await ensureEventRegistrationColumns();
       const result = await pool.query(
         `SELECT id, full_name, phone, email, role, city, preferred_language,
-          business_name, trade_types, years_in_business, team_size,
+          business_name, trade_types, website, years_in_business, team_size,
           units_managed, brokerage_name, referral_source, referral_name,
           dietary_restriction, consent_contact, consent_photo,
           bringing_guest, guest_name, guest_role,

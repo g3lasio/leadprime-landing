@@ -18,13 +18,102 @@ const CITIES = [
   "Pittsburg", "Antioch", "Otra",
 ];
 
-const TRADE_TYPES: { category: string; items: string[] }[] = [
-  { category: "Estructura y fundación", items: ["Excavación / Earthwork", "Fundaciones y cimentaciones", "Concreto y hormigón", "Framing / Enmarcado", "Acero estructural"] },
-  { category: "Exterior", items: ["Roofing / Techos", "Fencing / Cercas", "Siding / Revestimiento exterior", "Stucco / Aplanado", "Puertas y ventanas", "Garage doors / Puertas de garaje", "Decks y patios", "Driveways y concreto decorativo"] },
-  { category: "Interior", items: ["Drywall", "Pintura interior", "Pintura exterior", "Pisos / Flooring", "Tile / Azulejo", "Carpintería interior / Trim", "Gabinetes de cocina y baño", "Countertops / Encimeras", "Closets y almacenamiento"] },
-  { category: "Sistemas", items: ["Plomería / Plumbing", "Electricidad", "HVAC / Aire acondicionado", "Gas y calefacción", "Solar / Energía solar", "Seguridad y cámaras", "Insulation / Aislamiento"] },
-  { category: "Remodelación", items: ["Remodelación general", "Cocinas / Kitchen remodel", "Baños / Bathroom remodel", "Adiciones y ampliaciones", "ADU / Casitas"] },
-  { category: "Especialidades", items: ["Landscaping / Jardinería", "Demolición", "Waterproofing / Impermeabilización", "Pool / Albercas", "Handyman general", "Otro"] },
+const CSLB_LICENSES: { group: string; items: string[] }[] = [
+  {
+    group: "Clase A — Ingeniería General",
+    items: [
+      "A — Contratista de Ingeniería General (General Engineering Contractor)",
+    ],
+  },
+  {
+    group: "Clase B — Construcción General",
+    items: [
+      "B — Contratista General de Edificios (General Building Contractor)",
+      "B-2 — Remodelación Residencial (Residential Remodeling Contractor)",
+    ],
+  },
+  {
+    group: "Clase C — Contratistas Especializados",
+    items: [
+      "C-2 — Aislamiento Acústico (Insulation and Acoustical)",
+      "C-4 — Calderas y Vapor (Boiler, Hot-Water Heating and Steam Fitting)",
+      "C-5 — Framing / Estructura de Madera (Framing and Rough Carpentry)",
+      "C-6 — Gabinetes y Carpintería Fina (Cabinet, Millwork and Finish Carpentry)",
+      "C-7 — Sistemas de Bajo Voltaje (Low Voltage Systems)",
+      "C-8 — Concreto (Concrete)",
+      "C-9 — Drywall",
+      "C-10 — Electricidad (Electrical)",
+      "C-11 — Elevadores (Elevator)",
+      "C-12 — Movimiento de Tierra y Pavimento (Earthwork and Paving)",
+      "C-13 — Cercas y Decks (Fencing and Decking)",
+      "C-15 — Pisos y Recubrimientos (Flooring and Floor Covering)",
+      "C-16 — Protección contra Incendios (Fire Protection)",
+      "C-17 — Vidrios y Acristalamientos (Glazing)",
+      "C-20 — HVAC / Climatización (Heating, Ventilating and Air-Conditioning)",
+      "C-21 — Demolición y Traslado de Edificios (Building Moving and Demolition)",
+      "C-22 — Remoción de Asbesto (Asbestos Abatement)",
+      "C-23 — Metal Ornamental (Ornamental Metal)",
+      "C-27 — Paisajismo (Landscaping)",
+      "C-28 — Cerrajería y Seguridad (Lock and Security Equipment)",
+      "C-29 — Mampostería (Masonry)",
+      "C-31 — Control de Tráfico en Obra (Construction Zone Traffic Control)",
+      "C-32 — Pavimento y Mejoras Viales (Parking and Highway Improvement)",
+      "C-33 — Pintura y Decoración (Painting and Decorating)",
+      "C-34 — Tuberías (Pipeline)",
+      "C-35 — Lathing y Aplanado (Lathing and Plastering)",
+      "C-36 — Plomería (Plumbing)",
+      "C-38 — Refrigeración (Refrigeration)",
+      "C-39 — Techos (Roofing)",
+      "C-42 — Sistemas Sanitarios (Sanitation System)",
+      "C-43 — Hojalatería / Lámina (Sheet Metal)",
+      "C-45 — Letreros y Señales (Sign)",
+      "C-46 — Solar / Energía Solar (Solar)",
+      "C-47 — Viviendas Prefabricadas (General Manufactured Housing)",
+      "C-50 — Acero de Refuerzo (Reinforcing Steel)",
+      "C-51 — Acero Estructural (Structural Steel)",
+      "C-53 — Albercas y Piscinas (Swimming Pool)",
+      "C-54 — Azulejo y Cerámica (Ceramic and Mosaic Tile)",
+      "C-55 — Tratamiento de Agua (Water Conditioning)",
+      "C-57 — Pozos de Agua (Well Drilling)",
+      "C-60 — Soldadura (Welding)",
+    ],
+  },
+  {
+    group: "C-61 — Especialidad Limitada (Subclases D)",
+    items: [
+      "D-03 — Toldos y Marquesinas (Awnings)",
+      "D-06 — Azulejo Cerámico y Similar (Ceramic Tile and Similar Tile)",
+      "D-09 — Perforación y Detonación (Drilling, Blasting and Oil Field Work)",
+      "D-16 — Herrajes para Construcción (Builders' and Institutional Hardware)",
+      "D-21 — Maquinaria y Bombas (Machinery and Pumps)",
+      "D-24 — Soldadura y Fabricación de Metal (Metal Products Welding and Fabricating)",
+      "D-28 — Puertas, Portones y Automatización (Doors, Gates and Activating Devices)",
+      "D-30 — Pilotes y Cimentación (Pile Driving and Pressure Foundation Jacking)",
+      "D-31 — Instalación de Postes (Pole Installation and Maintenance)",
+      "D-34 — Equipo Prefabricado (Prefabricated Equipment)",
+      "D-38 — Sandblasting y Chorro a Presión (Sand and Water Blast)",
+      "D-39 — Andamios (Scaffolding)",
+      "D-40 — Equipo para Gasolinera (Service Station Equipment and Maintenance)",
+      "D-41 — Siding y Recubrimiento Exterior (Siding and Decking)",
+      "D-42 — Ignifugación Pasiva (Fireproofing Passive)",
+      "D-49 — Servicio de Árboles (Tree Service)",
+      "D-50 — Tratamiento de Madera (Wood Decay Treatment)",
+      "D-52 — Persianas y Cubiertas de Ventanas (Window Coverings)",
+      "D-59 — Subpisos y Tratamiento (Sub-floor and Treatment)",
+      "D-62 — Balance de Aire y Agua (Air and Water Balancing)",
+      "D-63 — Mampostería en Unidades (Unit Masonry)",
+      "D-65 — Recubrimientos Industriales (Industrial Coating)",
+      "D-66 — Hidrosembrado y Retención de Suelo (Hydroseed and Soil Retention)",
+      "D-67 — Instalación de Productos Sintéticos (Synthetic Products Installation)",
+      "D-71 — Instalación de Viviendas Prefabricadas (Manufactured Housing Installation)",
+    ],
+  },
+  {
+    group: "Sin Licencia CSLB",
+    items: [
+      "Sin licencia CSLB / Subcontratista independiente",
+    ],
+  },
 ];
 
 const YEARS_OPTIONS = [
@@ -41,8 +130,9 @@ type FormData = {
   preferred_language: string;
   // Contractor
   business_name: string;
-  trade_types: string[];
-  trade_other: string;
+  trade_types: string;
+  website: string;
+  no_website: boolean;
   has_cslb_license: string;
   cslb_license_number: string;
   years_in_business: string;
@@ -73,7 +163,7 @@ type FormData = {
 const initialForm: FormData = {
   full_name: "", phone: "", email: "", role: "", city: "", city_other: "",
   preferred_language: "",
-  business_name: "", trade_types: [], trade_other: "", has_cslb_license: "",
+  business_name: "", trade_types: "", website: "", no_website: false, has_cslb_license: "",
   cslb_license_number: "", years_in_business: "", team_size: "", current_estimating_tool: "",
   units_managed: "", property_types: [], has_real_estate_license: "", current_pm_software: "",
   brokerage_name: "", dre_license_number: "", also_property_manager: "", service_areas: [],
@@ -104,7 +194,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const toggleMulti = (field: "trade_types" | "property_types" | "service_areas", val: string) => {
+  const toggleMulti = (field: "property_types" | "service_areas", val: string) => {
     const arr = form[field] as string[];
     set(field, arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
   };
@@ -159,9 +249,8 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
       city: form.city === "Otra" ? form.city_other : form.city,
       preferred_language: form.preferred_language,
       business_name: form.business_name || null,
-      trade_types: form.trade_types.length > 0
-        ? form.trade_types.map((t) => t === "Otro" && form.trade_other ? form.trade_other : t).join(", ")
-        : null,
+      trade_types: form.trade_types || null,
+      website: form.no_website ? "No website" : (form.website.trim() || null),
       has_cslb_license: form.has_cslb_license || null,
       cslb_license_number: form.cslb_license_number || null,
       years_in_business: form.years_in_business || null,
@@ -198,7 +287,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
       role: form.role as "Contratista" | "Property Manager" | "Realtor" | "Otro profesional de la industria",
       city: form.city === "Otra" ? form.city_other : form.city,
       preferred_language: form.preferred_language || "Español",
-      business_name: null, trade_types: null, has_cslb_license: null, cslb_license_number: null,
+      business_name: null, trade_types: null, website: null, has_cslb_license: null, cslb_license_number: null,
       years_in_business: null, team_size: null, current_estimating_tool: null, units_managed: null,
       property_types: null, has_real_estate_license: null, current_pm_software: null,
       brokerage_name: null, dre_license_number: null, also_property_manager: null,
@@ -314,30 +403,55 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
         {form.role === "Contratista" && (
           <div className="space-y-4 p-4 rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/5">
             <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-wider">Sobre tu negocio</p>
-            <div><label className={labelClass}>Nombre del negocio</label><input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: García Roofing & Construction" /></div>
             <div>
-              <label className={labelClass}>Especialidad(es) — selecciona todas las que aplican</label>
-              <div className="max-h-64 overflow-y-auto space-y-3 mt-1 pr-1">
-                {TRADE_TYPES.map((group) => (
-                  <div key={group.category}>
-                    <p className="text-white/30 text-xs uppercase tracking-wider mb-1.5 font-semibold">{group.category}</p>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {group.items.map((t) => (
-                        <label key={t} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer transition-colors text-xs ${form.trade_types.includes(t) ? "border-[#D4AF37]/60 bg-[#D4AF37]/10 text-[#D4AF37]" : "border-white/10 bg-white/3 text-white/60 hover:border-white/20"}`}>
-                          <input type="checkbox" checked={form.trade_types.includes(t)} onChange={() => toggleMulti("trade_types", t)} className="hidden" />
-                          {form.trade_types.includes(t) && <span className="flex-shrink-0">✓</span>}
-                          {t}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {form.trade_types.includes("Otro") && (
-                <input className={inputClass("trade_other") + " mt-2"} value={form.trade_other} onChange={(e) => set("trade_other", e.target.value)} placeholder="Describe tu especialidad..." />
-              )}
+              <label className={labelClass}>Nombre del negocio</label>
+              <input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: García Roofing & Construction" />
             </div>
-            <div><label className={labelClass}>Años en el negocio</label><select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}><option value="">Selecciona</option>{YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}</select></div>
+            <div>
+              <label className={labelClass}>Licencia CSLB — tipo de contratista</label>
+              <select
+                className={inputClass("trade_types") + " bg-[#0D1220]"}
+                value={form.trade_types}
+                onChange={(e) => set("trade_types", e.target.value)}
+              >
+                <option value="">Selecciona tu licencia</option>
+                {CSLB_LICENSES.map((group) => (
+                  <optgroup key={group.group} label={group.group}>
+                    {group.items.map((item) => (
+                      <option key={item} value={item}>{item}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Años en el negocio</label>
+              <select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}>
+                <option value="">Selecciona</option>
+                {YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Sitio web del negocio</label>
+              {!form.no_website && (
+                <input
+                  className={inputClass("website") + " mb-2"}
+                  value={form.website}
+                  onChange={(e) => set("website", e.target.value)}
+                  placeholder="https://tuempresa.com"
+                  type="url"
+                />
+              )}
+              <label className="flex items-center gap-2 cursor-pointer mt-1">
+                <input
+                  type="checkbox"
+                  checked={form.no_website}
+                  onChange={(e) => { set("no_website", e.target.checked); if (e.target.checked) set("website", ""); }}
+                  className={checkboxClass}
+                />
+                <span className="text-white/60 text-sm">No tengo website</span>
+              </label>
+            </div>
           </div>
         )}
 
