@@ -3,7 +3,6 @@ import { publicProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import pkg from "pg";
 const { Pool } = pkg;
-import QRCode from "qrcode";
 import { buildApproveToken } from "./eventoApprove.js";
 
 // Neon PostgreSQL connection — uses NEON_DATABASE_URL env var
@@ -88,36 +87,20 @@ async function sendPendingEmail(email: string, name: string, code: string) {
   } catch (e) { console.error("[Evento] Failed to send pending email:", e); }
 }
 
-// Generate QR code as base64 data URL
-async function generateQRDataUrl(text: string): Promise<string> {
-  try {
-    return await QRCode.toDataURL(text, {
-      width: 200,
-      margin: 2,
-      color: { dark: '#0a1628', light: '#ffffff' },
-      errorCorrectionLevel: 'M',
-    });
-  } catch (e) {
-    console.error('[QR] Failed to generate QR:', e);
-    return '';
-  }
-}
-
 // Send APPROVED email via Resend (with QR code) — fully redesigned
 async function sendApprovedEmail(email: string, name: string, code: string) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) { console.warn("[Evento] RESEND_API_KEY not set — skipping email"); return; }
   try {
-    const qrDataUrl = await generateQRDataUrl(`LPN-${code}`);
-    const qrBlock = qrDataUrl
-      ? `<div style="text-align:center;margin:24px 0 8px;">
+    // Use hosted QR API — base64 data URIs are blocked by all major email clients
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`LPN-${code}`)}&bgcolor=ffffff&color=0a1628&margin=10&ecc=M`;
+    const qrBlock = `<div style="text-align:center;margin:24px 0 8px;">
           <p style="color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;">Escanea para entrar</p>
           <div style="display:inline-block;background:#ffffff;padding:12px;border-radius:16px;border:3px solid rgba(212,175,55,0.5);">
-            <img src="${qrDataUrl}" alt="QR LPN-${code}" style="width:180px;height:180px;display:block;" />
+            <img src="${qrUrl}" alt="QR LPN-${code}" style="width:180px;height:180px;display:block;" />
           </div>
           <p style="color:rgba(255,255,255,0.35);font-size:11px;margin:10px 0 0;">Presenta este QR en la entrada del evento</p>
-        </div>`
-      : '';
+        </div>`;
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="background:#080C14;color:#fff;font-family:'Inter',sans-serif;padding:32px 20px;max-width:600px;margin:0 auto;">
