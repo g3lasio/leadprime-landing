@@ -9,7 +9,7 @@ const { Pool } = pkg;
 import QRCode from "qrcode";
 
 const EVENT_NAME = "LeadPrime Networking";
-const EVENT_DATE = "Jueves 2 de Julio, 2026";
+const EVENT_DATE = "jueves 2 de julio, 2026";
 const EVENT_TIME = "7:00 PM – 8:30 PM";
 const EVENT_VENUE = "Fairfield, California";
 const EVENT_ADDRESS = "1000 Webster Street, Fairfield, CA 94533";

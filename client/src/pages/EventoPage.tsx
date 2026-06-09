@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 // Event constants
 const EVENT_NAME = "LeadPrime Networking";
-const EVENT_DATE = "Jueves 2 de Julio, 2026";
+const EVENT_DATE = "jueves 2 de julio, 2026";
 const EVENT_TIME = "7:00 PM – 8:30 PM";
 const EVENT_VENUE = "Fairfield, California";
 const EVENT_ADDRESS = "1000 Webster Street, Fairfield, CA 94533";
@@ -523,7 +523,7 @@ function SuccessScreen({ code, onClose }: { code: string; onClose: () => void })
     <div className="text-center py-8">
       <div className="text-6xl mb-4">🎉</div>
       <h3 className="text-2xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-        ¡Solicitud recibida
+        ¡Solicitud recibida!
       </h3>
       <p className="text-white/60 mb-6">Revisa tu email — te enviamos todos los detalles.</p>
 
@@ -630,7 +630,7 @@ export default function EventoPage() {
             {[
               { icon: "📅", text: EVENT_DATE },
               { icon: "📍", text: "1000 Webster Street, Fairfield" },
-              { icon: "🎟", text: "Cupo curado y limitado" },
+              { icon: "🎟", text: "Cupo limitado y exclusivo" },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-white/80" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <span>{item.icon}</span>
@@ -867,7 +867,7 @@ export default function EventoPage() {
               <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-4">Sobre el host</p>
               <div className="space-y-4 text-white/70 leading-relaxed">
                 <p>"Me llamo Gelasio Sánchez. Soy el founder de Chyrris, la compañía madre detrás de LeadPrime y Owl Fenc.</p>
-                <p>Llevo años viendo cómo la industria de construction y property management en el Bay Area opera con herramientas que no fueron hechas para nosotros — caras, complicadas, en inglés, y diseñadas para corporaciones que manejan 500 propiedades, no para el plomero independiente o el PM que maneja 30 unidades en Fairfield.</p>
+                <p>Llevo años viendo cómo la industria de la construcción y el property management en el Bay Area opera con herramientas que no fueron hechas para nosotros — caras, complicadas, en inglés, y diseñadas para corporaciones que manejan 500 propiedades, no para el plomero independiente o el PM que maneja 30 unidades en Fairfield.</p>
                 <p>Por eso construí Chyrris y LeadPrime. Y por eso los invito a este networking privado. Creo que el contratista latino y el property manager local del condado merecen herramientas tan buenas como las que tienen los grandes, pero diseñadas para como realmente trabajamos y en el idioma que hablamos.</p>
                 <p>Si vienes esa noche, te prometo dos cosas: vas a salir con contactos reales que van a mover tu negocio, y vas a tener herramientas que te van a cambiar cómo trabajas. Lo demás es bonus."</p>
               </div>
@@ -893,7 +893,7 @@ export default function EventoPage() {
 
           <div className="space-y-3">
             {[
-              { q: "¿Tengo que pagar algo?", a: "El evento se manejará como acceso privado exclusivo por invitación. No es un registro abierto: cada solicitud se revisa por cupo, perfil profesional y relevancia para mantener una sala de alto nivel entre contratistas, general contractors y property managers." },
+              { q: "¿Tengo que pagar algo?", a: "No. El evento es completamente gratuito para los asistentes confirmados — no hay costo de entrada ni cuota de registro. Es acceso privado por invitación: cada solicitud se revisa por cupo y perfil profesional para mantener una sala de alto nivel." },
               { q: "¿Es un evento para venderme algo?", a: "No es una presentación masiva de ventas. Es un evento ejecutivo para construir relaciones, mostrar tecnología útil y abrir oportunidades entre quienes administran propiedades y quienes ejecutan trabajos de calidad." },
               { q: "¿Tengo que hablar inglés?", a: "El evento es en español. Si vienes con alguien que solo habla inglés, también es bienvenido — los productos funcionan en ambos idiomas." },
               { q: "¿Puedo llevar a un invitado?", a: "Sí. En el formulario puedes incluir el nombre y perfil de tu invitado. Por capacidad y calidad del networking, el invitado queda sujeto a confirmación junto con tu solicitud." },
@@ -916,7 +916,7 @@ export default function EventoPage() {
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Solicita Acceso Privado
             </h2>
-            <p className="text-white/50">Acceso privado exclusivo · Solo por invitación · Cupo curado y limitado</p>
+            <p className="text-white/50">Acceso privado exclusivo · Solo por invitación · Cupo limitado y exclusivo</p>
           </div>
 
           {successCode ? (
