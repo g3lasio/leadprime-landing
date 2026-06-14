@@ -432,25 +432,29 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
               </select>
             </div>
             <div>
-              <label className={labelClass}>Sitio web del negocio</label>
-              {!form.no_website && (
-                <input
-                  className={inputClass("website") + " mb-2"}
-                  value={form.website}
-                  onChange={(e) => set("website", e.target.value)}
-                  placeholder="https://tuempresa.com"
-                  type="url"
-                />
-              )}
-              <label className="flex items-center gap-2 cursor-pointer mt-1">
-                <input
-                  type="checkbox"
-                  checked={form.no_website}
-                  onChange={(e) => { set("no_website", e.target.checked); if (e.target.checked) set("website", ""); }}
-                  className={checkboxClass}
-                />
-                <span className="text-white/60 text-sm">No tengo website</span>
-              </label>
+              <label className={labelClass}>¿Tienes website del negocio?</label>
+              <div className="flex flex-col gap-2 mt-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="website_status"
+                    checked={!form.no_website && form.website === "Sí"}
+                    onChange={() => { set("no_website", false); set("website", "Sí"); }}
+                    className="w-4 h-4 accent-[#D4AF37] cursor-pointer"
+                  />
+                  <span className="text-white/60 text-sm">Sí, tengo website</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="website_status"
+                    checked={form.no_website}
+                    onChange={() => { set("no_website", true); set("website", ""); }}
+                    className="w-4 h-4 accent-[#D4AF37] cursor-pointer"
+                  />
+                  <span className="text-white/60 text-sm">No tengo website</span>
+                </label>
+              </div>
             </div>
           </div>
         )}
@@ -476,7 +480,7 @@ function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) 
           <label className={labelClass}>¿Cómo te enteraste?</label>
           <select className={inputClass("referral_source") + " bg-[#0D1220]"} value={form.referral_source} onChange={(e) => set("referral_source", e.target.value)}>
             <option value="">Selecciona</option>
-            {["Invitación directa de Gelasio","Un amigo/colega me invitó","Home Depot","Redes sociales","Otro"].map((r) => <option key={r}>{r}</option>)}
+            {["Invitación directa de Gelasio","Invitación por Yuselis","Invitación por Gloria Casillas","Invitación por Janet C.","Un amigo/colega me invitó","Home Depot","Redes sociales","Otro"].map((r) => <option key={r}>{r}</option>)}
           </select>
         </div>
 
