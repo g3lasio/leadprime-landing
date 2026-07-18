@@ -26,17 +26,15 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo — official lockup image (arrow + wordmark) */}
-          <div className="flex items-center gap-2.5">
+          {/* Logo — official lockup image; the confusing NETWORK pill was
+              removed (Brief F6.4: brand vs section vs Elite plan ambiguity) */}
+          <div className="flex items-center">
             <img
               src="/logo-full.png"
               alt="LeadPrime — AI-powered CRM for contractors and real estate pros"
               className="h-10 lg:h-12 w-auto"
               height={48}
             />
-            <span className="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30">
-              NETWORK
-            </span>
           </div>
 
           {/* Desktop Nav */}

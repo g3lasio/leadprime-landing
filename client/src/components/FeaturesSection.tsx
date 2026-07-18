@@ -146,8 +146,8 @@ export default function FeaturesSection() {
             <span className="lp-text-gradient-cyan">Everything Your Business Needs.</span>
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
-            From first lead to final payment — every tool below is live in
-            LeadPrime today. What's on the way is clearly marked.
+            From first lead to final payment — core tools are live today, and
+            what's on the way is clearly marked.
           </p>
         </div>
 
@@ -165,7 +165,7 @@ export default function FeaturesSection() {
               Get paid faster — one tap turns an approved estimate into an
               invoice, and your client signs on any device.
             </p>
-            <p className="text-xs text-white/45" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <p className="text-xs text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>
               Shown with demo data.
             </p>
           </div>

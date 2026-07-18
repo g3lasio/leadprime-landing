@@ -4,12 +4,14 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import NetworkSection from "@/components/NetworkSection";
 import IndustrySection from "@/components/IndustrySection";
+import AdaptsSection from "@/components/AdaptsSection";
+import SuperCapabilitiesSection from "@/components/SuperCapabilitiesSection";
 import AIAgentSection from "@/components/AIAgentSection";
 import ComparisonSection from "@/components/ComparisonSection";
-import KenChat from "@/components/KenChat";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
+import KeenWidget from "@/components/KeenWidget";
 
 export default function Home() {
   return (
@@ -21,13 +23,16 @@ export default function Home() {
         <FeaturesSection />
         <NetworkSection />
         <IndustrySection />
+        <AdaptsSection />
+        <SuperCapabilitiesSection />
         <AIAgentSection />
         <ComparisonSection />
-        <KenChat />
         <PricingSection />
         <FAQSection />
       </main>
       <Footer />
+      {/* KEEN floating chat — present through the whole scroll (Brief F3) */}
+      <KeenWidget />
     </div>
   );
 }

@@ -25,7 +25,7 @@ const verticalDetails = [
       "Get contracts signed on-site — no printer, no office.",
       "KEEN follows up on every lead so none goes cold.",
       "Track your license, insurance, and W-9 so you never miss a renewal.",
-      "Find government projects that match your trade (GovPrime).",
+      "Find government projects with GovPrime — pulls federal & state opportunities from SAM.gov, matched to your trade.",
       "Accept card and ACH payments — get paid on the spot.",
     ],
     mockup: true,
@@ -65,18 +65,21 @@ const primary = [
     emoji: "🔨",
     color: "#00D4FF",
     desc: "Manage every job from estimate to final payment. Construction-stage pipelines, digital contracts, native estimates and invoices, and an AI agent that follows up so you don't have to.",
+    cta: "Start free →",
   },
   {
     label: "Property Managers",
     emoji: "🏢",
     color: "#F59E0B",
     desc: "Rent collection, tenant communication, and owner reporting — with payments built in. Your whole portfolio in one pipeline.",
+    cta: "Try it free →",
   },
   {
     label: "Real Estate Investors",
     emoji: "📈",
     color: "#10B981",
     desc: "Track deals, organize your buyer and seller network, and run outreach and follow-up on autopilot. Built for how investors actually work a pipeline.",
+    cta: "Start with $0 — no card →",
   },
 ];
 
@@ -135,7 +138,7 @@ export default function IndustrySection() {
                 className="text-sm font-bold transition-colors"
                 style={{ color: v.color }}
               >
-                Start free →
+                {v.cta}
               </a>
             </div>
           ))}

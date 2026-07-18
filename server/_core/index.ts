@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerEventoApproveRoute } from "../routers/eventoApprove.js";
 import { registerQRRoute } from "../routers/qrRoute.js";
+import { registerKeenRoutes } from "../keen/route.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -51,6 +52,8 @@ async function startServer() {
   registerEventoApproveRoute(app);
   // Self-hosted QR code PNG endpoint — used in invitation emails
   registerQRRoute(app);
+  // KEEN live chat (Brief F4) — key only from KEEN_API_KEY env, strict limits
+  registerKeenRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

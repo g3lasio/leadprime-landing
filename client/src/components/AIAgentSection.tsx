@@ -1,9 +1,10 @@
 /**
- * AI Agent (KEEN) — capabilities supported by production. The CloudFront
- * image was replaced with a CSS chat mock (Brief C: zero external assets).
+ * AI Agent (KEEN) — capabilities supported by production. Brief F3 replaced
+ * the static 3-bubble chat mockup with the REAL floating KEEN widget; this
+ * section now presents the agent and hands off to the live chat.
  */
 import { appLink } from "@/lib/appLinks";
-import { KenAvatar } from "@/components/KenChat";
+import KeenAvatar from "@/components/KeenAvatar";
 
 const capabilities = [
   {
@@ -38,61 +39,43 @@ const capabilities = [
   },
 ];
 
-const chatDemo = [
-  { from: "lead", text: "Hi, I need a quote for a kitchen remodel." },
-  { from: "agent", text: "Great! I can help with that. Would Tuesday at 10 AM work for a free estimate visit?" },
-  { from: "lead", text: "Tuesday works. See you then!" },
-];
-
 export default function AIAgentSection() {
+  const openKeen = () => window.dispatchEvent(new Event("keen:open"));
+
   return (
     <section className="py-24 bg-[#0A1628] relative overflow-hidden">
       <div className="absolute bottom-0 left-1/4 w-96 max-w-full h-96 bg-[#F59E0B]/5 rounded-full blur-3xl" aria-hidden="true" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* CSS chat mock */}
-          <div className="order-2 lg:order-1" aria-hidden="true">
-            <div className="lp-card rounded-2xl p-6 max-w-md mx-auto">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
-                <KenAvatar size={40} />
-                <div>
-                  <p className="text-white font-bold text-sm">
-                    KEEN <span className="text-white/50 font-semibold">· AI Agent</span>
-                  </p>
-                  <p className="text-[#10B981] text-xs">● Working your pipeline</p>
-                </div>
+          {/* Live-agent card — the real KEEN is one click away */}
+          <div className="order-2 lg:order-1">
+            <div className="lp-card lp-border-cyan rounded-2xl p-8 max-w-md mx-auto text-center">
+              <div className="flex justify-center mb-4">
+                <KeenAvatar size={96} online />
               </div>
-              <div className="space-y-3">
-                {chatDemo.map((m, i) => (
-                  <div
-                    key={i}
-                    className={`flex lp-mock-fade ${m.from === "agent" ? "justify-end" : "justify-start"}`}
-                    style={{ animationDelay: `${i * 0.5}s` }}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                        m.from === "agent"
-                          ? "bg-[#00D4FF]/15 border border-[#00D4FF]/30 text-white"
-                          : "bg-white/5 border border-white/10 text-white/80"
-                      }`}
-                    >
-                      {m.text}
-                    </div>
-                  </div>
-                ))}
-                {/* typing indicator — subtle loop */}
-                <div className="flex justify-end lp-mock-fade" style={{ animationDelay: "1.8s" }}>
-                  <div className="rounded-2xl px-4 py-3 bg-[#00D4FF]/15 border border-[#00D4FF]/30 flex items-center gap-1.5">
-                    <span className="lp-typing-dot" />
-                    <span className="lp-typing-dot" style={{ animationDelay: "0.18s" }} />
-                    <span className="lp-typing-dot" style={{ animationDelay: "0.36s" }} />
-                  </div>
-                </div>
-                <p className="text-center text-xs text-white/45 pt-2">
-                  Appointment booked automatically · You just show up
-                </p>
-              </div>
+              <p className="text-white font-bold text-lg mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                KEEN
+                <span className="ml-2 align-middle text-xs px-1.5 py-0.5 rounded bg-[#00D4FF]/15 border border-[#00D4FF]/30 text-[#00D4FF] font-semibold uppercase tracking-wide">
+                  AI Agent
+                </span>
+              </p>
+              <p className="text-[#10B981] text-xs mb-5">● Live on this page</p>
+              <p className="text-sm text-white/70 leading-relaxed mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+                This isn't a mockup — KEEN is live right here. Ask it about
+                pricing, features, or whether LeadPrime fits your business.
+                English o español.
+              </p>
+              <button
+                onClick={openKeen}
+                className="lp-btn-primary px-6 py-3 rounded-xl text-sm font-bold w-full"
+                aria-label="Open the KEEN chat"
+              >
+                Chat with KEEN now
+              </button>
+              <p className="text-xs text-white/65 mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Public product info only · usage limits apply per visitor.
+              </p>
             </div>
           </div>
 

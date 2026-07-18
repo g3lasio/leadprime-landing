@@ -124,6 +124,24 @@
         border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 26px 0 40px;
         color: rgba(255, 255, 255, 0.45); font-size: 13px;
       }
+      /* Mobile: stack the comparison table into per-capability cards so
+         nothing is cut off at 375–390px */
+      @media (max-width: 640px) {
+        table { min-width: 0; }
+        thead { display: none; }
+        tbody tr { display: block; border-top: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 0 12px; }
+        tbody tr:first-child { border-top: none; }
+        td { display: block; border: none; padding: 5px 16px; }
+        td::before {
+          display: block; font-size: 10.5px; font-weight: 700;
+          text-transform: uppercase; letter-spacing: 0.07em;
+          color: rgba(255, 255, 255, 0.5); margin-bottom: 2px;
+        }
+        td:nth-child(2)::before { content: "LeadPrime"; color: #00d4ff; }
+        td:nth-child(3)::before { content: "Jobber"; }
+        td:nth-child(4)::before { content: "ServiceTitan"; }
+        td.cap { font-size: 15px; color: #fff; padding-top: 4px; }
+      }
     </style>
   </head>
   <body>
@@ -206,11 +224,13 @@
           </table>
         </div>
         <p class="foot">
-          Competitor pricing based on publicly reported figures, July 2026;
-          ServiceTitan and some others do not publish official pricing. Feature
-          availability varies by competitor plan. LeadPrime pricing reflects
-          current published plans. Jobber® and ServiceTitan® are trademarks of
-          their respective owners; LeadPrime is not affiliated with either.
+          Competitor pricing based on publicly reported figures, July 2026
+          (Jobber, ServiceTitan, DocuSign, Rocket Lawyer, LawDepot);
+          ServiceTitan and some others do not publish official pricing, and
+          plans vary. Feature availability varies by competitor plan.
+          LeadPrime pricing reflects current published plans. All product
+          names are trademarks of their respective owners; LeadPrime is not
+          affiliated with any of them.
         </p>
 
         <h2>Price: what you actually pay to start</h2>
@@ -242,6 +262,21 @@
           <li><strong>AI agent (KEEN)</strong> — follows up on every lead, drafts messages, and books appointments, in English and Spanish.</li>
           <li><strong>License-verified B2B network</strong> — connect with verified contractors, property managers, and investors; neither competitor offers this.</li>
         </ul>
+
+        <h2>One subscription that replaces 4–5</h2>
+        <p>
+          Beyond the CRM itself, LeadPrime bundles tools that are usually
+          separate subscriptions: e-signature with AI signer and field mapping
+          (LeadSign — the capability DocuSign gates behind its IAM
+          Professional tier, ~$75/user/mo with a 3-user minimum, publicly
+          reported), an AI contract generator that leaves the document ready
+          to sign in the same flow (where Rocket Lawyer ~$39.99/mo and
+          LawDepot ~$35/mo sell templates you fill in by hand), a government
+          contract finder that matches SAM.gov opportunities to your trade
+          (GovPrime), and license/insurance/W-9/workers'-comp tracking with
+          expiration alerts (Business Health Passport). Time and cost figures
+          are typical examples, not guarantees.
+        </p>
 
         <h2>Who each platform is really for</h2>
         <p>
