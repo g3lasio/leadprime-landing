@@ -77,9 +77,17 @@ export default function KenChat() {
             Live Demo
           </span>
         </div>
-        {/* KEN identity — /ken.png (owner-provided portrait); falls back to monogram */}
-        <div className="flex justify-center mb-6">
+        {/* KEN identity — /ken.png (owner-provided portrait); falls back to
+            monogram. The "AI Assistant" tag is required brand policy: KEN is
+            an AI agent and must never read as a human team member. */}
+        <div className="flex flex-col items-center gap-2.5 mb-6">
           <KenAvatar size={88} />
+          <span
+            className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 text-[#00D4FF]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            KEN · AI Assistant
+          </span>
         </div>
         <h2
           className="text-4xl lg:text-5xl font-black text-white mb-5"

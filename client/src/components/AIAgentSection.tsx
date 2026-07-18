@@ -57,7 +57,9 @@ export default function AIAgentSection() {
               <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
                 <KenAvatar size={40} />
                 <div>
-                  <p className="text-white font-bold text-sm">KEEN</p>
+                  <p className="text-white font-bold text-sm">
+                    KEEN <span className="text-white/50 font-semibold">· AI Agent</span>
+                  </p>
                   <p className="text-[#10B981] text-xs">● Working your pipeline</p>
                 </div>
               </div>

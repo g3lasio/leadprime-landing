@@ -16,7 +16,12 @@
 | Apple touch icon | `client/public/apple-touch-icon.png` |
 | OG image 1200×630 | `client/public/og-image.png` (122 KB) — usa la marca oficial |
 
-**Actualización — logo oficial instalado:** el adjunto original del chat fue recuperado del transcript de la sesión (2000×667, lockup completo). El fondo de tablero venía **horneado** en el archivo (no era transparencia real), así que el mark se extrajo por chroma-key de saturación (los grises del tablero → alfa 0, los azules del mark → opacos, con rampa suave en bordes). Resultado: `logo.png` es ahora el **mark oficial exacto con transparencia real** (512×512), `favicon.svg` lo embebe como data-URI, `favicon.png`/`apple-touch-icon.png` derivan de él, y `og-image.png` fue regenerado (1200×630) con el mark oficial. Verificado con captura del bundle servido en local: navbar y OG muestran la marca real.
+**Actualización final — paquete oficial de assets instalado:** el dueño entregó un zip con assets corregidos (transparencia RGBA real, verificada píxel a píxel). Instalado tal cual:
+
+- `logo.png` ← `leadprime-icon.png` del paquete (414×414, flecha oficial transparente) — navbar y footer.
+- `favicon-16/32/192/512.png` del paquete, enlazados en `client/index.html:13-15`; `apple-touch-icon.png` ← `favicon-180.png`. Los `favicon.svg`/`favicon.png` de la recreación fueron eliminados.
+- `og-image.png` regenerado (1200×630) con el **ícono del paquete** + branding completo. El og que venía en el zip no se usó tal cual porque llegó **sin el nombre "LEADPRIME"**.
+- ⚠️ `leadprime-logo-full.png` del paquete llegó **dañado**: la zona del wordmark tiene 0.00% de píxeles opacos (el proceso que quitó el fondo también borró el texto blanco "LEADPRIME"). Por eso navbar/footer conservan el patrón ícono + texto vivo "LeadPrime" (mismo resultado visual, siempre nítido). Si Manus reexporta el lockup completo con el wordmark intacto, se puede colocar como imagen única.
 
 ## D2 — Beneficios por vertical (copy aprobado, verbatim)
 
@@ -55,7 +60,7 @@ Animaciones: `client/src/index.css:254-297` (`lp-mock-fade`, `lp-mock-travel`, `
 - **Flag OFF fail-closed:** líneas 57 y 69 — sin la variable, la sección **no renderiza nada** y no se inyecta ningún script. **No hay fallback al widget personal** (documentado en el comentario de cabecera, líneas 2-15).
 - **Mecanismo de embed = producción:** líneas 59-65 — inyecta `${APP_URL}/api/widget/embed.js` con `data-token`, igual que `routes/websiteBuilder.ts` del repo principal.
 - **Expectativas del visitante:** líneas 105-107 — "Demo assistant with public product info only · usage limits apply per visitor."
-- **Imagen de KEN ("usa esta imagen como la de ken"):** ✅ instalada. El retrato adjunto fue recuperado del transcript (1254×1254) y guardado como `client/public/ken.png` (512×512, 122 KB). `KenAvatar` (líneas 26-51) lo carga con fallback al monograma "K" (`onError`, línea 48) y aparece en la sección Try KEN (avatar 88px, línea 82) y en el chat mock de AIAgentSection (`AIAgentSection.tsx:58`). Verificado con captura del bundle en local: el retrato renderiza en el avatar circular.
+- **Imagen de KEN ("usa esta imagen como la de ken"):** ✅ instalada — `client/public/ken.png` ← `ken-avatar-256.png` del paquete oficial (256×256, 88 KB; tamaño idóneo: se muestra a 88px máx). Por política de transparencia del README del paquete, el avatar lleva **siempre** la etiqueta "KEN · AI Assistant" (`KenChat.tsx`, pill bajo el avatar) y el mock del chat dice "KEEN · AI Agent" (`AIAgentSection.tsx`) — KEN nunca debe leerse como un miembro humano del equipo. `KenAvatar` (líneas 26-51) lo carga con fallback al monograma "K" (`onError`, línea 48) y aparece en la sección Try KEN (avatar 88px, línea 82) y en el chat mock de AIAgentSection (`AIAgentSection.tsx:58`). Verificado con captura del bundle en local: el retrato renderiza en el avatar circular.
 
 ### Pasos para activar KEN (para Gelasio — el código ya está listo)
 
