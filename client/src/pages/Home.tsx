@@ -8,6 +8,7 @@ import AIAgentSection from "@/components/AIAgentSection";
 import ComparisonSection from "@/components/ComparisonSection";
 import KenChat from "@/components/KenChat";
 import PricingSection from "@/components/PricingSection";
+import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -24,6 +25,7 @@ export default function Home() {
         <ComparisonSection />
         <KenChat />
         <PricingSection />
+        <FAQSection />
       </main>
       <Footer />
     </div>

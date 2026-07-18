@@ -126,6 +126,15 @@ export default function ComparisonSection() {
           availability varies by competitor plan. LeadPrime pricing reflects
           current published plans.
         </p>
+        <p className="mt-6">
+          <a
+            href="/compare/"
+            className="text-sm font-bold text-[#00D4FF] hover:underline"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Read the full LeadPrime vs Jobber vs ServiceTitan comparison →
+          </a>
+        </p>
       </div>
     </section>
   );

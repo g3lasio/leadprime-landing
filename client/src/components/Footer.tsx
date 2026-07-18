@@ -58,7 +58,7 @@ export default function Footer() {
               <div className="flex items-center mb-4">
                 <img
                   src="/logo-full.png"
-                  alt="LeadPrime"
+                  alt="LeadPrime — AI-powered CRM for contractors and real estate pros"
                   className="h-10 w-auto"
                   height={40}
                   loading="lazy"
@@ -66,7 +66,7 @@ export default function Footer() {
               </div>
               <p className="text-sm text-white/60 leading-relaxed max-w-xs" style={{ fontFamily: "'Inter', sans-serif" }}>
                 The AI-powered CRM for contractors, property managers, and real
-                estate investors.
+                estate investors — in English &amp; Español.
               </p>
             </div>
 

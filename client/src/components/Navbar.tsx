@@ -30,7 +30,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2.5">
             <img
               src="/logo-full.png"
-              alt="LeadPrime"
+              alt="LeadPrime — AI-powered CRM for contractors and real estate pros"
               className="h-10 lg:h-12 w-auto"
               height={48}
             />

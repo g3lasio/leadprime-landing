@@ -1,4 +1,53 @@
+# LeadPrime — leadprimecrm.chyrris.com
+# All crawlers welcome (marketing site). Admin routes excluded.
+
 User-agent: *
+Allow: /
+Disallow: /admin/
+
+# AI assistant crawlers — explicitly welcome (we WANT AI assistants
+# to read and cite this site).
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /admin/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin/
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin/
+
+User-agent: meta-externalagent
 Allow: /
 Disallow: /admin/
 

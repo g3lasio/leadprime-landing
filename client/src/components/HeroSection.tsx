@@ -42,7 +42,7 @@ export default function HeroSection() {
           Built for Contractors · Property Managers · Investors
         </p>
 
-        {/* H1 */}
+        {/* H1 — Brief B approved headline + Brief E2 bilingual signal */}
         <h1
           className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.05] mb-6"
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
@@ -52,17 +52,20 @@ export default function HeroSection() {
           <span className="lp-text-gradient-cyan">runs your business,</span>
           <br />
           not just your leads.
+          <span className="block text-xl md:text-2xl lg:text-3xl font-bold text-white/85 mt-5">
+            In English <span className="lp-text-gradient-amber">&amp; Español.</span>
+          </span>
         </h1>
 
-        {/* Subhead */}
+        {/* Subhead — Brief E2 prominent bilingual/Latino line */}
         <p
           className="text-base md:text-lg text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
           From first lead to signed contract to paid invoice — LeadPrime unifies
           your pipeline, your documents, your estimates, and your payments in
-          one place. Built for Latino contractors and real estate pros in the
-          U.S.
+          one place. Built for Latino contractors in the U.S. — works fully in
+          English and Spanish, so your whole crew can use it.
         </p>
 
         {/* CTAs */}
