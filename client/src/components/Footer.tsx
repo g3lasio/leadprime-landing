@@ -12,6 +12,7 @@ const productLinks = [
   { label: "Network", href: "#network" },
   { label: "Who It's For", href: "#industry" },
   { label: "Pricing", href: "#pricing" },
+  { label: "About Us — Our Story", href: "/about/" },
 ];
 
 const legalLinks = [

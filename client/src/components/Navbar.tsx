@@ -55,6 +55,13 @@ export default function Navbar() {
                 {item.label}
               </button>
             ))}
+            <a
+              href="/about/"
+              className="text-sm font-medium text-white/70 hover:text-[#00D4FF] transition-colors duration-200"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              About
+            </a>
           </div>
 
           {/* CTA */}
@@ -115,6 +122,12 @@ export default function Navbar() {
                   {item.label}
                 </button>
               ))}
+              <a
+                href="/about/"
+                className="text-left text-sm font-medium text-white/70 hover:text-[#00D4FF] transition-colors py-1"
+              >
+                About
+              </a>
               <a
                 href={appLink("navbar", "signup")}
                 target="_blank"
