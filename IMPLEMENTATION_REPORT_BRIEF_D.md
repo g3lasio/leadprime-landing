@@ -20,8 +20,11 @@
 
 - `logo.png` ← `leadprime-icon.png` del paquete (414×414, flecha oficial transparente) — navbar y footer.
 - `favicon-16/32/192/512.png` del paquete, enlazados en `client/index.html:13-15`; `apple-touch-icon.png` ← `favicon-180.png`. Los `favicon.svg`/`favicon.png` de la recreación fueron eliminados.
-- `og-image.png` regenerado (1200×630) con el **ícono del paquete** + branding completo. El og que venía en el zip no se usó tal cual porque llegó **sin el nombre "LEADPRIME"**.
-- ⚠️ `leadprime-logo-full.png` del paquete llegó **dañado**: la zona del wordmark tiene 0.00% de píxeles opacos (el proceso que quitó el fondo también borró el texto blanco "LEADPRIME"). Por eso navbar/footer conservan el patrón ícono + texto vivo "LeadPrime" (mismo resultado visual, siempre nítido). Si Manus reexporta el lockup completo con el wordmark intacto, se puede colocar como imagen única.
+- **Paquete v2 (lockup corregido):** el primer zip traía `leadprime-logo-full.png` y su og con el wordmark blanco borrado (0.00% opaco en la zona de texto — el filtro anti-checkerboard lo trató como fondo). El v2 llegó corregido (4.90% opaco verificado). Instalado:
+  - `logo-full.png` (144px de alto, 12.7 KB, optimizado web) — **imagen única del lockup en navbar (`Navbar.tsx`, h-10/h-12) y footer (`Footer.tsx`, h-10)**, reemplazando el patrón ícono + texto.
+  - `leadprime-logo-full.png` (original 2172×724 full-res) preservado en `client/public/` como fuente de verdad.
+  - `og-image.png` ← el del v2 (wordmark real + tagline + dominio), usado tal cual.
+  - Limpieza documentada: ambos archivos v2 traían un residuo de checkerboard (~46 píxeles en la esquina superior izquierda del lockup; mota de 3×3 en el og en x161,y181). Se borraron esos píxeles sueltos — cero cambios al arte.
 
 ## D2 — Beneficios por vertical (copy aprobado, verbatim)
 

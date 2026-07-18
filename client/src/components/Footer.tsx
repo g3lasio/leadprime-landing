@@ -55,11 +55,14 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Brand */}
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/logo.png" alt="LeadPrime logo" className="w-8 h-8" width={32} height={32} loading="lazy" />
-                <span className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  LeadPrime
-                </span>
+              <div className="flex items-center mb-4">
+                <img
+                  src="/logo-full.png"
+                  alt="LeadPrime"
+                  className="h-10 w-auto"
+                  height={40}
+                  loading="lazy"
+                />
               </div>
               <p className="text-sm text-white/60 leading-relaxed max-w-xs" style={{ fontFamily: "'Inter', sans-serif" }}>
                 The AI-powered CRM for contractors, property managers, and real

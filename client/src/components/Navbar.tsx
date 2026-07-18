@@ -26,17 +26,14 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 flex items-center justify-center">
-              <img src="/logo.png" alt="LeadPrime" className="w-9 h-9 object-contain" width={36} height={36} />
-            </div>
-            <span
-              className="font-bold text-xl text-white"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              LeadPrime
-            </span>
+          {/* Logo — official lockup image (arrow + wordmark) */}
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo-full.png"
+              alt="LeadPrime"
+              className="h-10 lg:h-12 w-auto"
+              height={48}
+            />
             <span className="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30">
               NETWORK
             </span>
