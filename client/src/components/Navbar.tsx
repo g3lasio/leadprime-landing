@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { appLink } from "@/lib/appLinks";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -28,7 +29,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 flex items-center justify-center">
-              <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/leadprime-logo_b6e94952.png" alt="LeadPrime" className="w-9 h-9 object-contain" />
+              <img src="/logo.png" alt="LeadPrime" className="w-9 h-9 object-contain" width={36} height={36} />
             </div>
             <span
               className="font-bold text-xl text-white"
@@ -44,9 +45,10 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
             {[
+              { label: "How It Works", id: "how-it-works" },
               { label: "Features", id: "features" },
               { label: "Network", id: "network" },
-              { label: "For Industry", id: "industry" },
+              { label: "Who It's For", id: "industry" },
               { label: "Pricing", id: "pricing" },
             ].map((item) => (
               <button
@@ -63,7 +65,7 @@ export default function Navbar() {
           {/* CTA */}
           <div className="hidden lg:flex items-center gap-3">
             <a
-              href="https://leadprime.chyrris.com"
+              href={appLink("navbar", "signin")}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-white/70 hover:text-white transition-colors"
@@ -71,7 +73,7 @@ export default function Navbar() {
               Sign In
             </a>
             <a
-              href="https://leadprime.chyrris.com"
+              href={appLink("navbar", "signup")}
               target="_blank"
               rel="noopener noreferrer"
               className="lp-btn-primary px-5 py-2.5 rounded-lg text-sm font-bold"
@@ -84,6 +86,8 @@ export default function Navbar() {
           <button
             className="lg:hidden text-white/70 hover:text-white p-2"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,9 +106,10 @@ export default function Navbar() {
           <div className="lg:hidden py-4 border-t border-[#00D4FF]/10">
             <div className="flex flex-col gap-4">
               {[
+                { label: "How It Works", id: "how-it-works" },
                 { label: "Features", id: "features" },
                 { label: "Network", id: "network" },
-                { label: "For Industry", id: "industry" },
+                { label: "Who It's For", id: "industry" },
                 { label: "Pricing", id: "pricing" },
               ].map((item) => (
                 <button
@@ -116,7 +121,7 @@ export default function Navbar() {
                 </button>
               ))}
               <a
-                href="https://leadprime.chyrris.com"
+                href={appLink("navbar", "signup")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="lp-btn-primary px-5 py-3 rounded-lg text-sm font-bold text-center mt-2"

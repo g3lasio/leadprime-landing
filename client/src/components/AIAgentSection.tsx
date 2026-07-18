@@ -1,134 +1,131 @@
-const AI_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/leadprime-ai-agent-YfBKo4A9LiWB4AkDpmP439.webp";
+/**
+ * AI Agent (KEEN) — capabilities supported by production. The CloudFront
+ * image was replaced with a CSS chat mock (Brief C: zero external assets).
+ */
+import { appLink } from "@/lib/appLinks";
 
 const capabilities = [
   {
-    title: "Autonomous Lead Management",
-    desc: "Your AI agent manages and handles your leads completely autonomously — qualifies, prioritizes, and responds without you having to intervene.",
+    title: "Autonomous Lead Follow-Up",
+    desc: "KEEN qualifies, prioritizes, and responds to leads without you having to intervene.",
     icon: "🎯",
   },
   {
-    title: "SMS Follow-Up on Autopilot",
-    desc: "Every new lead gets immediate follow-up via SMS automatically. Your pipeline never goes cold — the agent works 24/7 without rest.",
-    icon: "📲",
-  },
-  {
-    title: "Talks to Your Clients",
-    desc: "Your agent answers questions, qualifies leads, and handles objections via SMS, email, and voice — 24/7, without you lifting a finger.",
+    title: "24/7 SMS Autopilot",
+    desc: "Follow-ups go out on schedule — nights, weekends, and while you're on the job.",
     icon: "💬",
   },
   {
-    title: "Connects with Other AI Agents",
-    desc: "Via Agent Connector MCP, your agent integrates with external AI tools — letting other agents send leads directly into your CRM.",
-    icon: "🤖",
-  },
-  {
-    title: "Books Appointments Automatically",
-    desc: "Qualifies leads and books appointments directly on your calendar. You only talk to people who are ready to do business.",
+    title: "Books Appointments",
+    desc: "Connected to your calendar. KEEN proposes times, confirms, and reminds.",
     icon: "📅",
   },
   {
-    title: "Trained on Your Business",
-    desc: "Feed your agent your pricing, FAQs, service area, and documents via the Knowledge Base. It knows your business as well as you do.",
-    icon: "🧠",
+    title: "Trained On Your Business",
+    desc: "Feed it your pricing, docs, and FAQs through the Knowledge Base — it answers like you would.",
+    icon: "📚",
   },
   {
-    title: "Multi-Channel Presence",
-    desc: "Active on SMS, email, voice calls, and web chat simultaneously. Never miss a lead regardless of how they contact you.",
-    icon: "📡",
+    title: "Agent-to-Agent (MCP)",
+    desc: "Connect external AI agents to your CRM to send leads, update contacts, and trigger workflows.",
+    icon: "🔌",
   },
   {
-    title: "Your Name. Your Identity.",
-    desc: "Give your agent any name you want and train it with your business knowledge. It's your assistant — fully branded to you.",
+    title: "Yours to Name",
+    desc: "KEEN is the default — give your agent any name and personality you want.",
     icon: "✨",
   },
+];
+
+const chatDemo = [
+  { from: "lead", text: "Hi, I need a quote for a kitchen remodel." },
+  { from: "agent", text: "Great! I can help with that. Would Tuesday at 10 AM work for a free estimate visit?" },
+  { from: "lead", text: "Tuesday works. See you then!" },
 ];
 
 export default function AIAgentSection() {
   return (
     <section className="py-24 bg-[#0A1628] relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF]/3 via-transparent to-[#F59E0B]/3" />
+      <div className="absolute bottom-0 left-1/4 w-96 max-w-full h-96 bg-[#F59E0B]/5 rounded-full blur-3xl" aria-hidden="true" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left: Content */}
-          <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-6">
-              <span className="w-2 h-2 rounded-full bg-[#00D4FF] animate-pulse" />
-              <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                AI Super-Agent
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* CSS chat mock */}
+          <div className="order-2 lg:order-1" aria-hidden="true">
+            <div className="lp-card rounded-2xl p-6 max-w-md mx-auto">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#00D4FF]/20 border border-[#00D4FF]/50 flex items-center justify-center text-[#00D4FF] font-black">
+                  K
+                </div>
+                <div>
+                  <p className="text-white font-bold text-sm">KEEN</p>
+                  <p className="text-[#10B981] text-xs">● Working your pipeline</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {chatDemo.map((m, i) => (
+                  <div key={i} className={`flex ${m.from === "agent" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                        m.from === "agent"
+                          ? "bg-[#00D4FF]/15 border border-[#00D4FF]/30 text-white"
+                          : "bg-white/5 border border-white/10 text-white/80"
+                      }`}
+                    >
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+                <p className="text-center text-xs text-white/45 pt-2">
+                  Appointment booked automatically · You just show up
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Copy */}
+          <div className="order-1 lg:order-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/30 mb-6">
+              <span className="text-sm font-semibold text-[#F59E0B]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Meet KEEN
               </span>
             </div>
-
             <h2
-              className="text-4xl lg:text-5xl font-black text-white mb-6 leading-tight"
+              className="text-4xl lg:text-5xl font-black text-white mb-6"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Your AI Agent.
+              Your AI agent works
               <br />
-              <span className="lp-text-gradient-cyan">The One That Never Sleeps.</span>
+              <span className="lp-text-gradient-amber">while you build.</span>
             </h2>
-
-            <p className="text-white/60 mb-4 leading-relaxed text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Your AI agent is not just a chatbot. It's a full agent that autonomously manages your leads,
-              follows up via SMS on autopilot, talks to other AI agents, and keeps your pipeline moving —
-              all while you focus on what you do best.
+            <p className="text-lg text-white/60 mb-8 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
+              KEEN follows up on every lead, drafts your messages, and keeps
+              your pipeline moving — 24/7. Give it any name you want. It's
+              yours.
             </p>
-            <p className="text-[#00D4FF] font-semibold mb-10 text-base" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Give it any name you want. Train it on your business. It's yours.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-              {capabilities.map((cap, i) => (
-                <div key={i} className="lp-card rounded-xl p-4 hover:border-[#00D4FF]/30 transition-all duration-200">
-                  <div className="text-2xl mb-2">{cap.icon}</div>
-                  <div className="text-sm font-bold text-white mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {cap.title}
-                  </div>
-                  <div className="text-xs text-white/50" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {cap.desc}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              {capabilities.map((c) => (
+                <div key={c.title} className="flex items-start gap-3">
+                  <span className="text-xl" aria-hidden="true">{c.icon}</span>
+                  <div>
+                    <p className="text-white font-semibold text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {c.title}
+                    </p>
+                    <p className="text-white/55 text-xs leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {c.desc}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
-
             <a
-              href="https://leadprime.chyrris.com"
+              href={appLink("ai-agent", "signup")}
               target="_blank"
               rel="noopener noreferrer"
-              className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-flex items-center gap-2"
+              className="lp-btn-primary px-8 py-4 rounded-xl text-base font-bold inline-block"
             >
-              <span>🤖</span>
               Activate Your AI Agent — Free
             </a>
-          </div>
-
-          {/* Right: Image */}
-          <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden lp-border-cyan animate-float">
-              <img
-                src={AI_IMG}
-                alt="LeadPrime AI Agent"
-                className="w-full object-cover"
-                style={{ height: "500px", objectPosition: "center" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A1628]/40 to-transparent" />
-            </div>
-
-            {/* Floating chat bubbles */}
-            <div className="absolute top-8 -left-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-cyan">
-              <div className="text-xs text-[#00D4FF] font-semibold mb-1">AI Agent → Lead</div>
-              <div className="text-xs text-white/80">"Hi! I saw you're interested. When's a good time to connect?"</div>
-            </div>
-
-            <div className="absolute bottom-16 -right-6 lp-card rounded-xl px-4 py-3 max-w-[220px] lp-border-amber">
-              <div className="text-xs text-[#F59E0B] font-semibold mb-1">Lead → AI Agent</div>
-              <div className="text-xs text-white/80">"Tomorrow at 2pm works for me!"</div>
-            </div>
-
-            <div className="absolute bottom-2 left-8 lp-card rounded-xl px-4 py-3 max-w-[200px]" style={{ border: "1px solid #10B98130" }}>
-              <div className="text-xs text-[#10B981] font-semibold mb-1">✓ Appointment Booked</div>
-              <div className="text-xs text-white/80">Tomorrow 2:00 PM — Added to calendar</div>
-            </div>
           </div>
         </div>
       </div>

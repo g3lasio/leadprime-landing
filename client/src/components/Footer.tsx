@@ -1,139 +1,123 @@
+/**
+ * Footer + final CTA — Brief B: positioning line aligned with the hero
+ * (contractors first, no "real estate professionals" framing); legal
+ * links point at the production app's real public pages; Chyrris appears
+ * only in the legal line. Contrast raised to AA (Brief C7).
+ */
+import { appLink, APP_URL } from "@/lib/appLinks";
+
+const productLinks = [
+  { label: "Features", href: "#features" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Network", href: "#network" },
+  { label: "Who It's For", href: "#industry" },
+  { label: "Pricing", href: "#pricing" },
+];
+
+const legalLinks = [
+  { label: "Privacy Policy", href: `${APP_URL}/privacy-policy` },
+  { label: "Terms of Service", href: `${APP_URL}/terms-of-service` },
+  { label: "Support", href: "mailto:info@chyrris.com" },
+];
+
 export default function Footer() {
   return (
     <>
       {/* Final CTA */}
       <section className="py-24 bg-[#0A1628] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF]/5 via-transparent to-[#F59E0B]/5" />
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0,212,255,0.5) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,212,255,0.5) 1px, transparent 1px)
-            `,
-            backgroundSize: "40px 40px",
-          }}
-        />
-        <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-8">
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-            <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Start Free — No Credit Card Required
-            </span>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF]/5 via-transparent to-[#F59E0B]/5" aria-hidden="true" />
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
           <h2
-            className="text-5xl lg:text-7xl font-black text-white mb-6 leading-tight"
+            className="text-4xl lg:text-6xl font-black text-white mb-6"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Ready to Dominate
+            Ready to run your business
             <br />
-            <span className="lp-text-gradient-cyan">Your Market?</span>
+            <span className="lp-text-gradient-cyan">from one place?</span>
           </h2>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Start free with Pay-As-You-Go. Upgrade to Pro or Network Elite when you're ready to scale.
+          <p className="text-lg text-white/60 max-w-xl mx-auto mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Start free with $15 in welcome credits. No credit card required.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="https://leadprime.chyrris.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="lp-btn-primary px-10 py-5 rounded-xl text-lg font-black inline-flex items-center justify-center gap-3"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Get Started Free
-            </a>
-          </div>
-          <p className="text-white/20 text-sm mt-6">
-            No credit card required. Cancel anytime. Powered by Chyrris Technologies.
-          </p>
+          <a
+            href={appLink("footer-cta", "signup")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="lp-btn-primary px-10 py-4 rounded-xl text-base font-bold inline-block"
+          >
+            Start free — $0 Pay-As-You-Go
+          </a>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#050B18] border-t border-white/5 py-12">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+      <footer className="bg-[#050B18] border-t border-white/10">
+        <div className="container mx-auto px-4 lg:px-8 py-14">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {/* Brand */}
-            <div className="md:col-span-2">
+            <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 flex items-center justify-center">
-                  <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/leadprime-logo_b6e94952.png" alt="LeadPrime" className="w-8 h-8 object-contain" />
-                </div>
-                <span className="font-bold text-xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <img src="/logo.png" alt="LeadPrime logo" className="w-8 h-8" width={32} height={32} loading="lazy" />
+                <span className="text-white font-bold text-lg" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   LeadPrime
                 </span>
               </div>
-              <p className="text-white/40 text-sm max-w-xs leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
-                The AI-powered CRM built for real estate professionals. Connect, automate, and grow your business with LeadPrime Network.
+              <p className="text-sm text-white/60 leading-relaxed max-w-xs" style={{ fontFamily: "'Inter', sans-serif" }}>
+                The AI-powered CRM for contractors, property managers, and real
+                estate investors.
               </p>
-              <p className="text-white/20 text-xs mt-4">Powered by Chyrris Technologies</p>
             </div>
 
             {/* Product */}
-            <div>
-              <h4 className="text-sm font-bold text-white mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <nav aria-label="Product">
+              <p className="text-white font-bold text-sm mb-4 uppercase tracking-wider" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 Product
-              </h4>
+              </p>
               <ul className="space-y-2">
-                {["Features", "LeadPrime Network", "AI Agent", "Pricing", "Integrations"].map((item) => (
-                  <li key={item}>
-                    <a
-                      href="https://leadprime.chyrris.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-white/40 hover:text-[#00D4FF] transition-colors"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      {item}
+                {productLinks.map((l) => (
+                  <li key={l.label}>
+                    <a href={l.href} className="text-sm text-white/60 hover:text-[#00D4FF] transition-colors">
+                      {l.label}
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a
+                    href={appLink("footer", "signin")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-white/60 hover:text-[#00D4FF] transition-colors"
+                  >
+                    Sign In
+                  </a>
+                </li>
               </ul>
-            </div>
+            </nav>
 
-            {/* Industries */}
-            <div>
-              <h4 className="text-sm font-bold text-white mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                Industries
-              </h4>
+            {/* Legal & contact */}
+            <nav aria-label="Legal">
+              <p className="text-white font-bold text-sm mb-4 uppercase tracking-wider" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Legal & Support
+              </p>
               <ul className="space-y-2">
-                {["Contractors", "Property Managers", "Investors", "Realtors", "Lenders", "Wholesalers"].map((item) => (
-                  <li key={item}>
+                {legalLinks.map((l) => (
+                  <li key={l.label}>
                     <a
-                      href="https://leadprime.chyrris.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-white/40 hover:text-[#00D4FF] transition-colors"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      href={l.href}
+                      {...(l.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="text-sm text-white/60 hover:text-[#00D4FF] transition-colors"
                     >
-                      {item}
+                      {l.label}
                     </a>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           </div>
 
-          <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-white/20 text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>
-              © 2026 LeadPrime. All rights reserved. Powered by Chyrris Technologies.
+          <div className="border-t border-white/10 mt-12 pt-6 text-center">
+            <p className="text-xs text-white/50" style={{ fontFamily: "'Inter', sans-serif" }}>
+              © 2026 LeadPrime · Chyrris Technologies / Owl Fenc LLC. All rights reserved.
             </p>
-            <div className="flex gap-6">
-              {["Privacy Policy", "Terms of Service", "Support"].map((item) => (
-                <a
-                  key={item}
-                  href="https://leadprime.chyrris.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-white/20 hover:text-white/50 transition-colors"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  {item}
-                </a>
-              ))}
-            </div>
           </div>
         </div>
       </footer>
