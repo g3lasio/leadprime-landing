@@ -1,25 +1,40 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import EventoPage from "./pages/EventoPage";
-import AdminEventoPage from "./pages/AdminEventoPage";
-import CheckInPage from "./pages/CheckInPage";
+
+// Route-level code splitting (Brief C4): only the marketing Home ships in
+// the main chunk. The Spanish event gallery, the admin dashboard, the QR
+// scanner (jsqr), and the 404 page load on demand.
+const EventoPage = lazy(() => import("./pages/EventoPage"));
+const AdminEventoPage = lazy(() => import("./pages/AdminEventoPage"));
+const CheckInPage = lazy(() => import("./pages/CheckInPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+function RouteFallback() {
+  return (
+    <div className="min-h-screen bg-[#050B18] flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-2 border-[#00D4FF]/30 border-t-[#00D4FF] animate-spin" aria-label="Loading" />
+    </div>
+  );
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/evento"} component={EventoPage} />
-      <Route path={"/admin/evento/checkin"} component={CheckInPage} />
-      <Route path={"/admin/evento"} component={AdminEventoPage} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<RouteFallback />}>
+      <Switch>
+        <Route path={"/"} component={Home} />
+        <Route path={"/evento"} component={EventoPage} />
+        <Route path={"/admin/evento/checkin"} component={CheckInPage} />
+        <Route path={"/admin/evento"} component={AdminEventoPage} />
+        <Route path={"/404"} component={NotFound} />
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

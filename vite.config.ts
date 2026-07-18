@@ -150,10 +150,17 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
-
-export default defineConfig({
-  plugins,
+// Brief C1: Manus dev tooling (runtime overlay with a second React copy,
+// jsx-loc data attributes, debug collector) must NEVER reach the production
+// bundle — it only loads for the local dev server (`vite` / command "serve").
+export default defineConfig(({ command }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    ...(command === "serve"
+      ? [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()]
+      : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -167,6 +174,16 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        // Brief C4: split the stable vendor core from app code so repeat
+        // visits hit long-lived caches.
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-data": ["@tanstack/react-query", "@trpc/client", "@trpc/react-query", "superjson"],
+        },
+      },
+    },
   },
   server: {
     host: true,
@@ -184,4 +201,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));

@@ -13,6 +13,9 @@ const queryClient = new QueryClient();
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
+  // Manus-template leftover: without the OAuth portal env this redirected to
+  // the literal "undefined/app-auth". Only redirect when a portal is configured.
+  if (!import.meta.env.VITE_OAUTH_PORTAL_URL) return;
 
   const isUnauthorized = error.message === UNAUTHED_ERR_MSG;
 

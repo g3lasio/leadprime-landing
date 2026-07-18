@@ -31,8 +31,7 @@ const PAST_EVENTS: PastEvent[] = [
       "General contractors, contratistas locales y property managers del área de Fairfield y Bay Area",
     description:
       "Una noche privada de networking curado: recepción con credenciales, industry briefing por Gelasio Sánchez (Founder, Chyrris) sobre cómo conectar demanda real de property managers con contratistas confiables, y cierre con introducciones dirigidas entre asistentes.",
-    image:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/noche-chyrris-hero_73b82ad9.jpg",
+    image: "/evento-networking.png",
     presenter: "LeadPrime · Owl Fenc",
   },
 ];

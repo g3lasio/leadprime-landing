@@ -32,6 +32,16 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  // Brief C3: the legacy hyphenated domain 301s to the canonical landing
+  // domain so indexed URLs keep their equity. App CTAs still point at
+  // leadprime.chyrris.com (the production app) — that host is not touched.
+  app.use((req, res, next) => {
+    const host = (req.headers.host ?? "").toLowerCase().split(":")[0];
+    if (host === "lead-prime.chyrris.com") {
+      return res.redirect(301, `https://leadprimecrm.chyrris.com${req.originalUrl}`);
+    }
+    next();
+  });
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
