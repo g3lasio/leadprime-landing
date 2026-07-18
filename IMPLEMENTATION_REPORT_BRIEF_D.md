@@ -16,8 +16,7 @@
 | Apple touch icon | `client/public/apple-touch-icon.png` |
 | OG image 1200×630 | `client/public/og-image.png` (122 KB) — usa la marca oficial |
 
-**Nota importante:** las imágenes adjuntas en el chat no llegan a mi entorno como archivo, así que la marca es una **recreación vectorial fiel** de la flecha facetada azul del logo oficial (dos iteraciones visuales, comparadas lado a lado con captura). Geometría del mark (viewBox 0 0 100 100): flecha superior `70,4 → 22,50 → 46,44` + `70,4 → 46,44 → 60,50`, hoja inferior `46,56 → 58,64 → 24,98 → 12,90` + `46,56 → 12,90 → 22,84 → 40,62`, gradientes cian.
-**Si quieres el PNG original exacto:** simplemente colócalo como `client/public/logo.png` (y regenera favicon/og si gustas) — todo el código ya apunta ahí, no hay que tocar nada más.
+**Actualización — logo oficial instalado:** el adjunto original del chat fue recuperado del transcript de la sesión (2000×667, lockup completo). El fondo de tablero venía **horneado** en el archivo (no era transparencia real), así que el mark se extrajo por chroma-key de saturación (los grises del tablero → alfa 0, los azules del mark → opacos, con rampa suave en bordes). Resultado: `logo.png` es ahora el **mark oficial exacto con transparencia real** (512×512), `favicon.svg` lo embebe como data-URI, `favicon.png`/`apple-touch-icon.png` derivan de él, y `og-image.png` fue regenerado (1200×630) con el mark oficial. Verificado con captura del bundle servido en local: navbar y OG muestran la marca real.
 
 ## D2 — Beneficios por vertical (copy aprobado, verbatim)
 
@@ -56,7 +55,7 @@ Animaciones: `client/src/index.css:254-297` (`lp-mock-fade`, `lp-mock-travel`, `
 - **Flag OFF fail-closed:** líneas 57 y 69 — sin la variable, la sección **no renderiza nada** y no se inyecta ningún script. **No hay fallback al widget personal** (documentado en el comentario de cabecera, líneas 2-15).
 - **Mecanismo de embed = producción:** líneas 59-65 — inyecta `${APP_URL}/api/widget/embed.js` con `data-token`, igual que `routes/websiteBuilder.ts` del repo principal.
 - **Expectativas del visitante:** líneas 105-107 — "Demo assistant with public product info only · usage limits apply per visitor."
-- **Imagen de KEN ("usa esta imagen como la de ken"):** `KenAvatar` (líneas 26-51) carga `/ken.png` con fallback elegante al monograma "K" si el archivo no existe (`onError`, línea 48). Igual que con el logo, no puedo guardar la foto adjunta desde el chat: **sube el retrato como `client/public/ken.png`** y aparecerá automáticamente en la sección Try KEN (avatar 88px, línea 82) y en el chat mock de AIAgentSection (`AIAgentSection.tsx:58`). Recomendado: cuadrada, ≥256×256, JPEG/PNG optimizado.
+- **Imagen de KEN ("usa esta imagen como la de ken"):** ✅ instalada. El retrato adjunto fue recuperado del transcript (1254×1254) y guardado como `client/public/ken.png` (512×512, 122 KB). `KenAvatar` (líneas 26-51) lo carga con fallback al monograma "K" (`onError`, línea 48) y aparece en la sección Try KEN (avatar 88px, línea 82) y en el chat mock de AIAgentSection (`AIAgentSection.tsx:58`). Verificado con captura del bundle en local: el retrato renderiza en el avatar circular.
 
 ### Pasos para activar KEN (para Gelasio — el código ya está listo)
 
@@ -64,7 +63,7 @@ Animaciones: `client/src/index.css:254-297` (`lp-mock-fade`, `lp-mock-travel`, `
 2. Cárgalo **solo con conocimiento público** del producto (features, precios publicados, FAQs) — nada interno.
 3. Asócialo a una **wallet separada con tope** (los límites por visitante se aplican server-side en producción).
 4. En Railway (proyecto de la landing): `VITE_KEN_WIDGET_TOKEN = <token del widget dedicado>` y redeploy (es variable de build de Vite).
-5. Sube `client/public/ken.png` con el retrato elegido.
+5. ~~Sube `client/public/ken.png`~~ — ✅ ya instalado (retrato oficial).
 6. Sin el paso 4, la sección permanece invisible — ese es el comportamiento diseñado, no un bug.
 
 ---
@@ -79,7 +78,7 @@ Animaciones: `client/src/index.css:254-297` (`lp-mock-fade`, `lp-mock-travel`, `
 
 ## Pendiente del dueño (fuera de mi alcance)
 
-1. `client/public/ken.png` — retrato oficial de KEN.
-2. (Opcional) `client/public/logo.png` — PNG original si prefieres el archivo exacto sobre la recreación.
-3. Railway: `VITE_KEN_WIDGET_TOKEN` cuando el widget dedicado esté listo.
-4. Confirmar la marca "(Owl Funding)" para restaurarla en `IndustrySection.tsx:56`.
+1. Railway: `VITE_KEN_WIDGET_TOKEN` cuando el widget dedicado esté listo (sin la variable, la sección Try KEN no aparece — por diseño).
+2. Confirmar la marca "(Owl Funding)" para restaurarla en `IndustrySection.tsx:56`.
+
+*(El retrato de KEN y el logo oficial ya quedaron instalados en el repo — recuperados del transcript de la sesión, sin acción requerida.)*
