@@ -1,1011 +1,162 @@
-import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+/**
+ * EventoPage — Galería de eventos LeadPrime Networking (histórico).
+ *
+ * Brief A (contención): esta página dejó de ser un funnel de registro.
+ * El evento del 2 de julio de 2026 ya se realizó; la página ahora es una
+ * galería de eventos pasados — sin formulario, sin CTAs de solicitud de
+ * acceso y sin llamadas al backend. Los futuros eventos se anunciarán
+ * cuando exista una fecha confirmada.
+ */
 
-// Event constants
-const EVENT_NAME = "LeadPrime Networking";
-const EVENT_DATE = "jueves 2 de julio, 2026";
-const EVENT_TIME = "7:00 PM – 8:30 PM";
-const EVENT_VENUE = "Fairfield, California";
-const EVENT_ADDRESS = "1000 Webster Street, Fairfield, CA 94533";
+const GOLD = "#D4AF37";
 
-const HERO_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/noche-chyrris-hero_73b82ad9.jpg";
-const GELASIO_PHOTO = "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/gelasio-photo_3fe4ac74.png";
-
-const CITIES = [
-  "Fairfield", "Vacaville", "Vallejo", "Benicia", "Suisun City",
-  "Napa", "American Canyon", "Martinez", "Concord", "Walnut Creek",
-  "Pittsburg", "Antioch", "Otra",
-];
-
-const CSLB_LICENSES: { group: string; items: string[] }[] = [
-  {
-    group: "Clase A — Ingeniería General",
-    items: [
-      "A — Contratista de Ingeniería General (General Engineering Contractor)",
-    ],
-  },
-  {
-    group: "Clase B — Construcción General",
-    items: [
-      "B — Contratista General de Edificios (General Building Contractor)",
-      "B-2 — Remodelación Residencial (Residential Remodeling Contractor)",
-    ],
-  },
-  {
-    group: "Clase C — Contratistas Especializados",
-    items: [
-      "C-2 — Aislamiento Acústico (Insulation and Acoustical)",
-      "C-4 — Calderas y Vapor (Boiler, Hot-Water Heating and Steam Fitting)",
-      "C-5 — Framing / Estructura de Madera (Framing and Rough Carpentry)",
-      "C-6 — Gabinetes y Carpintería Fina (Cabinet, Millwork and Finish Carpentry)",
-      "C-7 — Sistemas de Bajo Voltaje (Low Voltage Systems)",
-      "C-8 — Concreto (Concrete)",
-      "C-9 — Drywall",
-      "C-10 — Electricidad (Electrical)",
-      "C-11 — Elevadores (Elevator)",
-      "C-12 — Movimiento de Tierra y Pavimento (Earthwork and Paving)",
-      "C-13 — Cercas y Decks (Fencing and Decking)",
-      "C-15 — Pisos y Recubrimientos (Flooring and Floor Covering)",
-      "C-16 — Protección contra Incendios (Fire Protection)",
-      "C-17 — Vidrios y Acristalamientos (Glazing)",
-      "C-20 — HVAC / Climatización (Heating, Ventilating and Air-Conditioning)",
-      "C-21 — Demolición y Traslado de Edificios (Building Moving and Demolition)",
-      "C-22 — Remoción de Asbesto (Asbestos Abatement)",
-      "C-23 — Metal Ornamental (Ornamental Metal)",
-      "C-27 — Paisajismo (Landscaping)",
-      "C-28 — Cerrajería y Seguridad (Lock and Security Equipment)",
-      "C-29 — Mampostería (Masonry)",
-      "C-31 — Control de Tráfico en Obra (Construction Zone Traffic Control)",
-      "C-32 — Pavimento y Mejoras Viales (Parking and Highway Improvement)",
-      "C-33 — Pintura y Decoración (Painting and Decorating)",
-      "C-34 — Tuberías (Pipeline)",
-      "C-35 — Lathing y Aplanado (Lathing and Plastering)",
-      "C-36 — Plomería (Plumbing)",
-      "C-38 — Refrigeración (Refrigeration)",
-      "C-39 — Techos (Roofing)",
-      "C-42 — Sistemas Sanitarios (Sanitation System)",
-      "C-43 — Hojalatería / Lámina (Sheet Metal)",
-      "C-45 — Letreros y Señales (Sign)",
-      "C-46 — Solar / Energía Solar (Solar)",
-      "C-47 — Viviendas Prefabricadas (General Manufactured Housing)",
-      "C-50 — Acero de Refuerzo (Reinforcing Steel)",
-      "C-51 — Acero Estructural (Structural Steel)",
-      "C-53 — Albercas y Piscinas (Swimming Pool)",
-      "C-54 — Azulejo y Cerámica (Ceramic and Mosaic Tile)",
-      "C-55 — Tratamiento de Agua (Water Conditioning)",
-      "C-57 — Pozos de Agua (Well Drilling)",
-      "C-60 — Soldadura (Welding)",
-    ],
-  },
-  {
-    group: "C-61 — Especialidad Limitada (Subclases D)",
-    items: [
-      "D-03 — Toldos y Marquesinas (Awnings)",
-      "D-06 — Azulejo Cerámico y Similar (Ceramic Tile and Similar Tile)",
-      "D-09 — Perforación y Detonación (Drilling, Blasting and Oil Field Work)",
-      "D-16 — Herrajes para Construcción (Builders' and Institutional Hardware)",
-      "D-21 — Maquinaria y Bombas (Machinery and Pumps)",
-      "D-24 — Soldadura y Fabricación de Metal (Metal Products Welding and Fabricating)",
-      "D-28 — Puertas, Portones y Automatización (Doors, Gates and Activating Devices)",
-      "D-30 — Pilotes y Cimentación (Pile Driving and Pressure Foundation Jacking)",
-      "D-31 — Instalación de Postes (Pole Installation and Maintenance)",
-      "D-34 — Equipo Prefabricado (Prefabricated Equipment)",
-      "D-38 — Sandblasting y Chorro a Presión (Sand and Water Blast)",
-      "D-39 — Andamios (Scaffolding)",
-      "D-40 — Equipo para Gasolinera (Service Station Equipment and Maintenance)",
-      "D-41 — Siding y Recubrimiento Exterior (Siding and Decking)",
-      "D-42 — Ignifugación Pasiva (Fireproofing Passive)",
-      "D-49 — Servicio de Árboles (Tree Service)",
-      "D-50 — Tratamiento de Madera (Wood Decay Treatment)",
-      "D-52 — Persianas y Cubiertas de Ventanas (Window Coverings)",
-      "D-59 — Subpisos y Tratamiento (Sub-floor and Treatment)",
-      "D-62 — Balance de Aire y Agua (Air and Water Balancing)",
-      "D-63 — Mampostería en Unidades (Unit Masonry)",
-      "D-65 — Recubrimientos Industriales (Industrial Coating)",
-      "D-66 — Hidrosembrado y Retención de Suelo (Hydroseed and Soil Retention)",
-      "D-67 — Instalación de Productos Sintéticos (Synthetic Products Installation)",
-      "D-71 — Instalación de Viviendas Prefabricadas (Manufactured Housing Installation)",
-    ],
-  },
-  {
-    group: "Sin Licencia CSLB",
-    items: [
-      "Sin licencia CSLB / Subcontratista independiente",
-    ],
-  },
-];
-
-const YEARS_OPTIONS = [
-  "Menos de 1 año", "1-3 años", "4-7 años", "8-15 años", "Más de 15 años",
-];
-
-type FormData = {
-  full_name: string;
-  phone: string;
-  email: string;
-  role: string;
-  city: string;
-  city_other: string;
-  preferred_language: string;
-  // Contractor
-  business_name: string;
-  trade_types: string;
-  website: string;
-  no_website: boolean;
-  has_cslb_license: string;
-  cslb_license_number: string;
-  years_in_business: string;
-  team_size: string;
-  current_estimating_tool: string;
-  // PM
-  units_managed: string;
-  property_types: string[];
-  has_real_estate_license: string;
-  current_pm_software: string;
-  // Realtor
-  brokerage_name: string;
-  dre_license_number: string;
-  also_property_manager: string;
-  service_areas: string[];
-  // Other
-  profession_description: string;
-  // Common final
-  referral_source: string;
-  referral_name: string;
-  consent_contact: boolean;
-  consent_photo: boolean;
-  bringing_guest: boolean;
-  guest_name: string;
-  guest_role: string;
+type PastEvent = {
+  title: string;
+  date: string;
+  time: string;
+  address: string;
+  audience: string;
+  description: string;
+  image: string;
+  presenter: string;
 };
 
-const initialForm: FormData = {
-  full_name: "", phone: "", email: "", role: "", city: "", city_other: "",
-  preferred_language: "",
-  business_name: "", trade_types: "", website: "", no_website: false, has_cslb_license: "",
-  cslb_license_number: "", years_in_business: "", team_size: "", current_estimating_tool: "",
-  units_managed: "", property_types: [], has_real_estate_license: "", current_pm_software: "",
-  brokerage_name: "", dre_license_number: "", also_property_manager: "", service_areas: [],
-  profession_description: "",
-  referral_source: "", referral_name: "",
-  consent_contact: false, consent_photo: false,
-  bringing_guest: false, guest_name: "", guest_role: "",
-};
-
-function RegistrationForm({ onSuccess }: { onSuccess: (code: string) => void }) {
-  const [form, setForm] = useState<FormData>(initialForm);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<1 | 2>(1);
-
-  const register = trpc.evento.registerFull.useMutation({
-    onSuccess: (data) => onSuccess(data.code),
-    onError: (e) => {
-      if (e.message.includes("ya está registrado")) {
-        toast.error(e.message);
-      } else {
-        toast.error("Hubo un error al procesar tu registro. Intenta de nuevo.");
-      }
-    },
-  });
-
-  const set = (field: keyof FormData, value: unknown) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-  };
-
-  const toggleMulti = (field: "property_types" | "service_areas", val: string) => {
-    const arr = form[field] as string[];
-    set(field, arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
-  };
-
-  const validateStep1 = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!form.full_name || form.full_name.length < 3) e.full_name = "Ingresa tu nombre completo";
-    if (!form.phone) e.phone = "Ingresa tu teléfono";
-    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Ingresa un email válido";
-    if (!form.role) e.role = "Selecciona tu rol";
-    if (!form.city) e.city = "Selecciona tu ciudad";
-    if (form.city === "Otra" && !form.city_other) e.city_other = "Escribe tu ciudad";
-    if (!form.consent_contact) e.consent_contact = "Necesitamos tu autorización para contactarte";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const validate = (): boolean => {
-    const e: Record<string, string> = {};
-    if (!form.full_name || form.full_name.length < 3) e.full_name = "Ingresa tu nombre completo";
-    if (!form.phone) e.phone = "Ingresa tu teléfono";
-    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Ingresa un email válido";
-    if (!form.role) e.role = "Selecciona tu rol";
-    if (!form.city) e.city = "Selecciona tu ciudad";
-    if (form.city === "Otra" && !form.city_other) e.city_other = "Escribe tu ciudad";
-    if (!form.consent_contact) e.consent_contact = "Necesitamos tu autorización para contactarte";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleStep1 = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateStep1()) {
-      toast.error("Por favor completa los campos requeridos");
-      return;
-    }
-    setStep(2);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) {
-      toast.error("Por favor completa los campos requeridos");
-      return;
-    }
-
-    const payload = {
-      full_name: form.full_name.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      role: form.role as "Contratista" | "Property Manager" | "Realtor" | "Otro profesional de la industria",
-      city: form.city === "Otra" ? form.city_other : form.city,
-      preferred_language: form.preferred_language,
-      business_name: form.business_name || null,
-      trade_types: form.trade_types || null,
-      website: form.no_website ? "No website" : (form.website.trim() || null),
-      has_cslb_license: form.has_cslb_license || null,
-      cslb_license_number: form.cslb_license_number || null,
-      years_in_business: form.years_in_business || null,
-      team_size: form.team_size || null,
-      current_estimating_tool: form.current_estimating_tool || null,
-      units_managed: form.units_managed || null,
-      property_types: form.property_types.length > 0 ? form.property_types.join(", ") : null,
-      has_real_estate_license: form.has_real_estate_license || null,
-      current_pm_software: form.current_pm_software || null,
-      brokerage_name: form.brokerage_name || null,
-      dre_license_number: form.dre_license_number || null,
-      also_property_manager: form.also_property_manager || null,
-      service_areas: form.service_areas.length > 0 ? form.service_areas.join(", ") : null,
-      profession_description: form.profession_description || null,
-      referral_source: form.referral_source,
-      referral_name: form.referral_name || null,
-      dietary_restriction: "Ninguna",
-      consent_contact: form.consent_contact,
-      consent_photo: form.consent_photo,
-      bringing_guest: form.bringing_guest,
-      guest_name: form.bringing_guest ? form.guest_name.trim() || null : null,
-      guest_role: form.bringing_guest ? form.guest_role || null : null,
-    };
-
-    register.mutate(payload);
-  };
-
-  const handleSkipStep2 = () => {
-    // Submit with only step 1 data
-    const payload = {
-      full_name: form.full_name.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      role: form.role as "Contratista" | "Property Manager" | "Realtor" | "Otro profesional de la industria",
-      city: form.city === "Otra" ? form.city_other : form.city,
-      preferred_language: form.preferred_language || "Español",
-      business_name: null, trade_types: null, website: null, has_cslb_license: null, cslb_license_number: null,
-      years_in_business: null, team_size: null, current_estimating_tool: null, units_managed: null,
-      property_types: null, has_real_estate_license: null, current_pm_software: null,
-      brokerage_name: null, dre_license_number: null, also_property_manager: null,
-      service_areas: null, profession_description: null,
-      referral_source: "No especificado", referral_name: null,
-      dietary_restriction: "Ninguna",
-      consent_contact: form.consent_contact, consent_photo: false,
-      bringing_guest: form.bringing_guest,
-      guest_name: form.bringing_guest ? form.guest_name.trim() || null : null,
-      guest_role: form.bringing_guest ? form.guest_role || null : null,
-    };
-    register.mutate(payload);
-  };
-
-  const inputClass = (field: string) =>
-    `w-full px-4 py-3 rounded-xl bg-white/5 border ${errors[field] ? "border-red-500/60" : "border-white/10"} text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-colors`;
-
-  const labelClass = "block text-sm text-white/70 mb-1.5 font-medium";
-  const errorClass = "text-red-400 text-xs mt-1";
-  const checkboxClass = "w-4 h-4 rounded border-white/20 bg-white/5 accent-[#D4AF37] cursor-pointer";
-
-  return (
-    <div className="space-y-6">
-      {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-black ${step === 1 ? 'bg-[#D4AF37] text-[#080C14]' : 'bg-[#D4AF37]/20 text-[#D4AF37]'}`}>1</div>
-        <div className="flex-1 h-px bg-white/10" />
-        <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-black ${step === 2 ? 'bg-[#D4AF37] text-[#080C14]' : 'bg-white/10 text-white/30'}`}>2</div>
-      </div>
-
-      {step === 1 && (
-      <form onSubmit={handleStep1} className="space-y-5">
-        <p className="text-white/50 text-xs text-center">Paso 1 de 2 — Información básica</p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>Nombre completo *</label>
-            <input className={inputClass("full_name")} value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder="Tu nombre completo" />
-            {errors.full_name && <p className={errorClass}>{errors.full_name}</p>}
-          </div>
-          <div>
-            <label className={labelClass}>Teléfono (USA) *</label>
-            <input className={inputClass("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="(707) 555-0100" type="tel" />
-            {errors.phone && <p className={errorClass}>{errors.phone}</p>}
-          </div>
-        </div>
-
-        <div>
-          <label className={labelClass}>Email *</label>
-          <input className={inputClass("email")} value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="tu@email.com" type="email" />
-          {errors.email && <p className={errorClass}>{errors.email}</p>}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>¿Cuál es tu rol? *</label>
-            <select className={inputClass("role") + " bg-[#0D1220]"} value={form.role} onChange={(e) => set("role", e.target.value)}>
-              <option value="">Selecciona tu rol</option>
-              <option>Contratista</option>
-              <option>Property Manager</option>
-              <option>Realtor</option>
-              <option>Otro profesional de la industria</option>
-            </select>
-            {errors.role && <p className={errorClass}>{errors.role}</p>}
-          </div>
-          <div>
-            <label className={labelClass}>Ciudad *</label>
-            <select className={inputClass("city") + " bg-[#0D1220]"} value={form.city} onChange={(e) => set("city", e.target.value)}>
-              <option value="">Selecciona tu ciudad</option>
-              {CITIES.map((c) => <option key={c}>{c}</option>)}
-            </select>
-            {errors.city && <p className={errorClass}>{errors.city}</p>}
-          </div>
-        </div>
-
-        {form.city === "Otra" && (
-          <div>
-            <label className={labelClass}>¿Cuál ciudad? *</label>
-            <input className={inputClass("city_other")} value={form.city_other} onChange={(e) => set("city_other", e.target.value)} placeholder="Escribe tu ciudad" />
-            {errors.city_other && <p className={errorClass}>{errors.city_other}</p>}
-          </div>
-        )}
-
-        <div className="p-4 rounded-xl bg-white/3 border border-white/10">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.consent_contact} onChange={(e) => set("consent_contact", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
-            <span className="text-white/70 text-sm leading-relaxed">
-              Autorizo que LeadPrime me contacte por teléfono, SMS y email para confirmar mi asistencia y enviarme información exclusiva del evento. *
-            </span>
-          </label>
-          {errors.consent_contact && <p className={errorClass}>{errors.consent_contact}</p>}
-        </div>
-
-        <button
-          type="submit"
-          className="w-full py-4 rounded-2xl font-black text-lg text-[#080C14] transition-all"
-          style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}
-        >
-          Solicitar Acceso Privado →
-        </button>
-        <p className="text-center text-white/30 text-xs">Solicitud sujeta a aprobación · Sin tarjeta de crédito · Cupo limitado a 150 personas</p>
-      </form>
-      )}
-
-      {step === 2 && (
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <p className="text-white/50 text-xs text-center">Paso 2 de 2 — Completa tu perfil (opcional)</p>
-        <div className="p-4 rounded-xl bg-[#D4AF37]/5 border border-[#D4AF37]/20">
-          <p className="text-[#D4AF37] text-sm font-bold mb-1">Hola {form.full_name.split(' ')[0]}! 👋</p>
-          <p className="text-white/60 text-sm">Ya tenemos tus datos principales. Completar este perfil nos ayuda a curar mejor las conexiones de la noche. Es opcional — puedes saltarte este paso.</p>
-        </div>
-
-        {form.role === "Contratista" && (
-          <div className="space-y-4 p-4 rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/5">
-            <p className="text-[#D4AF37] text-sm font-bold uppercase tracking-wider">Sobre tu negocio</p>
-            <div>
-              <label className={labelClass}>Nombre del negocio</label>
-              <input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: García Roofing & Construction" />
-            </div>
-            <div>
-              <label className={labelClass}>Licencia CSLB — tipo de contratista</label>
-              <select
-                className={inputClass("trade_types") + " bg-[#0D1220]"}
-                value={form.trade_types}
-                onChange={(e) => set("trade_types", e.target.value)}
-              >
-                <option value="">Selecciona tu licencia</option>
-                {CSLB_LICENSES.map((group) => (
-                  <optgroup key={group.group} label={group.group}>
-                    {group.items.map((item) => (
-                      <option key={item} value={item}>{item}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Años en el negocio</label>
-              <select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}>
-                <option value="">Selecciona</option>
-                {YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>¿Tienes website del negocio?</label>
-              <div className="flex flex-col gap-2 mt-1">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="website_status"
-                    checked={!form.no_website && form.website === "Sí"}
-                    onChange={() => { set("no_website", false); set("website", "Sí"); }}
-                    className="w-4 h-4 accent-[#D4AF37] cursor-pointer"
-                  />
-                  <span className="text-white/60 text-sm">Sí, tengo website</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="website_status"
-                    checked={form.no_website}
-                    onChange={() => { set("no_website", true); set("website", ""); }}
-                    className="w-4 h-4 accent-[#D4AF37] cursor-pointer"
-                  />
-                  <span className="text-white/60 text-sm">No tengo website</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {form.role === "Property Manager" && (
-          <div className="space-y-4 p-4 rounded-xl border border-[#00D4FF]/20 bg-[#00D4FF]/5">
-            <p className="text-[#00D4FF] text-sm font-bold uppercase tracking-wider">Sobre tu empresa</p>
-            <div><label className={labelClass}>Nombre de la empresa</label><input className={inputClass("business_name")} value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Ej: Solano Property Group" /></div>
-            <div><label className={labelClass}>Unidades que manejas</label><select className={inputClass("units_managed") + " bg-[#0D1220]"} value={form.units_managed} onChange={(e) => set("units_managed", e.target.value)}><option value="">Selecciona</option>{["1-10","11-25","26-50","51-100","Más de 100"].map((u) => <option key={u}>{u}</option>)}</select></div>
-            <div><label className={labelClass}>Software actual</label><select className={inputClass("current_pm_software") + " bg-[#0D1220]"} value={form.current_pm_software} onChange={(e) => set("current_pm_software", e.target.value)}><option value="">Selecciona</option>{["AppFolio","Buildium","Propertyware","Rent Manager","Excel/Google Sheets","Ninguno","Otro"].map((s) => <option key={s}>{s}</option>)}</select></div>
-          </div>
-        )}
-
-        {form.role === "Realtor" && (
-          <div className="space-y-4 p-4 rounded-xl border border-[#A78BFA]/20 bg-[#A78BFA]/5">
-            <p className="text-[#A78BFA] text-sm font-bold uppercase tracking-wider">Sobre tu brokerage</p>
-            <div><label className={labelClass}>Nombre del brokerage</label><input className={inputClass("brokerage_name")} value={form.brokerage_name} onChange={(e) => set("brokerage_name", e.target.value)} placeholder="Ej: Keller Williams Fairfield" /></div>
-            <div><label className={labelClass}>Años en el negocio</label><select className={inputClass("years_in_business") + " bg-[#0D1220]"} value={form.years_in_business} onChange={(e) => set("years_in_business", e.target.value)}><option value="">Selecciona</option>{YEARS_OPTIONS.map((y) => <option key={y}>{y}</option>)}</select></div>
-          </div>
-        )}
-
-        <div>
-          <label className={labelClass}>¿Cómo te enteraste?</label>
-          <select className={inputClass("referral_source") + " bg-[#0D1220]"} value={form.referral_source} onChange={(e) => set("referral_source", e.target.value)}>
-            <option value="">Selecciona</option>
-            {["Invitación directa de Gelasio","Invitación por Yuselis","Invitación por Gloria Casillas","Invitación por Janet C.","Un amigo/colega me invitó","Home Depot","Redes sociales","Otro"].map((r) => <option key={r}>{r}</option>)}
-          </select>
-        </div>
-
-        <div className="p-4 rounded-xl bg-white/3 border border-white/10 space-y-3">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.bringing_guest} onChange={(e) => set("bringing_guest", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
-            <span className="text-white/70 text-sm leading-relaxed">Quiero incluir un invitado en mi solicitud. El invitado también queda sujeto a aprobación por capacidad y perfil profesional.</span>
-          </label>
-          {form.bringing_guest && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div><label className={labelClass}>Nombre del invitado</label><input className={inputClass("guest_name")} value={form.guest_name} onChange={(e) => set("guest_name", e.target.value)} placeholder="Nombre completo" /></div>
-              <div><label className={labelClass}>Perfil del invitado</label><select className={inputClass("guest_role") + " bg-[#0D1220]"} value={form.guest_role} onChange={(e) => set("guest_role", e.target.value)}><option value="">Selecciona</option>{["Contratista","Property Manager","Realtor","Inversionista","Dueño de negocio","Acompañante"].map((r) => <option key={r}>{r}</option>)}</select></div>
-            </div>
-          )}
-        </div>
-
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input type="checkbox" checked={form.consent_photo} onChange={(e) => set("consent_photo", e.target.checked)} className={checkboxClass + " mt-0.5 flex-shrink-0"} />
-          <span className="text-white/70 text-sm leading-relaxed">Autorizo el uso de fotos del evento para redes sociales de Chyrris. (Opcional)</span>
-        </label>
-
-        <div className="space-y-2">
-          <div className="flex gap-3">
-            <button type="button" onClick={handleSkipStep2} disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-bold text-white/60 border border-white/10 hover:border-white/20 transition-colors text-sm">
-              {register.isPending ? "Enviando..." : "Saltar este paso"}
-            </button>
-            <button type="submit" disabled={register.isPending} className="flex-1 py-3 rounded-2xl font-black text-[#080C14] transition-all disabled:opacity-60" style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" }}>
-              {register.isPending ? "Enviando..." : "Completar perfil →"}
-            </button>
-          </div>
-          <button type="button" onClick={() => setStep(1)} disabled={register.isPending} className="w-full py-2.5 rounded-2xl text-sm text-white/35 hover:text-white/55 transition-colors">
-            ← Volver al paso anterior
-          </button>
-        </div>
-      </form>
-      )}
-    </div>
-  );
-}
-
-
-function SuccessScreen({ code, onClose }: { code: string; onClose: () => void }) {
-  return (
-    <div className="text-center py-8">
-      <div className="text-6xl mb-4">🎉</div>
-      <h3 className="text-2xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-        ¡Solicitud recibida!
-      </h3>
-      <p className="text-white/60 mb-6">Revisa tu email — te enviamos todos los detalles.</p>
-
-      <div className="inline-block px-8 py-4 rounded-2xl mb-6" style={{ background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.3)" }}>
-        <p className="text-white/40 text-xs uppercase tracking-widest mb-1">Tu código de asistente</p>
-        <p className="text-[#D4AF37] text-4xl font-black tracking-widest" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          {code}
-        </p>
-      </div>
-
-      <p className="text-white/50 text-sm mb-6">
-        Guarda este código — lo necesitarás para el check-in el día del evento.
-      </p>
-
-      <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-left mb-6">
-        <p className="text-white/80 text-sm font-medium mb-2">Detalles del evento</p>
-        <p className="text-white/60 text-sm">{EVENT_NAME}</p>
-        <p className="text-white/60 text-sm">{EVENT_DATE} · {EVENT_TIME}</p>
-        <p className="text-white/60 text-sm">{EVENT_VENUE} · {EVENT_ADDRESS}</p>
-      </div>
-
-      <button onClick={onClose} className="text-white/40 text-sm hover:text-white/60 transition-colors">
-        Cerrar
-      </button>
-    </div>
-  );
-}
+const PAST_EVENTS: PastEvent[] = [
+  {
+    title: "LeadPrime Networking · Bay Area",
+    date: "jueves 2 de julio, 2026",
+    time: "7:00 PM – 8:30 PM",
+    address: "1000 Webster Street, Fairfield, CA 94533",
+    audience:
+      "General contractors, contratistas locales y property managers del área de Fairfield y Bay Area",
+    description:
+      "Una noche privada de networking curado: recepción con credenciales, industry briefing por Gelasio Sánchez (Founder, Chyrris) sobre cómo conectar demanda real de property managers con contratistas confiables, y cierre con introducciones dirigidas entre asistentes.",
+    image:
+      "https://d2xsxph8kpxj0f.cloudfront.net/310519663306487441/bdcwZfK93hqCYNkzHv426f/noche-chyrris-hero_73b82ad9.jpg",
+    presenter: "LeadPrime · Owl Fenc",
+  },
+];
 
 export default function EventoPage() {
-  const [showModal, setShowModal] = useState(false);
-  const [successCode, setSuccessCode] = useState<string | null>(null);
-  const [showSticky, setShowSticky] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setShowSticky(window.scrollY > 600);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const openModal = () => { setSuccessCode(null); setShowModal(true); };
-  const closeModal = () => setShowModal(false);
-  const handleSuccess = (code: string) => setSuccessCode(code);
-
-  const goldBtn = "inline-block px-8 py-4 rounded-2xl font-black text-lg text-[#080C14] cursor-pointer transition-all hover:scale-105 active:scale-95";
-  const goldBtnStyle = { background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%)" };
-
   return (
-    <div className="min-h-screen bg-[#080C14] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
-
-      {/* Sticky CTA */}
-      <div
-        className={`fixed bottom-0 left-0 right-0 z-40 transition-all duration-300 ${showSticky ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}`}
-        style={{ background: "rgba(8,12,20,0.95)", backdropFilter: "blur(12px)", borderTop: "1px solid rgba(212,175,55,0.2)" }}
-      >
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-white font-bold text-sm">LeadPrime Networking</p>
-            <p className="text-white/40 text-xs">2 de Julio · Fairfield, CA</p>
-          </div>
-          <button onClick={openModal} className={goldBtn + " text-sm px-6 py-3"} style={goldBtnStyle}>
-            Solicitar mi Invitación
-          </button>
-        </div>
-      </div>
-
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4" style={{ background: "rgba(8,12,20,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-[#D4AF37] text-sm" style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)" }}>C</div>
-            <span className="text-white font-bold text-sm">LeadPrime</span>
-          </div>
-          <button onClick={openModal} className="px-4 py-2 rounded-xl text-sm font-bold text-[#D4AF37] border border-[#D4AF37]/30 hover:bg-[#D4AF37]/10 transition-colors">
-            Solicitar acceso
-          </button>
+    <div className="min-h-screen bg-[#050B18] text-white">
+      {/* Nav mínima */}
+      <nav className="border-b border-white/10">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <a href="/" className="font-bold tracking-tight text-white">
+            LeadPrime{" "}
+            <span className="text-[10px] align-middle px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300">
+              NETWORK
+            </span>
+          </a>
+          <a
+            href="/"
+            className="text-sm text-white/60 hover:text-white transition-colors"
+          >
+            ← Volver al inicio
+          </a>
         </div>
       </nav>
 
-      {/* SECTION 1: Hero */}
-      <section
-        className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-20"
-        style={{ minHeight: "100vh" }}
-      >
-        <div className="absolute inset-0 z-0">
-          <img src={HERO_BG} alt="" className="w-full h-full object-cover opacity-25" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,12,20,0.7) 0%, rgba(8,12,20,0.5) 50%, rgba(8,12,20,0.95) 100%)" }} />
-        </div>
+      {/* Encabezado */}
+      <header className="max-w-5xl mx-auto px-6 pt-14 pb-8 text-center">
+        <p
+          className="text-xs font-bold uppercase tracking-widest mb-3"
+          style={{ color: GOLD }}
+        >
+          ◆ LeadPrime Networking
+        </p>
+        <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
+          Eventos
+        </h1>
+        <p className="text-white/50 mt-3 max-w-xl mx-auto text-sm md:text-base">
+          Encuentros privados que conectan a contratistas y property managers
+          del Bay Area. Las próximas fechas se anunciarán aquí.
+        </p>
+      </header>
 
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", color: "#D4AF37" }}>
-            Acceso privado · Alto perfil · Solo por invitación
-          </div>
-
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white mb-4 leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            LeadPrime<br />
-            <span style={{ WebkitTextStroke: "2px #D4AF37", color: "transparent" }}>Networking</span>
-          </h1>
-
-          <p className="text-xl sm:text-2xl text-white/70 mb-8 font-medium">
-            General contractors, contratistas locales y property managers<br />del área de Fairfield y Bay Area
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-10">
-            {[
-              { icon: "📅", text: EVENT_DATE },
-              { icon: "📍", text: "1000 Webster Street, Fairfield" },
-              { icon: "🎟", text: "Cupo limitado y exclusivo" },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-2 px-4 py-2 rounded-full text-sm text-white/80" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                <span>{item.icon}</span>
-                <span>{item.text}</span>
+      {/* Galería de eventos pasados */}
+      <main className="max-w-5xl mx-auto px-6 pb-20">
+        <h2 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-6">
+          Eventos realizados
+        </h2>
+        <div className="grid gap-8">
+          {PAST_EVENTS.map((ev) => (
+            <article
+              key={ev.title + ev.date}
+              className="rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03]"
+            >
+              <div className="relative">
+                <img
+                  src={ev.image}
+                  alt={ev.title}
+                  className="w-full object-cover"
+                  style={{ maxHeight: "360px" }}
+                  loading="lazy"
+                />
+                <span
+                  className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border"
+                  style={{
+                    color: GOLD,
+                    borderColor: `${GOLD}66`,
+                    backgroundColor: "rgba(5,11,24,0.85)",
+                  }}
+                >
+                  Evento realizado
+                </span>
               </div>
-            ))}
-          </div>
-
-          <button onClick={openModal} className={goldBtn + " text-xl px-10 py-5 shadow-2xl"} style={goldBtnStyle}>
-            Solicitar Acceso Privado →
-          </button>
-
-          <p className="text-white/40 text-sm mt-4">
-            Acceso privado exclusivo por invitación · Solicitud sujeta a aprobación por cupo y perfil profesional
-          </p>
-        </div>
-
-        {/* Logos bottom right */}
-        <div className="absolute bottom-8 right-6 z-10 flex items-center gap-3 opacity-50">
-          <span className="text-white/40 text-xs">Presentado por</span>
-          <span className="text-white/60 text-xs font-bold">LeadPrime</span>
-          <span className="text-white/30">·</span>
-          <span className="text-white/60 text-xs font-bold">Owl Fenc</span>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
-          <div className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center pt-2">
-            <div className="w-1 h-2 bg-white/40 rounded-full" />
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 2: El problema */}
-      <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contractors */}
-            <div className="p-6 rounded-2xl" style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.15)" }}>
-              <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-4">Para contratistas</p>
-              <h3 className="text-xl font-bold text-white mb-4 leading-snug" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                "Si eres contratista en el Bay Area, esto te suena familiar:"
-              </h3>
-              <ul className="space-y-3">
-                {[
-                  "Pierdes leads porque no alcanzas a llamar de regreso a tiempo.",
-                  "Haces estimados en papel o en Excel, te tardas 2 horas, el cliente ya contrató a otro.",
-                  "Mandas contratos por WhatsApp y nunca sabes si el cliente los firmó realmente.",
-                  "Quieres chamba recurrente con property managers pero no sabes cómo llegar a ellos.",
-                  "Tus competidores tienen apps en inglés que tú no entiendes y que cobran $200+ al mes.",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-white/70 text-sm leading-relaxed">
-                    <span className="text-[#D4AF37] mt-0.5 flex-shrink-0">→</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Property Managers */}
-            <div className="p-6 rounded-2xl" style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)" }}>
-              <p className="text-[#00D4FF] text-xs font-bold uppercase tracking-widest mb-4">Para property managers</p>
-              <h3 className="text-xl font-bold text-white mb-4 leading-snug" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                "Si administras propiedades, conoces este dolor:"
-              </h3>
-              <ul className="space-y-3">
-                {[
-                  "Llamas a 5 plomeros un sábado en la noche y nadie contesta.",
-                  "El contratista que sí viene te cobra el doble porque es fin de semana.",
-                  "Coordinas todo por WhatsApp y pierdes 2 horas al día en logística.",
-                  "Nunca sabes cuáles contratistas son de confianza hasta que te fallan.",
-                  "Usas AppFolio o Buildium que te cobra $300/mes y sigues sin resolver el problema humano.",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-white/70 text-sm leading-relaxed">
-                    <span className="text-[#00D4FF] mt-0.5 flex-shrink-0">→</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Por eso LeadPrime Networking junta a quienes hacen el trabajo con quienes necesitan contratistas confiables.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: Timeline */}
-      <section className="py-20 px-4" style={{ background: "rgba(255,255,255,0.02)" }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">El programa</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Una agenda enfocada en conexiones reales
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { time: "7:00 PM", title: "Recepción privada", desc: "Check-in, credenciales y primera ronda de networking curado entre general contractors, contratistas especializados y property managers del área.", icon: "🤝" },
-              { time: "7:25 PM", title: "Industry briefing", desc: "Gelasio Sánchez presenta la visión de LeadPrime: cómo conectar demanda real de property managers con contratistas confiables usando tecnología y relaciones de alto nivel.", icon: "🎤" },
-              { time: "7:50 PM", title: "Demo ejecutiva", desc: "LeadPrime y Owl Fenc en acción: seguimiento de leads, propuestas, estimados y contratos digitales diseñados para negocios de servicio que quieren operar como empresas serias.", icon: "⚡" },
-              { time: "8:15 PM", title: "Conexiones estratégicas", desc: "Cierre con introducciones dirigidas y próximos pasos para que cada asistente salga con oportunidades reales, no solo tarjetas de presentación.", icon: "📱" },
-            ].map((item, i) => (
-              <div key={i} className="relative p-5 rounded-2xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div className="text-3xl mb-3">{item.icon}</div>
-                <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-1">{item.time}</p>
-                <h4 className="text-white font-bold mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{item.title}</h4>
-                <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 p-4 rounded-xl text-center" style={{ background: "rgba(212,175,55,0.05)", border: "1px solid rgba(212,175,55,0.15)" }}>
-            <p className="text-white/60 text-sm">
-              <span className="text-[#D4AF37] font-bold">8:30 PM — Cierre formal:</span>{" "}
-              La intención es respetar el tiempo de todos y terminar fuerte. Si surgen conversaciones privadas después, que sean entre personas con interés real.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4: Benefits */}
-      <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">Beneficios exclusivos</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Tu asistencia incluye:
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                badge: "Para contratistas",
-                color: "#D4AF37",
-                title: "60 días de Owl Fenc Mero Patrón",
-                value: "Valor real: $99.98",
-                features: [
-                  "500 créditos AI por mes (1,000 totales)",
-                  "Estimados profesionales sin marca de agua",
-                  "Contratos con firma dual (Dual Signature Protocol)",
-                  "Property Verifier para evitar fraudes",
-                  "AI Invoices y Permit Advisor",
-                  "Perfil verificado en LeadPrime Network",
-                  "Acceso a property managers del condado",
-                ],
-                footer: "Sin tarjeta de crédito · Sin compromisos · Cancelas cuando quieras",
-              },
-              {
-                badge: "Para property managers",
-                color: "#00D4FF",
-                title: "60 días de LeadPrime Pro + $50 en créditos",
-                value: "Valor real: $80.00",
-                features: [
-                  "$20 en créditos renovables + $50 de bonus",
-                  "Command Center para llamadas y mensajes",
-                  "AI Autopilot con inquilinos y contratistas",
-                  "LeadSign para contratos digitales",
-                  "Property Manager Module completo",
-                  "Directorio de contratistas verificados",
-                  "Invitación a eventos futuros del ecosistema",
-                ],
-                footer: "Sin tarjeta de crédito · Sin compromisos · Cancelas cuando quieras",
-              },
-              {
-                badge: "Para realtors",
-                color: "#A78BFA",
-                title: "60 días de LeadPrime Pro + 50% off Network Elite",
-                value: "Valor real: $452.50 en 5 meses",
-                features: [
-                  "60 días de LeadPrime Pro incluidos ($30 de valor)",
-                  "3 meses de Network Elite al 50% después",
-                  "Government Projects access",
-                  "Business Financing & 0% Credit Lines",
-                  "Acceso al directorio completo",
-                  "Exclusive Networking Events",
-                ],
-                footer: "Sin tarjeta de crédito el día del evento · Upgrade voluntario solo si decides continuar",
-              },
-            ].map((card) => (
-              <div
-                key={card.badge}
-                className="p-6 rounded-2xl flex flex-col"
-                style={{ background: `${card.color}08`, border: `1px solid ${card.color}25` }}
-              >
-                <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 self-start" style={{ background: `${card.color}20`, color: card.color }}>
-                  {card.badge}
+              <div className="p-6 md:p-8">
+                <h3 className="text-xl md:text-2xl font-bold">{ev.title}</h3>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm text-white/60">
+                  <span>📅 {ev.date}</span>
+                  <span>🕖 {ev.time}</span>
+                  <span>📍 {ev.address}</span>
                 </div>
-                <h3 className="text-xl font-black text-white mb-1 leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  {card.title}
-                </h3>
-                <p className="text-sm font-bold mb-4" style={{ color: card.color }}>{card.value}</p>
-                <ul className="space-y-2 flex-1 mb-4">
-                  {card.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-white/70">
-                      <span style={{ color: card.color }} className="mt-0.5 flex-shrink-0">✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-white/30 text-xs border-t border-white/10 pt-3">{card.footer}</p>
+                <p className="text-white/70 text-sm md:text-base leading-relaxed mt-4">
+                  {ev.description}
+                </p>
+                <p className="text-white/45 text-sm mt-3">{ev.audience}</p>
+                <p className="text-xs text-white/35 mt-5">
+                  Presentado por{" "}
+                  <span style={{ color: GOLD }}>{ev.presenter}</span>
+                </p>
               </div>
-            ))}
-          </div>
-
-          <div className="mt-8 p-5 rounded-2xl text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-white/60 text-sm italic leading-relaxed">
-              "Los beneficios se activan el día del evento al crear tu perfil en LeadPrime Network. Todos los beneficios son reales y se entregan a asistentes confirmados, sin letra pequeña ni trucos. Si no quieres usarlos, no los uses — pero están ahí para ti."
-            </p>
-          </div>
+            </article>
+          ))}
         </div>
-      </section>
 
-      {/* SECTION 5: Host */}
-      <section className="py-20 px-4" style={{ background: "rgba(255,255,255,0.02)" }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div className="relative">
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(212,175,55,0.2)" }}>
-                <img src={GELASIO_PHOTO} alt="Gelasio Sánchez" className="w-full object-cover" style={{ maxHeight: "500px", objectPosition: "top" }} />
-              </div>
-              <div className="absolute -bottom-4 -right-4 px-4 py-2 rounded-xl" style={{ background: "rgba(8,12,20,0.95)", border: "1px solid rgba(212,175,55,0.3)" }}>
-                <p className="text-[#D4AF37] text-xs font-bold">Gelasio Sánchez</p>
-                <p className="text-white/40 text-xs">Founder, Chyrris</p>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-4">Sobre el host</p>
-              <div className="space-y-4 text-white/70 leading-relaxed">
-                <p>"Me llamo Gelasio Sánchez. Soy el founder de Chyrris, la compañía madre detrás de LeadPrime y Owl Fenc.</p>
-                <p>Llevo años viendo cómo la industria de la construcción y el property management en el Bay Area opera con herramientas que no fueron hechas para nosotros — caras, complicadas, en inglés, y diseñadas para corporaciones que manejan 500 propiedades, no para el plomero independiente o el PM que maneja 30 unidades en Fairfield.</p>
-                <p>Por eso construí Chyrris y LeadPrime. Y por eso los invito a este networking privado. Creo que el contratista latino y el property manager local del condado merecen herramientas tan buenas como las que tienen los grandes, pero diseñadas para como realmente trabajamos y en el idioma que hablamos.</p>
-                <p>Si vienes esa noche, te prometo dos cosas: vas a salir con contactos reales que van a mover tu negocio, y vas a tener herramientas que te van a cambiar cómo trabajas. Lo demás es bonus."</p>
-              </div>
-              <p className="text-white/50 text-sm mt-4 italic">Nos vemos el 2 de julio. — Gelasio</p>
-
-              <button onClick={openModal} className={goldBtn + " mt-6"} style={goldBtnStyle}>
-                Solicitar Acceso Privado →
-              </button>
-            </div>
-          </div>
+        {/* Próximos eventos — sin registro hasta que exista fecha confirmada */}
+        <div className="mt-12 rounded-2xl border border-dashed border-white/15 p-8 text-center">
+          <p className="text-white/60 font-semibold">¿Próximo evento?</p>
+          <p className="text-white/40 text-sm mt-2 max-w-md mx-auto">
+            Estamos preparando la siguiente fecha. Los miembros de LeadPrime
+            Network serán los primeros en enterarse dentro de la plataforma.
+          </p>
+          <a
+            href="https://leadprime.chyrris.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-5 px-6 py-3 rounded-xl bg-cyan-400 text-[#050B18] font-bold text-sm hover:bg-cyan-300 transition-colors"
+          >
+            Conocer LeadPrime
+          </a>
         </div>
-      </section>
+      </main>
 
-      {/* SECTION 6: FAQ */}
-      <section className="py-20 px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">Preguntas frecuentes</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Resolvemos tus dudas
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              { q: "¿Tengo que pagar algo?", a: "No. El evento es completamente gratuito para los asistentes confirmados — no hay costo de entrada ni cuota de registro. Es acceso privado por invitación: cada solicitud se revisa por cupo y perfil profesional para mantener una sala de alto nivel." },
-              { q: "¿Es un evento para venderme algo?", a: "No es una presentación masiva de ventas. Es un evento ejecutivo para construir relaciones, mostrar tecnología útil y abrir oportunidades entre quienes administran propiedades y quienes ejecutan trabajos de calidad." },
-              { q: "¿Tengo que hablar inglés?", a: "El evento es en español. Si vienes con alguien que solo habla inglés, también es bienvenido — los productos funcionan en ambos idiomas." },
-              { q: "¿Puedo llevar a un invitado?", a: "Sí. En el formulario puedes incluir el nombre y perfil de tu invitado. Por capacidad y calidad del networking, el invitado queda sujeto a confirmación junto con tu solicitud." },
-              { q: "¿Dónde exactamente va a ser?", a: "El evento será en 1000 Webster Street, Fairfield, CA 94533. Es una ubicación céntrica para reunir contratistas, general contractors y property managers del área." },
-              { q: "¿Qué pasa si me registro y no puedo ir?", a: "Avísanos con al menos 48 horas de anticipación para darle tu lugar a alguien de la lista de espera. Respetamos el tiempo de todos." },
-              { q: "¿Puedo ir si no soy de Solano/Contra Costa/Napa?", a: "Sí, siempre que el cupo lo permita. Prioridad de registro es para residentes de esos 3 condados, pero si vienes de Sacramento, Marin o Alameda y hay lugar, eres bienvenido." },
-              { q: "¿Habrá WiFi disponible en el evento?", a: "Sí, y te vamos a ayudar a configurar tu cuenta de LeadPrime y/o Owl Fenc directamente en tu teléfono durante el tiempo de networking." },
-            ].map((item, i) => (
-              <FAQItem key={i} q={item.q} a={item.a} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 7: Registration Form (inline) */}
-      <section id="registro" className="py-20 px-4" style={{ background: "rgba(212,175,55,0.03)", borderTop: "1px solid rgba(212,175,55,0.1)" }}>
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest mb-3">Registro</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              Solicita Acceso Privado
-            </h2>
-            <p className="text-white/50">Acceso privado exclusivo · Solo por invitación · Cupo limitado y exclusivo</p>
-          </div>
-
-          {successCode ? (
-            <SuccessScreen code={successCode} onClose={() => setSuccessCode(null)} />
-          ) : (
-            <RegistrationForm onSuccess={handleSuccess} />
-          )}
-        </div>
-      </section>
-
-      {/* SECTION 8: Footer */}
-      <footer className="py-12 px-4 border-t border-white/10">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="text-4xl font-black text-white mb-2" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>LeadPrime</div>
-          <p className="text-white/40 text-sm mb-6">Chyrris es la compañía madre de LeadPrime y Owl Fenc</p>
-
-          <div className="flex justify-center gap-6 mb-6">
-            <a href="https://leadprime.chyrris.com" className="text-white/50 hover:text-white/80 text-sm transition-colors">LeadPrime</a>
-            <a href="https://owlfenc.com" className="text-white/50 hover:text-white/80 text-sm transition-colors">Owl Fenc</a>
-          </div>
-
-          <div className="flex justify-center gap-4 mb-6 text-xs text-white/30">
-            <a href="https://chyrris.com/privacy" className="hover:text-white/50 transition-colors">Privacy Policy</a>
-            <span>·</span>
-            <a href="https://chyrris.com/terms" className="hover:text-white/50 transition-colors">Terms of Service</a>
-            <span>·</span>
-            <a href="mailto:info@chyrris.com" className="hover:text-white/50 transition-colors">info@chyrris.com</a>
-          </div>
-
-          <p className="text-white/20 text-xs">© 2026 Chyrris · Owl Fenc LLC · Todos los derechos reservados</p>
-          <p className="text-white/15 text-xs mt-1">Hecho con orgullo en California 🌴</p>
+      {/* Footer mínimo */}
+      <footer className="border-t border-white/10">
+        <div className="max-w-5xl mx-auto px-6 py-8 text-center text-xs text-white/40 space-y-2">
+          <p>
+            © 2026 LeadPrime · Powered by Chyrris Technologies ·{" "}
+            <a
+              href="mailto:info@chyrris.com"
+              className="underline hover:text-white/70"
+            >
+              info@chyrris.com
+            </a>
+          </p>
         </div>
       </footer>
-
-      {/* Registration Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}>
-          <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl p-6"
-            style={{ background: "#0D1220", border: "1px solid rgba(212,175,55,0.2)" }}
-          >
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-white/40 hover:text-white text-2xl leading-none z-10"
-            >
-              ✕
-            </button>
-
-            {successCode ? (
-              <SuccessScreen code={successCode} onClose={closeModal} />
-            ) : (
-              <>
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl font-black text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Solicita acceso a LeadPrime Networking
-                  </h2>
-                  <p className="text-white/40 text-sm mt-1">LeadPrime Networking · 2 de Julio, 2026</p>
-                </div>
-                <RegistrationForm onSuccess={handleSuccess} />
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div
-      className="rounded-xl overflow-hidden cursor-pointer"
-      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
-      onClick={() => setOpen(!open)}
-    >
-      <div className="flex items-center justify-between px-5 py-4 gap-4">
-        <p className="text-white font-medium text-sm">{q}</p>
-        <span className="text-white/40 text-lg flex-shrink-0 transition-transform" style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
-      </div>
-      {open && (
-        <div className="px-5 pb-4">
-          <p className="text-white/60 text-sm leading-relaxed">{a}</p>
-        </div>
-      )}
     </div>
   );
 }

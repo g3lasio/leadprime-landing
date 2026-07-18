@@ -58,15 +58,6 @@ export default function Navbar() {
                 {item.label}
               </button>
             ))}
-            {/* LeadPrime Networking event link */}
-            <a
-              href="/evento"
-              className="text-sm font-semibold text-[#D4AF37] hover:text-[#F5D060] transition-colors duration-200 flex items-center gap-1.5"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              <span>◆</span>
-              <span>LeadPrime Networking</span>
-            </a>
           </div>
 
           {/* CTA */}
@@ -124,13 +115,6 @@ export default function Navbar() {
                   {item.label}
                 </button>
               ))}
-              <a
-                href="/evento"
-                className="text-left text-sm font-semibold text-[#D4AF37] hover:text-[#F5D060] transition-colors py-1 flex items-center gap-1.5"
-              >
-                <span>◆</span>
-                <span>LeadPrime Networking</span>
-              </a>
               <a
                 href="https://leadprime.chyrris.com"
                 target="_blank"

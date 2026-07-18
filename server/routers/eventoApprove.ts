@@ -142,87 +142,26 @@ async function sendApprovedEmailDirect(email: string, name: string, code: string
 }
 
 export function buildApproveToken(id: number, action: string): string {
-  const pin = process.env.EVENTO_ADMIN_PIN ?? "6289";
+  const pin = process.env.EVENTO_ADMIN_PIN ?? "";
   return encodeToken(id, action, pin);
 }
 
 export function registerEventoApproveRoute(app: Express) {
   // GET /api/evento/action?token=xxx
-  // Actions: approve, reject, waitlist
-  app.get("/api/evento/action", async (req, res) => {
-    const token = req.query.token as string;
-    if (!token) {
-      return res.status(400).send(renderPage("Error", "Token inválido o faltante.", false));
-    }
-
-    const decoded = decodeToken(token);
-    if (!decoded) {
-      return res.status(400).send(renderPage("Error", "Token inválido.", false));
-    }
-
-    const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-    if (decoded.pin !== adminPin) {
-      return res.status(403).send(renderPage("Acceso denegado", "PIN incorrecto.", false));
-    }
-
-    const validActions = ["approve", "reject", "waitlist"];
-    if (!validActions.includes(decoded.action)) {
-      return res.status(400).send(renderPage("Error", "Acción inválida.", false));
-    }
-
-    try {
-      const pool = getPool();
-      const reg = await pool.query(
-        "SELECT full_name, email, attendee_code, status FROM event_registrations WHERE id = $1",
-        [decoded.id]
-      );
-
-      if (reg.rows.length === 0) {
-        return res.status(404).send(renderPage("No encontrado", "Registro no encontrado.", false));
-      }
-
-      const { full_name, email, attendee_code, status } = reg.rows[0];
-
-      // Don't re-process if already in a final state
-      if (status === "approved" && decoded.action === "approve") {
-        return res.send(renderPage(
-          "Ya aprobado",
-          `${full_name} ya fue aprobado anteriormente. El email de invitación fue enviado en su momento.`,
-          true
-        ));
-      }
-
-      const newStatus = decoded.action === "approve" ? "approved" : decoded.action === "reject" ? "rejected" : "waitlist";
-      await pool.query("UPDATE event_registrations SET status = $1 WHERE id = $2", [newStatus, decoded.id]);
-
-      if (decoded.action === "approve") {
-        await sendApprovedEmailDirect(email, full_name, attendee_code);
-        return res.send(renderPage(
-          "✅ Aprobado",
-          `<strong>${full_name}</strong> fue aprobado exitosamente.<br><br>
-          Se envió el email de invitación con QR a <strong>${email}</strong>.<br><br>
-          Código: <strong style="color:#D4AF37;font-size:20px;letter-spacing:2px;">LPN-${attendee_code}</strong>`,
-          true
-        ));
-      } else if (decoded.action === "reject") {
-        return res.send(renderPage(
-          "❌ Rechazado",
-          `<strong>${full_name}</strong> fue rechazado. Se envió notificación a ${email}.`,
-          true
-        ));
-      } else {
-        return res.send(renderPage(
-          "⏳ Waitlist",
-          `<strong>${full_name}</strong> fue movido a la lista de espera. Se envió notificación a ${email}.`,
-          true
-        ));
-      }
-    } catch (e) {
-      console.error("[Approve] Error processing action:", e);
-      return res.status(500).send(renderPage("Error del servidor", "Ocurrió un error. Intenta desde el dashboard.", false));
-    }
+  // Brief A: DESHABILITADO. El registro del evento está cerrado y el token
+  // base64 no está firmado — toda gestión de asistentes se hace únicamente
+  // desde /admin/evento (PIN vía EVENTO_ADMIN_PIN en Railway).
+  app.get("/api/evento/action", async (_req, res) => {
+    return res
+      .status(410)
+      .send(renderPage(
+        "Enlace deshabilitado",
+        "El registro de este evento está cerrado. La gestión de asistentes está disponible solo desde el panel de administración.",
+        false,
+      ));
   });
 }
+
 
 function renderPage(title: string, message: string, success: boolean): string {
   const color = success ? "#D4AF37" : "#ef4444";

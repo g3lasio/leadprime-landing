@@ -13,7 +13,7 @@
 - [x] Add La Noche Chyrris link to main Navbar (desktop + mobile, gold color)
 - [x] Register /evento and /admin/evento routes in App.tsx
 - [x] Upload hero background image and Gelasio photo to CDN
-- [x] EVENTO_ADMIN_PIN env var set (6289)
+- [x] EVENTO_ADMIN_PIN env var set (value lives ONLY in Railway — rotate it; the old committed value is burned)
 - [x] RESEND_API_KEY env var set
 - [x] NEON_DATABASE_URL env var set
 

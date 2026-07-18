@@ -3,8 +3,60 @@ import { publicProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import pkg from "pg";
 const { Pool } = pkg;
+import { timingSafeEqual } from "node:crypto";
 import { buildApproveToken } from "./eventoApprove.js";
 import QRCode from "qrcode";
+
+// ── Admin-PIN gate (Brief A hardening) ──────────────────────────────────────
+// The PIN lives ONLY in the EVENTO_ADMIN_PIN Railway variable — never in the
+// repo. Fails CLOSED when the variable is unset, compares in constant time,
+// and rate-limits failed attempts (the landing runs as a single node, so an
+// in-memory counter is sufficient).
+const PIN_MAX_ATTEMPTS = 10;
+const PIN_WINDOW_MS = 15 * 60 * 1000;
+let pinAttempts = { count: 0, windowStart: 0 };
+
+function requireAdminPin(pin: string): void {
+  const adminPin = process.env.EVENTO_ADMIN_PIN;
+  if (!adminPin) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "Acceso admin no configurado (EVENTO_ADMIN_PIN no definido)",
+    });
+  }
+  const now = Date.now();
+  if (now - pinAttempts.windowStart > PIN_WINDOW_MS) {
+    pinAttempts = { count: 0, windowStart: now };
+  }
+  if (pinAttempts.count >= PIN_MAX_ATTEMPTS) {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: "Demasiados intentos fallidos. Intenta de nuevo en 15 minutos.",
+    });
+  }
+  const a = Buffer.from(String(pin));
+  const b = Buffer.from(adminPin);
+  const ok = a.length === b.length && timingSafeEqual(a, b);
+  if (!ok) {
+    pinAttempts.count++;
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+  }
+  pinAttempts.count = 0;
+}
+
+// El evento del 2 de julio de 2026 ya se realizó. El registro público queda
+// cerrado; los procedures de escritura se conservan por estabilidad del API
+// pero siempre rechazan. Reabrir = flip a false cuando exista nueva fecha.
+const REGISTRATION_CLOSED = true;
+
+function assertRegistrationOpen(): void {
+  if (REGISTRATION_CLOSED) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "El registro para este evento está cerrado.",
+    });
+  }
+}
 
 // Neon PostgreSQL connection — uses NEON_DATABASE_URL env var
 let _pool: InstanceType<typeof Pool> | null = null;
@@ -406,6 +458,7 @@ const step2Input = z.object({
 export const eventoRouter = router({
   // Step 1: Register with minimal info — creates pending registration
   register: publicProcedure.input(step1Input).mutation(async ({ input }) => {
+    assertRegistrationOpen();
     const pool = getPool();
     await ensureEventRegistrationColumns();
     const existing = await pool.query("SELECT id FROM event_registrations WHERE email = $1", [input.email.toLowerCase()]);
@@ -464,6 +517,7 @@ export const eventoRouter = router({
 
   // Step 2: Complete profile (optional)
   completeProfile: publicProcedure.input(step2Input).mutation(async ({ input }) => {
+    assertRegistrationOpen();
     const pool = getPool();
     await ensureEventRegistrationColumns();
     const existing = await pool.query("SELECT id FROM event_registrations WHERE attendee_code = $1", [input.code]);
@@ -497,6 +551,7 @@ export const eventoRouter = router({
 
   // Full registration in one step (used by RegistrationModal)
   registerFull: publicProcedure.input(registerFullInput).mutation(async ({ input }) => {
+    assertRegistrationOpen();
     const pool = getPool();
     await ensureEventRegistrationColumns();
     const existing = await pool.query("SELECT id FROM event_registrations WHERE email = $1", [input.email.toLowerCase()]);
@@ -576,8 +631,7 @@ export const eventoRouter = router({
   adminList: publicProcedure
     .input(z.object({ pin: z.string() }))
     .query(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       await ensureEventRegistrationColumns();
       const result = await pool.query(
@@ -611,8 +665,7 @@ export const eventoRouter = router({
       sendEmail: z.boolean().optional().default(true),
     }))
     .mutation(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       const reg = await pool.query("SELECT full_name, email, attendee_code, status AS prev_status FROM event_registrations WHERE id = $1", [input.id]);
       if (reg.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
@@ -635,8 +688,7 @@ export const eventoRouter = router({
       sendEmail: z.boolean().optional().default(true),
     }))
     .mutation(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       // Only fetch registrations that are NOT already in the target status (to avoid duplicate emails)
       const regs = await pool.query("SELECT full_name, email, attendee_code, status AS prev_status FROM event_registrations WHERE id = ANY($1)", [input.ids]);
@@ -658,8 +710,7 @@ export const eventoRouter = router({
       code: z.string(), // attendee_code (with or without LPN- prefix)
     }))
     .mutation(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       // Normalize code: strip LPN- prefix if present
       const rawCode = input.code.trim().toUpperCase().replace(/^LPN-?/, "").replace(/^LNC-?/, "");
@@ -715,8 +766,7 @@ export const eventoRouter = router({
   adminDelete: publicProcedure
     .input(z.object({ pin: z.string(), id: z.number() }))
     .mutation(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       const result = await pool.query("DELETE FROM event_registrations WHERE id = $1 RETURNING id", [input.id]);
       if (result.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
@@ -732,8 +782,7 @@ export const eventoRouter = router({
       email: z.string().email(),
     }))
     .mutation(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       const conflict = await pool.query(
         "SELECT id FROM event_registrations WHERE LOWER(email) = LOWER($1) AND id != $2",
@@ -754,8 +803,7 @@ export const eventoRouter = router({
   adminResendInvitation: publicProcedure
     .input(z.object({ pin: z.string(), id: z.number() }))
     .mutation(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       const reg = await pool.query(
         "SELECT full_name, email, attendee_code FROM event_registrations WHERE id = $1",
@@ -771,8 +819,7 @@ export const eventoRouter = router({
   attendanceStats: publicProcedure
     .input(z.object({ pin: z.string() }))
     .query(async ({ input }) => {
-      const adminPin = process.env.EVENTO_ADMIN_PIN ?? "6289";
-      if (input.pin !== adminPin) throw new TRPCError({ code: "UNAUTHORIZED", message: "PIN incorrecto" });
+      requireAdminPin(input.pin);
       const pool = getPool();
       const stats = await pool.query(`
         SELECT

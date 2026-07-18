@@ -10,6 +10,13 @@ import QRCode from "qrcode";
 
 export function registerQRRoute(app: Express) {
   app.get("/api/qr/:code", async (req, res) => {
+    // Brief A: el registro del evento está cerrado — el generador público de
+    // QR queda deshabilitado. Reactivar con EVENTO_QR_ENABLED=true solo junto
+    // a un nuevo evento (idealmente firmando el código en lugar de aceptar
+    // cualquier valor arbitrario).
+    if (process.env.EVENTO_QR_ENABLED !== "true") {
+      return res.status(410).send("QR endpoint disabled — event registration is closed");
+    }
     const raw = (req.params.code ?? "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 20);
     if (!raw) {
       return res.status(400).send("Invalid code");
