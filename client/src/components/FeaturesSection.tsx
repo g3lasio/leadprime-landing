@@ -5,6 +5,8 @@
  * (Brief C: zero external asset dependencies).
  */
 
+import EstimateMockup from "@/components/mockups/EstimateMockup";
+
 type Feature = {
   title: string;
   desc: string;
@@ -147,6 +149,27 @@ export default function FeaturesSection() {
             From first lead to final payment — every tool below is live in
             LeadPrime today. What's on the way is clearly marked.
           </p>
+        </div>
+
+        {/* Estimates & Invoices showcase (Brief D3 mockup #2, next to its feature) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-16">
+          <div>
+            <h3
+              className="text-2xl lg:text-3xl font-black text-white mb-3"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              Estimates that <span className="lp-text-gradient-cyan">close jobs.</span>
+            </h3>
+            <p className="text-white/60 leading-relaxed mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Build professional estimates and send invoices from your phone.
+              Get paid faster — one tap turns an approved estimate into an
+              invoice, and your client signs on any device.
+            </p>
+            <p className="text-xs text-white/45" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Shown with demo data.
+            </p>
+          </div>
+          <EstimateMockup />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

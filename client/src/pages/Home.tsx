@@ -5,6 +5,8 @@ import FeaturesSection from "@/components/FeaturesSection";
 import NetworkSection from "@/components/NetworkSection";
 import IndustrySection from "@/components/IndustrySection";
 import AIAgentSection from "@/components/AIAgentSection";
+import ComparisonSection from "@/components/ComparisonSection";
+import KenChat from "@/components/KenChat";
 import PricingSection from "@/components/PricingSection";
 import Footer from "@/components/Footer";
 
@@ -19,6 +21,8 @@ export default function Home() {
         <NetworkSection />
         <IndustrySection />
         <AIAgentSection />
+        <ComparisonSection />
+        <KenChat />
         <PricingSection />
       </main>
       <Footer />

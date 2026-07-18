@@ -3,6 +3,7 @@
  * image was replaced with a CSS chat mock (Brief C: zero external assets).
  */
 import { appLink } from "@/lib/appLinks";
+import { KenAvatar } from "@/components/KenChat";
 
 const capabilities = [
   {
@@ -54,9 +55,7 @@ export default function AIAgentSection() {
           <div className="order-2 lg:order-1" aria-hidden="true">
             <div className="lp-card rounded-2xl p-6 max-w-md mx-auto">
               <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
-                <div className="w-10 h-10 rounded-full bg-[#00D4FF]/20 border border-[#00D4FF]/50 flex items-center justify-center text-[#00D4FF] font-black">
-                  K
-                </div>
+                <KenAvatar size={40} />
                 <div>
                   <p className="text-white font-bold text-sm">KEEN</p>
                   <p className="text-[#10B981] text-xs">● Working your pipeline</p>
@@ -64,7 +63,11 @@ export default function AIAgentSection() {
               </div>
               <div className="space-y-3">
                 {chatDemo.map((m, i) => (
-                  <div key={i} className={`flex ${m.from === "agent" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={i}
+                    className={`flex lp-mock-fade ${m.from === "agent" ? "justify-end" : "justify-start"}`}
+                    style={{ animationDelay: `${i * 0.5}s` }}
+                  >
                     <div
                       className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                         m.from === "agent"
@@ -76,6 +79,14 @@ export default function AIAgentSection() {
                     </div>
                   </div>
                 ))}
+                {/* typing indicator — subtle loop */}
+                <div className="flex justify-end lp-mock-fade" style={{ animationDelay: "1.8s" }}>
+                  <div className="rounded-2xl px-4 py-3 bg-[#00D4FF]/15 border border-[#00D4FF]/30 flex items-center gap-1.5">
+                    <span className="lp-typing-dot" />
+                    <span className="lp-typing-dot" style={{ animationDelay: "0.18s" }} />
+                    <span className="lp-typing-dot" style={{ animationDelay: "0.36s" }} />
+                  </div>
+                </div>
                 <p className="text-center text-xs text-white/45 pt-2">
                   Appointment booked automatically · You just show up
                 </p>

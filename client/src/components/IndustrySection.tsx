@@ -7,6 +7,57 @@
  *   REALTORS  network/services access only — one line, NO pipeline claims.
  */
 import { appLink } from "@/lib/appLinks";
+import PipelineMockup from "@/components/mockups/PipelineMockup";
+
+// Brief D2 — per-vertical benefits (approved copy, verbatim). Every bullet is
+// backed by production today; "(Owl Funding)" was omitted from the investors
+// list pending confirmation that the brand exists in the product (the
+// financing-request flow itself is live). Documented in the D report.
+const verticalDetails = [
+  {
+    id: "for-contractors",
+    title: "For Contractors",
+    subtitle: "From the first estimate to the final payment — without the paperwork.",
+    color: "#00D4FF",
+    benefits: [
+      "Send professional estimates from your phone in minutes.",
+      "Turn an approved estimate into an invoice with one tap.",
+      "Get contracts signed on-site — no printer, no office.",
+      "KEEN follows up on every lead so none goes cold.",
+      "Track your license, insurance, and W-9 so you never miss a renewal.",
+      "Find government projects that match your trade (GovPrime).",
+      "Accept card and ACH payments — get paid on the spot.",
+    ],
+    mockup: true,
+  },
+  {
+    id: "for-property-managers",
+    title: "For Property Managers",
+    subtitle: "Your whole portfolio, one pipeline, payments built in.",
+    color: "#F59E0B",
+    benefits: [
+      "Collect rent by card or ACH — automatically reconciled.",
+      "Keep every tenant conversation in one place.",
+      "Track units, leases, and renewals without spreadsheets.",
+      "Owner-ready reporting when you need it.",
+      "Connect with license-verified contractors in your network.",
+    ],
+    mockup: false,
+  },
+  {
+    id: "for-investors",
+    title: "For Real Estate Investors",
+    subtitle: "Work your deals and your network on autopilot.",
+    color: "#10B981",
+    benefits: [
+      "Organize your buyer and seller network in one CRM.",
+      "Run outreach and follow-up without lifting a finger.",
+      "Track every deal through a pipeline built for how you work.",
+      "Access financing referrals through the network.",
+    ],
+    mockup: false,
+  },
+];
 
 const primary = [
   {
@@ -86,6 +137,42 @@ export default function IndustrySection() {
               >
                 Start free →
               </a>
+            </div>
+          ))}
+        </div>
+
+        {/* Expanded per-vertical benefits (Brief D2) — the trade-language detail */}
+        <div className="space-y-16 mb-20">
+          {verticalDetails.map((v, idx) => (
+            <div
+              key={v.id}
+              id={v.id}
+              className={`grid grid-cols-1 ${v.mockup ? "lg:grid-cols-2" : "lg:grid-cols-1 max-w-3xl mx-auto"} gap-10 items-center`}
+            >
+              <div className={idx % 2 === 1 && v.mockup ? "lg:order-2" : ""}>
+                <h3
+                  className="text-2xl lg:text-3xl font-black text-white mb-2"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                >
+                  {v.title}
+                </h3>
+                <p className="text-white/60 mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {v.subtitle}
+                </p>
+                <ul className="space-y-3">
+                  {v.benefits.map((b) => (
+                    <li key={b} className="flex items-start gap-3 text-sm text-white/75" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <span className="mt-0.5 font-bold" style={{ color: v.color }} aria-hidden="true">✓</span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {v.mockup && (
+                <div className="overflow-x-auto">
+                  <PipelineMockup />
+                </div>
+              )}
             </div>
           ))}
         </div>
