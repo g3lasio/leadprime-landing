@@ -18,7 +18,7 @@ const productLinks = [
 const legalLinks = [
   { label: "Privacy Policy", href: `${APP_URL}/privacy-policy` },
   { label: "Terms of Service", href: `${APP_URL}/terms-of-service` },
-  { label: "Support", href: "mailto:info@chyrris.com" },
+  { label: "Support", href: "/support" },
 ];
 
 export default function Footer() {

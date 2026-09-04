@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 const EventoPage = lazy(() => import("./pages/EventoPage"));
 const AdminEventoPage = lazy(() => import("./pages/AdminEventoPage"));
 const CheckInPage = lazy(() => import("./pages/CheckInPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function RouteFallback() {
@@ -27,6 +28,8 @@ function Router() {
     <Suspense fallback={<RouteFallback />}>
       <Switch>
         <Route path={"/"} component={Home} />
+        <Route path={"/support"} component={SupportPage} />
+        <Route path={"/soporte"} component={SupportPage} />
         <Route path={"/evento"} component={EventoPage} />
         <Route path={"/admin/evento/checkin"} component={CheckInPage} />
         <Route path={"/admin/evento"} component={AdminEventoPage} />
