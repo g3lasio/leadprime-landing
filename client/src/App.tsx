@@ -5,10 +5,12 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import ProgramasPage from "./pages/ProgramasPage";
 
-// Route-level code splitting (Brief C4): only the marketing Home ships in
-// the main chunk. The Spanish event gallery, the admin dashboard, the QR
-// scanner (jsqr), and the 404 page load on demand.
+// Route-level code splitting (Brief C4): only the marketing pages (Home and
+// the Programs page, which reuses Home's sections) ship in the main chunk.
+// The Spanish event gallery, the admin dashboard, the QR scanner (jsqr), and
+// the 404 page load on demand.
 const EventoPage = lazy(() => import("./pages/EventoPage"));
 const AdminEventoPage = lazy(() => import("./pages/AdminEventoPage"));
 const CheckInPage = lazy(() => import("./pages/CheckInPage"));
@@ -27,7 +29,11 @@ function Router() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Switch>
+        {/* Bilingual marketing pages: each reads its language from the path */}
         <Route path={"/"} component={Home} />
+        <Route path={"/es"} component={Home} />
+        <Route path={"/programas"} component={ProgramasPage} />
+        <Route path={"/programs"} component={ProgramasPage} />
         <Route path={"/support"} component={SupportPage} />
         <Route path={"/soporte"} component={SupportPage} />
         <Route path={"/evento"} component={EventoPage} />

@@ -15,12 +15,65 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { appLink } from "@/lib/appLinks";
+import { useLang } from "@/lib/i18n";
 import KeenAvatar from "@/components/KeenAvatar";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const GREETING =
-  "Hi! I'm KEEN, LeadPrime's AI agent. Ask me anything about the product, pricing, or whether it fits your business — English o español. 👷";
+const COPY = {
+  en: {
+    greeting:
+      "Hi! I'm KEEN, LeadPrime's AI agent. Ask me anything about the product, pricing, the Growth and Legacy programs, or whether it fits your business — English o español. 👷",
+    busy: "KEEN is getting a lot of questions right now — try again in a minute.",
+    offlineNotice: "KEEN is offline right now — but you can start free below.",
+    hiccup: "Connection hiccup — please try again.",
+    launcher: "Chat with KEEN, LeadPrime AI agent",
+    dialog: "KEEN chat — LeadPrime AI agent",
+    chip: "AI Agent",
+    offline: "Offline",
+    online: "● Online",
+    moveLeft: "Move chat to the left corner",
+    moveRight: "Move chat to the right corner",
+    moveLeftTitle: "Move to left corner",
+    moveRightTitle: "Move to right corner",
+    close: "Close KEEN chat",
+    offlineBody:
+      "KEEN is taking a break right now. The product never does — start free and see it work your pipeline.",
+    offlineCta: "Start with $0 — no card",
+    limitCta: "Create a free account to keep chatting",
+    placeholder: "Ask about pricing, features, your trade…",
+    inputAria: "Message KEEN",
+    sendAria: "Send message to KEEN",
+    disclaimer:
+      "AI agent · public product info only — no account data. Usage limits apply per visitor.",
+  },
+  es: {
+    greeting:
+      "¡Hola! Soy KEEN, el agente de IA de LeadPrime. Pregúntame lo que quieras del producto, los precios, los programas Growth y Legacy o si LeadPrime le queda a tu negocio — en español o en inglés. 👷",
+    busy: "KEEN está recibiendo muchas preguntas en este momento — intenta de nuevo en un minuto.",
+    offlineNotice: "KEEN no está disponible en este momento — pero puedes empezar gratis abajo.",
+    hiccup: "Hubo un problema de conexión — intenta de nuevo.",
+    launcher: "Habla con KEEN, el agente de IA de LeadPrime",
+    dialog: "Chat de KEEN — agente de IA de LeadPrime",
+    chip: "Agente de IA",
+    offline: "Fuera de línea",
+    online: "● En línea",
+    moveLeft: "Mover el chat a la esquina izquierda",
+    moveRight: "Mover el chat a la esquina derecha",
+    moveLeftTitle: "Mover a la esquina izquierda",
+    moveRightTitle: "Mover a la esquina derecha",
+    close: "Cerrar el chat de KEEN",
+    offlineBody:
+      "KEEN está tomando un descanso. El producto nunca descansa — empieza gratis y míralo trabajar tu pipeline.",
+    offlineCta: "Empieza con $0 — sin tarjeta",
+    limitCta: "Crea una cuenta gratis para seguir platicando",
+    placeholder: "Pregunta por precios, funciones, tu oficio…",
+    inputAria: "Mensaje para KEEN",
+    sendAria: "Enviar mensaje a KEEN",
+    disclaimer:
+      "Agente de IA · solo información pública del producto — sin datos de cuentas. Hay límites de uso por visitante.",
+  },
+} as const;
 
 function safeSession(key: string, value?: string): string | null {
   try {
@@ -45,6 +98,7 @@ function makeSessionId(): string {
 }
 
 export default function KeenWidget() {
+  const t = COPY[useLang()];
   const [open, setOpen] = useState(false);
   const [side, setSide] = useState<"right" | "left">(
     () => (safeSession("keen-side") === "left" ? "left" : "right"),
@@ -100,13 +154,13 @@ export default function KeenWidget() {
         body: JSON.stringify({ sessionId: sessionIdRef.current, messages: history }),
       });
       if (r.status === 429) {
-        setNotice("KEEN is getting a lot of questions right now — try again in a minute.");
+        setNotice(t.busy);
         setMessages(history.slice(0, -1));
         setInput(text);
         return;
       }
       if (!r.ok) {
-        setNotice("KEEN is offline right now — but you can start free below.");
+        setNotice(t.offlineNotice);
         setMessages(history.slice(0, -1));
         return;
       }
@@ -114,13 +168,13 @@ export default function KeenWidget() {
       setMessages([...history, { role: "assistant", content: d.reply }]);
       if (d.limitReached) setDone(true);
     } catch {
-      setNotice("Connection hiccup — please try again.");
+      setNotice(t.hiccup);
       setMessages(history.slice(0, -1));
       setInput(text);
     } finally {
       setSending(false);
     }
-  }, [input, sending, done, messages]);
+  }, [input, sending, done, messages, t]);
 
   const sideClass = side === "right" ? "right-4 sm:right-6" : "left-4 sm:left-6";
 
@@ -130,7 +184,7 @@ export default function KeenWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          aria-label="Chat with KEEN, LeadPrime AI agent"
+          aria-label={t.launcher}
           className={`fixed bottom-4 sm:bottom-6 ${sideClass} z-50 rounded-full shadow-lg shadow-[#00D4FF]/20 transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#00D4FF]`}
         >
           <KeenAvatar size={56} online />
@@ -143,7 +197,7 @@ export default function KeenWidget() {
           className={`fixed bottom-4 sm:bottom-6 ${sideClass} z-50 w-[calc(100vw-2rem)] max-w-sm flex flex-col rounded-2xl border border-[#00D4FF]/25 bg-[#071224]/98 shadow-2xl shadow-black/50 backdrop-blur`}
           style={{ maxHeight: "min(560px, calc(100vh - 3rem))" }}
           role="dialog"
-          aria-label="KEEN chat — LeadPrime AI agent"
+          aria-label={t.dialog}
         >
           {/* Header */}
           <div className="flex items-center gap-2.5 border-b border-white/10 px-4 py-3">
@@ -152,17 +206,17 @@ export default function KeenWidget() {
               <p className="text-white font-bold text-sm leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 KEEN
                 <span className="ml-2 align-middle text-[10px] px-1.5 py-0.5 rounded bg-[#00D4FF]/15 border border-[#00D4FF]/30 text-[#00D4FF] font-semibold uppercase tracking-wide">
-                  AI Agent
+                  {t.chip}
                 </span>
               </p>
               <p className="text-[11px] leading-tight" style={{ color: enabled ? "#10B981" : "rgba(255,255,255,0.5)" }}>
-                {enabled === false ? "Offline" : "● Online"}
+                {enabled === false ? t.offline : t.online}
               </p>
             </div>
             <button
               onClick={toggleSide}
-              aria-label={side === "right" ? "Move chat to the left corner" : "Move chat to the right corner"}
-              title={side === "right" ? "Move to left corner" : "Move to right corner"}
+              aria-label={side === "right" ? t.moveLeft : t.moveRight}
+              title={side === "right" ? t.moveLeftTitle : t.moveRightTitle}
               className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -175,7 +229,7 @@ export default function KeenWidget() {
             </button>
             <button
               onClick={() => setOpen(false)}
-              aria-label="Close KEEN chat"
+              aria-label={t.close}
               className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -188,22 +242,19 @@ export default function KeenWidget() {
           <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 180 }}>
             {enabled === false ? (
               <div className="text-sm text-white/70 leading-relaxed">
-                <p className="mb-3">
-                  KEEN is taking a break right now. The product never does —
-                  start free and see it work your pipeline.
-                </p>
+                <p className="mb-3">{t.offlineBody}</p>
                 <a
                   href={appLink("keen-widget-offline", "signup")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lp-btn-primary px-4 py-2.5 rounded-lg text-sm font-bold inline-block"
                 >
-                  Start with $0 — no card
+                  {t.offlineCta}
                 </a>
               </div>
             ) : (
               <>
-                <Bubble role="assistant" content={GREETING} />
+                <Bubble role="assistant" content={t.greeting} />
                 {messages.map((m, i) => (
                   <Bubble key={i} role={m.role} content={m.content} />
                 ))}
@@ -224,7 +275,7 @@ export default function KeenWidget() {
                       rel="noopener noreferrer"
                       className="lp-btn-primary px-4 py-2.5 rounded-lg text-sm font-bold inline-block w-full text-center"
                     >
-                      Create a free account to keep chatting
+                      {t.limitCta}
                     </a>
                   </div>
                 )}
@@ -248,15 +299,15 @@ export default function KeenWidget() {
                   }}
                   rows={1}
                   maxLength={500}
-                  placeholder="Ask about pricing, features, your trade…"
-                  aria-label="Message KEEN"
+                  placeholder={t.placeholder}
+                  aria-label={t.inputAria}
                   className="flex-1 resize-none rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#00D4FF]/60"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 />
                 <button
                   onClick={() => void send()}
                   disabled={sending || !input.trim()}
-                  aria-label="Send message to KEEN"
+                  aria-label={t.sendAria}
                   className="lp-btn-primary rounded-xl p-2.5 disabled:opacity-40 disabled:pointer-events-none"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -265,8 +316,7 @@ export default function KeenWidget() {
                 </button>
               </div>
               <p className="text-[10.5px] text-white/65 mt-2 leading-snug">
-                AI agent · public product info only — no account data. Usage
-                limits apply per visitor.
+                {t.disclaimer}
               </p>
             </div>
           )}

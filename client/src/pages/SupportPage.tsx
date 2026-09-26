@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import Footer from "@/components/Footer";
 import { APP_URL } from "@/lib/appLinks";
+import { LangContext } from "@/lib/i18n";
 
 type Language = "en" | "es";
 
@@ -14,7 +16,7 @@ const copy = {
     eyebrow: "LEADPRIME SUPPORT",
     title: "Help for the business you run.",
     description:
-      "LeadPrime is the AI-powered CRM that brings leads, messages, estimates, contracts, and payments into one place. Built for contractors and service businesses that want less administrative work and more time in the field.",
+      "LeadPrime is the AI-powered CRM that brings leads, messages, estimates, contracts, and payments into one place. Built for contractors who want less administrative work and more time in the field.",
     contactTitle: "Get in touch",
     contactIntro: "Our support team assists customers in English and Spanish.",
     emailLabel: "Support email",
@@ -36,7 +38,7 @@ const copy = {
     eyebrow: "SOPORTE LEADPRIME",
     title: "Ayuda para el negocio que manejas.",
     description:
-      "LeadPrime es el CRM impulsado por IA que reúne prospectos, mensajes, estimados, contratos y pagos en un solo lugar. Está diseñado para contratistas y negocios de servicios que quieren menos trabajo administrativo y más tiempo en campo.",
+      "LeadPrime es el CRM impulsado por IA que reúne prospectos, mensajes, estimados, contratos y pagos en un solo lugar. Está diseñado para contratistas que quieren menos trabajo administrativo y más tiempo en campo.",
     contactTitle: "Contáctanos",
     contactIntro: "Nuestro equipo de soporte atiende en inglés y español.",
     emailLabel: "Correo de soporte",
@@ -146,7 +148,14 @@ function SupportQuestion({ question, answer }: { question: string; answer: strin
 }
 
 export default function SupportPage() {
-  const [language, setLanguage] = useState<Language>("en");
+  // /soporte opens in Spanish, /support in English; the toggle switches either.
+  const [location] = useLocation();
+  const [language, setLanguage] = useState<Language>(() =>
+    location.toLowerCase().startsWith("/soporte") ? "es" : "en"
+  );
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   const t = copy[language];
   const alternateLanguage: Language = language === "en" ? "es" : "en";
 
@@ -154,12 +163,12 @@ export default function SupportPage() {
     <div className="min-h-screen bg-[#050B18] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <header className="border-b border-white/10 bg-[#050B18]/95 backdrop-blur">
         <div className="container mx-auto flex min-h-20 items-center justify-between gap-4 px-4 lg:px-8">
-          <a href="/" className="inline-flex shrink-0 items-center rounded outline-none focus-visible:ring-2 focus-visible:ring-[#00D4FF]">
+          <a href={language === "es" ? "/es" : "/"} className="inline-flex shrink-0 items-center rounded outline-none focus-visible:ring-2 focus-visible:ring-[#00D4FF]">
             <img src="/logo-full.png" alt="LeadPrime" className="h-9 w-auto" width={160} height={36} />
           </a>
           <div className="flex items-center gap-3">
             <a
-              href="/"
+              href={language === "es" ? "/es" : "/"}
               className="hidden rounded px-3 py-2 text-sm font-semibold text-white/70 transition-colors hover:text-[#00D4FF] focus-visible:ring-2 focus-visible:ring-[#00D4FF] sm:inline-flex"
             >
               {t.nav}
@@ -258,7 +267,9 @@ export default function SupportPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <LangContext.Provider value={language}>
+        <Footer />
+      </LangContext.Provider>
     </div>
   );
 }

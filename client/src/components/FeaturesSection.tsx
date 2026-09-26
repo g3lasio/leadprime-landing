@@ -5,21 +5,55 @@
  * (Brief C: zero external asset dependencies).
  */
 
+import type { ReactNode } from "react";
 import EstimateMockup from "@/components/mockups/EstimateMockup";
+import { useLang, type Lang } from "@/lib/i18n";
 
 type Feature = {
-  title: string;
-  desc: string;
+  title: Record<Lang, string>;
+  desc: Record<Lang, string>;
   color: string;
-  icon: JSX.Element;
+  icon: ReactNode;
   highlight?: boolean;
   comingSoon?: boolean;
 };
 
+const COPY = {
+  en: {
+    badge: "What You Get",
+    title: { before: "One Platform.", highlight: "Everything Your Business Needs." },
+    subtitle:
+      "From first lead to final payment — core tools are live today, and what's on the way is clearly marked.",
+    showcase: {
+      title: { before: "Estimates that", highlight: "close jobs." },
+      text: "Build professional estimates and send invoices from your phone. Get paid faster — one tap turns an approved estimate into an invoice, and your client signs on any device.",
+      demo: "Shown with demo data.",
+    },
+    ai: "AI",
+    comingSoon: "Coming Soon",
+  },
+  es: {
+    badge: "Lo que obtienes",
+    title: { before: "Una sola plataforma.", highlight: "Todo lo que tu negocio necesita." },
+    subtitle:
+      "Del primer lead al pago final — las herramientas principales ya funcionan hoy, y lo que viene en camino está bien marcado.",
+    showcase: {
+      title: { before: "Estimados que", highlight: "cierran trabajos." },
+      text: "Haz estimados profesionales y manda facturas desde tu teléfono. Cobra más rápido — con un toque conviertes un estimado aprobado en factura, y tu cliente firma desde cualquier dispositivo.",
+      demo: "Mostrado con datos de ejemplo.",
+    },
+    ai: "IA",
+    comingSoon: "Próximamente",
+  },
+} as const;
+
 const features: Feature[] = [
   {
-    title: "AI Agent (KEEN)",
-    desc: "Your AI assistant that follows up on leads, drafts messages, and keeps your pipeline moving. Give it any name you want.",
+    title: { en: "AI Agent (KEEN)", es: "Agente de IA (KEEN)" },
+    desc: {
+      en: "Your AI assistant that follows up on leads, drafts messages, and keeps your pipeline moving. Give it any name you want.",
+      es: "Tu asistente de IA que da seguimiento a tus leads, escribe mensajes y mantiene tu pipeline en movimiento. Ponle el nombre que quieras.",
+    },
     color: "#00D4FF",
     highlight: true,
     icon: (
@@ -29,8 +63,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Native Estimates & Invoices",
-    desc: "Build professional estimates and send invoices from your phone. Get paid faster.",
+    title: { en: "Native Estimates & Invoices", es: "Estimados y facturas integrados" },
+    desc: {
+      en: "Build professional estimates and send invoices from your phone. Get paid faster.",
+      es: "Haz estimados profesionales y manda facturas desde tu teléfono. Cobra más rápido.",
+    },
     color: "#10B981",
     highlight: true,
     icon: (
@@ -40,8 +77,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Digital Contracts & E-Sign (LeadSign)",
-    desc: "Send contracts, get them signed on any device.",
+    title: { en: "Digital Contracts & E-Sign (LeadSign)", es: "Contratos digitales y firma electrónica (LeadSign)" },
+    desc: {
+      en: "Send contracts, get them signed on any device.",
+      es: "Manda contratos y que te los firmen desde cualquier dispositivo.",
+    },
     color: "#00D4FF",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -50,8 +90,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Pipelines by Industry",
-    desc: "Pre-built stages for how YOUR business works — contractor, property manager, or investor.",
+    title: { en: "Construction Pipelines", es: "Pipelines de construcción" },
+    desc: {
+      en: "Pre-built stages for how your jobs actually move — from first call to estimate, signed contract, and final payment.",
+      es: "Etapas listas para cómo se mueven tus trabajos — del primer contacto al estimado, el contrato firmado y el pago final.",
+    },
     color: "#F59E0B",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -60,8 +103,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Payments (LeadPrime Pay)",
-    desc: "Accept card and ACH. Surcharge supported.",
+    title: { en: "Payments (LeadPrime Pay)", es: "Pagos (LeadPrime Pay)" },
+    desc: {
+      en: "Accept card and ACH. Surcharge supported.",
+      es: "Acepta tarjeta y ACH. Puedes aplicar recargo.",
+    },
     color: "#10B981",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -70,8 +116,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "B2B Network",
-    desc: "Connect with license-verified contractors, PMs, and investors.",
+    title: { en: "B2B Network", es: "Red B2B" },
+    desc: {
+      en: "Connect with other license-verified contractors.",
+      es: "Conéctate con otros contratistas con licencia verificada.",
+    },
     color: "#00D4FF",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -80,8 +129,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Business Health Passport",
-    desc: "Track your licenses, insurance, and docs so you never miss a renewal or a fine.",
+    title: { en: "Business Health Passport", es: "Business Health Passport" },
+    desc: {
+      en: "Track your licenses, insurance, and docs so you never miss a renewal or a fine.",
+      es: "Controla tus licencias, seguros y documentos para que no se te pase una renovación ni te caiga una multa.",
+    },
     color: "#A78BFA",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -90,8 +142,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Lead Hunter",
-    desc: "AI-powered lead discovery for your target market.",
+    title: { en: "Lead Hunter", es: "Lead Hunter" },
+    desc: {
+      en: "AI-powered lead discovery for your target market.",
+      es: "Descubre leads con IA en tu mercado.",
+    },
     color: "#F59E0B",
     comingSoon: true,
     icon: (
@@ -101,8 +156,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Tap to Pay",
-    desc: "Take card payments with just your phone.",
+    title: { en: "Tap to Pay", es: "Tap to Pay" },
+    desc: {
+      en: "Take card payments with just your phone.",
+      es: "Cobra con tarjeta usando solo tu teléfono.",
+    },
     color: "#F59E0B",
     comingSoon: true,
     icon: (
@@ -112,8 +170,11 @@ const features: Feature[] = [
     ),
   },
   {
-    title: "Website Builder",
-    desc: "AI-generated website built from your CRM profile.",
+    title: { en: "Website Builder", es: "Creador de sitios web" },
+    desc: {
+      en: "AI-generated website built from your CRM profile.",
+      es: "Sitio web generado con IA a partir de tu perfil en el CRM.",
+    },
     color: "#F59E0B",
     comingSoon: true,
     icon: (
@@ -125,6 +186,9 @@ const features: Feature[] = [
 ];
 
 export default function FeaturesSection() {
+  const lang = useLang();
+  const t = COPY[lang];
+
   return (
     <section id="features" className="py-24 bg-[#050B18] relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 max-w-full h-96 bg-[#00D4FF]/5 rounded-full blur-3xl" aria-hidden="true" />
@@ -134,20 +198,19 @@ export default function FeaturesSection() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-6">
             <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              What You Get
+              {t.badge}
             </span>
           </div>
           <h2
             className="text-4xl lg:text-6xl font-black text-white mb-6"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            One Platform.
+            {t.title.before}
             <br />
-            <span className="lp-text-gradient-cyan">Everything Your Business Needs.</span>
+            <span className="lp-text-gradient-cyan">{t.title.highlight}</span>
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
-            From first lead to final payment — core tools are live today, and
-            what's on the way is clearly marked.
+            {t.subtitle}
           </p>
         </div>
 
@@ -158,15 +221,13 @@ export default function FeaturesSection() {
               className="text-2xl lg:text-3xl font-black text-white mb-3"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Estimates that <span className="lp-text-gradient-cyan">close jobs.</span>
+              {t.showcase.title.before} <span className="lp-text-gradient-cyan">{t.showcase.title.highlight}</span>
             </h3>
             <p className="text-white/60 leading-relaxed mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Build professional estimates and send invoices from your phone.
-              Get paid faster — one tap turns an approved estimate into an
-              invoice, and your client signs on any device.
+              {t.showcase.text}
             </p>
             <p className="text-xs text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Shown with demo data.
+              {t.showcase.demo}
             </p>
           </div>
           <EstimateMockup />
@@ -175,7 +236,7 @@ export default function FeaturesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {features.map((feat) => (
             <div
-              key={feat.title}
+              key={feat.title.en}
               className={`lp-card rounded-xl p-5 transition-all duration-300 hover:border-[#00D4FF]/40 hover:-translate-y-1 ${
                 feat.highlight ? "lp-border-amber" : ""
               } ${feat.comingSoon ? "opacity-80" : ""}`}
@@ -187,20 +248,20 @@ export default function FeaturesSection() {
                 {feat.icon}
               </div>
               <h3 className="font-bold text-white mb-2 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {feat.title}
+                {feat.title[lang]}
                 {feat.highlight && !feat.comingSoon && (
                   <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-[#F59E0B]/20 text-[#F59E0B] font-semibold">
-                    AI
+                    {t.ai}
                   </span>
                 )}
                 {feat.comingSoon && (
                   <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-semibold uppercase tracking-wide">
-                    Coming Soon
+                    {t.comingSoon}
                   </span>
                 )}
               </h3>
               <p className="text-xs text-white/55 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {feat.desc}
+                {feat.desc[lang]}
               </p>
             </div>
           ))}
