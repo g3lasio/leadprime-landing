@@ -10,7 +10,7 @@
 
 ## ⚠️ Pendientes antes del merge
 
-1. **URL de agendamiento del diagnóstico gratis (bloqueante).** El recurso de calendario "Chyrris Technologies" existe en LeadPrime (lun–vie 7:00–18:00, verificado con la API de disponibilidad), pero la API no expone una URL pública de reserva y no pude confirmarla desde este entorno. El CTA "Agenda un diagnóstico gratis" lee la constante **`DIAGNOSTIC_BOOKING_URL`** en `client/src/lib/appLinks.ts`; mientras tanto abre un correo a `info@chyrris.com` (el correo público de `/soporte`) con asunto "Quiero agendar mi diagnóstico gratis". Pegar la URL real ahí es un cambio de una línea; si es `https://…`, el enlace se abre en pestaña nueva automáticamente.
+1. ~~URL de agendamiento del diagnóstico gratis~~ — **resuelto:** `DIAGNOSTIC_BOOKING_URL` = `https://leadprime.chyrris.com/book/chyrris-technologies` (página pública de reserva del recurso "Chyrris Technologies"; el contratista elige en persona o Google Meet). Ver sección 8.
 2. **`/hazlo-real` y el Google tag no existen en este repo** (revisado todo el historial de todas las ramas: 0 coincidencias de `hazlo`, `gtag`, `googletagmanager`). Por eso este PR no los toca. Si hoy funcionan en producción, vienen de otra fuente (Cloudflare/GTM u otro deploy): conviene confirmar antes del deploy que publicar desde este repo no los reemplaza. Los `href` de todos los CTA existentes (UTMs incluidos) quedaron idénticos, así que los disparadores de conversión por URL no cambian.
 3. ~~`/soporte` mostraba los marcadores `SOPORTE_TELEFONO` y `SOPORTE_TIEMPO_RESPUESTA`~~ — **resuelto** (ver sección 7).
 
@@ -22,7 +22,7 @@
 - Posicionamiento visible: los planes Pago por uso / Pro / Network Elite son software de autoservicio; Growth y Legacy son programas hechos con nosotros que **incluyen** el software Elite.
 - Dos tarjetas con el contenido aprobado ítem por ítem (incluye / no incluye), sello "Software LeadPrime Elite incluido ($249/mes de valor)" y el pie "La pauta se paga directo a Google y Meta, nunca dentro del fee. Sin garantías de resultados; toda proyección es estimado." en ambas.
 - Único ajuste de redacción: la voz pasa a segunda persona donde el brief decía "del cliente" ("el dominio y el contenido son tuyos", "el filing fee del estado lo pagas tú", "tu calendario"). El resto es literal.
-- CTA principal "Agenda un diagnóstico gratis" → `DIAGNOSTIC_BOOKING_URL` (ver pendiente 1). CTA secundario discreto "Ya hablé con el equipo" → `https://leadprime.chyrris.com/join/growth` y `/join/legacy`, exactos (sin UTMs). Los CTA llevan `data-cta` (`programas-growth-diagnostico`, `programas-legacy-join`, …) por si se quiere medir desde GTM sin tocar código.
+- CTA principal "Agenda un diagnóstico gratis" → página pública de reserva (`DIAGNOSTIC_BOOKING_URL`, con el `gclid`/`utm_*` de la página; ver sección 8). CTA secundario discreto "Ya hablé con el equipo" → `https://leadprime.chyrris.com/join/growth` y `/join/legacy`, exactos (sin UTMs). Los CTA llevan `data-cta` (`programas-growth-diagnostico`, `programas-legacy-join`, …) por si se quiere medir desde GTM sin tocar código.
 - Accesos a la sección: enlace "¿Hablaste con nuestro equipo? Ver programas Growth y Legacy →" bajo los CTA del hero, enlace bajo los planes de Precios, "Programas" en el menú y en el footer.
 - Reglas verificadas con grep sobre el build de producción: 0 apariciones de "te conseguimos la licencia", "te conseguimos tu DUNS", "Hazlo Real", "Construye Patrimonio".
 - **KEEN también lo sabe:** el prompt del chat (`server/keen/systemPrompt.ts`) tiene Growth/Legacy con el mismo contenido y las mismas reglas (solo los nombres Growth y Legacy, "preparamos tu expediente" / "dejamos tu archivo comercial correcto", sin garantías, la pauta nunca va dentro del fee) y manda al diagnóstico gratis en `/programas`.
@@ -68,8 +68,14 @@ Quitado del sitio público: el banner "BUILT FOR CONTRACTORS · PROPERTY MANAGER
 
 - Los marcadores que venían de `main` se reemplazaron con los datos que dio Cowork: **Teléfono / WhatsApp 707 770 4888** (el número abre la llamada con `tel:+17077704888` y hay un enlace "Escríbenos por WhatsApp →" a `https://wa.me/17077704888`), **correo info@chyrris.com** y **"Respondemos el mismo día hábil, lunes a viernes."** (EN: "We reply the same business day, Monday through Friday.").
 - Las etiquetas fijas "CONTACT" y "PRIVACY" ahora se traducen ("CONTACTO", "PRIVACIDAD").
-- `DIAGNOSTIC_BOOKING_URL` sigue en el `mailto:` hasta recibir la URL pública de reserva del recurso "Chyrris Technologies" (en persona / Google Meet) que está exponiendo la sesión del repo `leadprime`.
+- La URL pública de reserva ya está conectada (ver sección 8).
 
+
+## 8. Reserva del diagnóstico gratis
+
+- `DIAGNOSTIC_BOOKING_URL` (`client/src/lib/appLinks.ts`) = `https://leadprime.chyrris.com/book/chyrris-technologies`: la página pública del recurso "Chyrris Technologies", donde el contratista elige en persona o Google Meet. Los 3 CTA "Agenda un diagnóstico gratis" (tarjetas Growth y Legacy + CTA final de `/programas`) abren esa página en pestaña nueva.
+- Los CTA le pasan como query el `gclid` y los `utm_*` de la página actual (ningún otro parámetro), para que la reserva conserve el clic del anuncio. Si el visitante ya navegó a una página sin ellos (la navegación interna puede perder el query), se usan los de la página por la que entró en esta sesión (`sessionStorage`); los de la página actual siempre ganan.
+- Verificado en navegador (7/7): parámetros de la página actual → CTA `…/book/chyrris-technologies?gclid=…&utm_source=…`; tras navegar de `/programas` a `/es#pricing` se conservan; sin parámetros → URL limpia; `/?gclid=…` con navegador en español → `/es?gclid=…` → el CTA lo lleva. La prueba funcional completa sigue en 23/23.
 ---
 
 ## Lista de textos cambiados

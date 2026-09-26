@@ -5,7 +5,7 @@
  * pages. Contrast raised to AA (Brief C7).
  */
 import { useLocation } from "wouter";
-import { appLink, APP_URL, DIAGNOSTIC_BOOKING_URL } from "@/lib/appLinks";
+import { appLink, APP_URL, diagnosticBookingLink } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 import { HOME_PATH } from "@shared/pageMeta";
 
@@ -89,7 +89,6 @@ export default function Footer({ variant = "default" }: { variant?: "default" | 
   const home = HOME_PATH[lang];
   const onHome = location.replace(/\/+$/, "") === home.replace(/\/+$/, "");
   const sectionHref = (id: string) => (onHome ? `#${id}` : `${home}#${id}`);
-  const bookingIsWeb = /^https?:/.test(DIAGNOSTIC_BOOKING_URL);
 
   return (
     <>
@@ -112,8 +111,9 @@ export default function Footer({ variant = "default" }: { variant?: "default" | 
           )}
           {variant === "programs" ? (
             <a
-              href={DIAGNOSTIC_BOOKING_URL}
-              {...(bookingIsWeb ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              href={diagnosticBookingLink()}
+              target="_blank"
+              rel="noopener noreferrer"
               data-cta="programas-footer-diagnostico"
               className="lp-btn-primary px-10 py-4 rounded-xl text-base font-bold inline-block mt-4"
             >

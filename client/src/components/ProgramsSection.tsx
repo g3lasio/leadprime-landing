@@ -10,7 +10,7 @@
  * correcto"); never call the programs "Hazlo Real" or "Construye
  * Patrimonio"; ad spend is never inside the fee; no guaranteed results.
  */
-import { DIAGNOSTIC_BOOKING_URL, PROGRAM_JOIN_URL } from "@/lib/appLinks";
+import { diagnosticBookingLink, PROGRAM_JOIN_URL } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 import { HOME_PATH } from "@shared/pageMeta";
 
@@ -197,15 +197,14 @@ const ACCENT: Record<Program["id"], string> = {
   legacy: "#F59E0B",
 };
 
-// The booking link may still be the mailto fallback (see appLinks.ts).
-const bookingIsWeb = /^https?:/.test(DIAGNOSTIC_BOOKING_URL);
-
 /** Home section by default; `standalone` renders it as the /programas page body. */
 export default function ProgramsSection({ standalone = false }: { standalone?: boolean }) {
   const lang = useLang();
   const t = COPY[lang];
   const Heading = standalone ? "h1" : "h2";
   const title = standalone ? t.pageTitle : t.title;
+  // Carries the page's gclid/utm_* into the booking page.
+  const bookingHref = diagnosticBookingLink();
 
   return (
     <section
@@ -301,8 +300,9 @@ export default function ProgramsSection({ standalone = false }: { standalone?: b
 
                 <div className="mt-auto pt-8">
                   <a
-                    href={DIAGNOSTIC_BOOKING_URL}
-                    {...(bookingIsWeb ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    href={bookingHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     data-cta={`programas-${program.id}-diagnostico`}
                     className={`${program.id === "legacy" ? "lp-btn-amber" : "lp-btn-primary"} block text-center px-6 py-4 rounded-xl text-base font-bold`}
                   >
