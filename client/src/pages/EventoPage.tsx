@@ -6,6 +6,10 @@
  * galería de eventos pasados — sin formulario, sin CTAs de solicitud de
  * acceso y sin llamadas al backend. Los futuros eventos se anunciarán
  * cuando exista una fecha confirmada.
+ *
+ * Sep 2026: sitio solo para contratistas, sin nombre personal del fundador
+ * ni dirección completa (solo "Fairfield, California"); la empresa es
+ * "LeadPrime · Chyrris Technologies".
  */
 
 const GOLD = "#D4AF37";
@@ -26,13 +30,13 @@ const PAST_EVENTS: PastEvent[] = [
     title: "LeadPrime Networking · Bay Area",
     date: "jueves 2 de julio, 2026",
     time: "7:00 PM – 8:30 PM",
-    address: "1000 Webster Street, Fairfield, CA 94533",
+    address: "Fairfield, California",
     audience:
-      "General contractors, contratistas locales y property managers del área de Fairfield y Bay Area",
+      "Contratistas generales y contratistas locales del área de Fairfield y el Bay Area",
     description:
-      "Una noche privada de networking curado: recepción con credenciales, industry briefing por Gelasio Sánchez (Founder, Chyrris) sobre cómo conectar demanda real de property managers con contratistas confiables, y cierre con introducciones dirigidas entre asistentes.",
+      "Una noche privada de networking curado: recepción con credenciales, un briefing de la industria a cargo del equipo de LeadPrime y cierre con introducciones dirigidas entre asistentes.",
     image: "/evento-networking.png",
-    presenter: "LeadPrime · Owl Fenc",
+    presenter: "LeadPrime · Chyrris Technologies",
   },
 ];
 
@@ -69,8 +73,8 @@ export default function EventoPage() {
           Eventos
         </h1>
         <p className="text-white/50 mt-3 max-w-xl mx-auto text-sm md:text-base">
-          Encuentros privados que conectan a contratistas y property managers
-          del Bay Area. Las próximas fechas se anunciarán aquí.
+          Encuentros privados para contratistas del Bay Area. Las próximas
+          fechas se anunciarán aquí.
         </p>
       </header>
 
@@ -146,7 +150,7 @@ export default function EventoPage() {
       <footer className="border-t border-white/10">
         <div className="max-w-5xl mx-auto px-6 py-8 text-center text-xs text-white/40 space-y-2">
           <p>
-            © 2026 LeadPrime · Powered by Chyrris Technologies ·{" "}
+            © 2026 LeadPrime · Chyrris Technologies LLC ·{" "}
             <a
               href="mailto:info@chyrris.com"
               className="underline hover:text-white/70"

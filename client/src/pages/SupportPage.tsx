@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import Footer from "@/components/Footer";
 import { APP_URL } from "@/lib/appLinks";
+import { LangContext } from "@/lib/i18n";
 
 type Language = "en" | "es";
 
 const supportEmail = "info@chyrris.com";
-const supportPhone = "SOPORTE_TELEFONO";
-const responseTarget = "SOPORTE_TIEMPO_RESPUESTA";
+// One number for calls and WhatsApp.
+const supportPhone = {
+  display: "707 770 4888",
+  tel: "tel:+17077704888",
+  whatsapp: "https://wa.me/17077704888",
+};
 
 const copy = {
   en: {
@@ -14,16 +20,19 @@ const copy = {
     eyebrow: "LEADPRIME SUPPORT",
     title: "Help for the business you run.",
     description:
-      "LeadPrime is the AI-powered CRM that brings leads, messages, estimates, contracts, and payments into one place. Built for contractors and service businesses that want less administrative work and more time in the field.",
+      "LeadPrime is the AI-powered CRM that brings leads, messages, estimates, contracts, and payments into one place. Built for contractors who want less administrative work and more time in the field.",
+    contactEyebrow: "CONTACT",
     contactTitle: "Get in touch",
     contactIntro: "Our support team assists customers in English and Spanish.",
     emailLabel: "Support email",
-    phoneLabel: "Support phone",
+    phoneLabel: "Phone / WhatsApp",
+    whatsapp: "Message us on WhatsApp →",
     responseLabel: "Response target",
-    responseSuffix: "during business days",
+    response: "We reply the same business day, Monday through Friday.",
     contactNote: "For account access, billing, or data requests, include the email address on your LeadPrime account.",
     faqEyebrow: "QUICK ANSWERS",
     faqTitle: "Frequently asked questions",
+    privacyEyebrow: "PRIVACY",
     privacyTitle: "Your account and privacy",
     privacyText:
       "Need help with account deletion or a privacy request? Contact support from the email associated with your account. We will verify the request before processing it.",
@@ -36,16 +45,19 @@ const copy = {
     eyebrow: "SOPORTE LEADPRIME",
     title: "Ayuda para el negocio que manejas.",
     description:
-      "LeadPrime es el CRM impulsado por IA que reúne prospectos, mensajes, estimados, contratos y pagos en un solo lugar. Está diseñado para contratistas y negocios de servicios que quieren menos trabajo administrativo y más tiempo en campo.",
+      "LeadPrime es el CRM impulsado por IA que reúne prospectos, mensajes, estimados, contratos y pagos en un solo lugar. Está diseñado para contratistas que quieren menos trabajo administrativo y más tiempo en campo.",
+    contactEyebrow: "CONTACTO",
     contactTitle: "Contáctanos",
     contactIntro: "Nuestro equipo de soporte atiende en inglés y español.",
     emailLabel: "Correo de soporte",
-    phoneLabel: "Teléfono de soporte",
+    phoneLabel: "Teléfono / WhatsApp",
+    whatsapp: "Escríbenos por WhatsApp →",
     responseLabel: "Tiempo de respuesta",
-    responseSuffix: "en días hábiles",
+    response: "Respondemos el mismo día hábil, lunes a viernes.",
     contactNote: "Para acceso a cuenta, cobros o solicitudes de datos, incluye el correo asociado a tu cuenta de LeadPrime.",
     faqEyebrow: "RESPUESTAS RÁPIDAS",
     faqTitle: "Preguntas frecuentes",
+    privacyEyebrow: "PRIVACIDAD",
     privacyTitle: "Tu cuenta y privacidad",
     privacyText:
       "¿Necesitas borrar tu cuenta o hacer una solicitud de privacidad? Escribe a soporte desde el correo asociado a tu cuenta. Verificaremos la solicitud antes de procesarla.",
@@ -146,7 +158,14 @@ function SupportQuestion({ question, answer }: { question: string; answer: strin
 }
 
 export default function SupportPage() {
-  const [language, setLanguage] = useState<Language>("en");
+  // /soporte opens in Spanish, /support in English; the toggle switches either.
+  const [location] = useLocation();
+  const [language, setLanguage] = useState<Language>(() =>
+    location.toLowerCase().startsWith("/soporte") ? "es" : "en"
+  );
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   const t = copy[language];
   const alternateLanguage: Language = language === "en" ? "es" : "en";
 
@@ -154,12 +173,12 @@ export default function SupportPage() {
     <div className="min-h-screen bg-[#050B18] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <header className="border-b border-white/10 bg-[#050B18]/95 backdrop-blur">
         <div className="container mx-auto flex min-h-20 items-center justify-between gap-4 px-4 lg:px-8">
-          <a href="/" className="inline-flex shrink-0 items-center rounded outline-none focus-visible:ring-2 focus-visible:ring-[#00D4FF]">
+          <a href={language === "es" ? "/es" : "/"} className="inline-flex shrink-0 items-center rounded outline-none focus-visible:ring-2 focus-visible:ring-[#00D4FF]">
             <img src="/logo-full.png" alt="LeadPrime" className="h-9 w-auto" width={160} height={36} />
           </a>
           <div className="flex items-center gap-3">
             <a
-              href="/"
+              href={language === "es" ? "/es" : "/"}
               className="hidden rounded px-3 py-2 text-sm font-semibold text-white/70 transition-colors hover:text-[#00D4FF] focus-visible:ring-2 focus-visible:ring-[#00D4FF] sm:inline-flex"
             >
               {t.nav}
@@ -191,7 +210,7 @@ export default function SupportPage() {
         <section className="container mx-auto max-w-6xl px-4 py-16 lg:px-8 lg:py-24" aria-labelledby="contact-title">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
             <div>
-              <p className="mb-4 text-xs font-bold tracking-[0.22em] text-[#00D4FF]">CONTACT</p>
+              <p className="mb-4 text-xs font-bold tracking-[0.22em] text-[#00D4FF]">{t.contactEyebrow}</p>
               <h2 id="contact-title" className="text-3xl font-black text-white sm:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {t.contactTitle}
               </h2>
@@ -209,13 +228,24 @@ export default function SupportPage() {
               </a>
               <div className="lp-card rounded-2xl p-6">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#00D4FF]">{t.phoneLabel}</p>
-                <p className="mt-3 text-lg font-bold text-white">{supportPhone}</p>
+                <a
+                  className="mt-3 block rounded text-lg font-bold text-white outline-none transition-colors hover:text-[#7BE5FF] focus-visible:ring-2 focus-visible:ring-[#00D4FF]"
+                  href={supportPhone.tel}
+                >
+                  {supportPhone.display}
+                </a>
+                <a
+                  className="mt-2 inline-block rounded text-sm font-semibold text-[#10B981] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-[#10B981]"
+                  href={supportPhone.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.whatsapp}
+                </a>
               </div>
               <div className="lp-card rounded-2xl p-6 sm:col-span-2">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#00D4FF]">{t.responseLabel}</p>
-                <p className="mt-3 text-lg font-bold text-white">
-                  {responseTarget} <span className="text-white/55">{t.responseSuffix}</span>
-                </p>
+                <p className="mt-3 text-lg font-bold text-white">{t.response}</p>
               </div>
             </div>
           </div>
@@ -238,7 +268,7 @@ export default function SupportPage() {
         <section className="container mx-auto max-w-6xl px-4 py-16 lg:px-8 lg:py-24" aria-labelledby="privacy-title">
           <div className="lp-card rounded-2xl p-8 sm:p-12">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold tracking-[0.22em] text-[#F59E0B]">PRIVACY</p>
+              <p className="text-xs font-bold tracking-[0.22em] text-[#F59E0B]">{t.privacyEyebrow}</p>
               <h2 id="privacy-title" className="mt-4 text-3xl font-black text-white sm:text-4xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {t.privacyTitle}
               </h2>
@@ -258,7 +288,9 @@ export default function SupportPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <LangContext.Provider value={language}>
+        <Footer />
+      </LangContext.Provider>
     </div>
   );
 }

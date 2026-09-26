@@ -2,12 +2,34 @@
  * How It Works — three simple steps (Brief B, approved copy — verbatim).
  * The hero's secondary CTA scrolls here (#how-it-works).
  */
+import { useLang } from "@/lib/i18n";
+
+const COPY = {
+  en: {
+    badge: "How It Works",
+    title: { before: "Three steps.", highlight: "One system." },
+    step: "Step",
+    steps: [
+      { title: "Capture", desc: "Leads come in from your ads, referrals, and network." },
+      { title: "Work the pipeline", desc: "KEEN follows up. You send estimates, contracts, and invoices without leaving the app." },
+      { title: "Get paid", desc: "Accept payment, track your documents, grow your business." },
+    ],
+  },
+  es: {
+    badge: "Cómo funciona",
+    title: { before: "Tres pasos.", highlight: "Un solo sistema." },
+    step: "Paso",
+    steps: [
+      { title: "Captura", desc: "Los leads llegan de tus anuncios, referidos y tu red." },
+      { title: "Trabaja tu pipeline", desc: "KEEN da seguimiento. Tú mandas estimados, contratos y facturas sin salir de la app." },
+      { title: "Cobra", desc: "Recibe pagos, controla tus documentos y haz crecer tu negocio." },
+    ],
+  },
+} as const;
 
 const steps = [
   {
     number: "1",
-    title: "Capture",
-    desc: "Leads come in from your ads, referrals, and network.",
     color: "#00D4FF",
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -17,8 +39,6 @@ const steps = [
   },
   {
     number: "2",
-    title: "Work the pipeline",
-    desc: "KEEN follows up. You send estimates, contracts, and invoices without leaving the app.",
     color: "#F59E0B",
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -28,8 +48,6 @@ const steps = [
   },
   {
     number: "3",
-    title: "Get paid",
-    desc: "Accept payment, track your documents, grow your business.",
     color: "#10B981",
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -40,6 +58,8 @@ const steps = [
 ];
 
 export default function HowItWorksSection() {
+  const t = COPY[useLang()];
+
   return (
     <section id="how-it-works" className="py-24 bg-[#050B18] relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] max-w-full h-[400px] bg-[#00D4FF]/5 rounded-full blur-3xl" aria-hidden="true" />
@@ -47,19 +67,19 @@ export default function HowItWorksSection() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-6">
             <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              How It Works
+              {t.badge}
             </span>
           </div>
           <h2
             className="text-4xl lg:text-5xl font-black text-white"
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            Three steps. <span className="lp-text-gradient-cyan">One system.</span>
+            {t.title.before} <span className="lp-text-gradient-cyan">{t.title.highlight}</span>
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {steps.map((step) => (
+          {steps.map((step, i) => (
             <div key={step.number} className="lp-card rounded-2xl p-8 text-center relative">
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
@@ -71,13 +91,13 @@ export default function HowItWorksSection() {
                 className="text-xs font-bold uppercase tracking-widest mb-2"
                 style={{ color: step.color, fontFamily: "'Space Grotesk', sans-serif" }}
               >
-                Step {step.number}
+                {t.step} {step.number}
               </p>
               <h3 className="text-xl font-bold text-white mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {step.title}
+                {t.steps[i].title}
               </h3>
               <p className="text-sm text-white/60 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {step.desc}
+                {t.steps[i].desc}
               </p>
             </div>
           ))}

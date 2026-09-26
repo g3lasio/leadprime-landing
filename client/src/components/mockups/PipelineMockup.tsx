@@ -2,39 +2,50 @@
  * Animated contractor-pipeline mockup (Brief D3).
  * 100% fictional demo data — CSS-only animation, Linear/Stripe style.
  */
+import { useLang } from "@/lib/i18n";
 
-const stages = [
-  {
-    name: "New",
-    color: "#00D4FF",
-    cards: [{ title: "Maria's Kitchen Remodel", meta: "$18,500 · San Jose" }],
-  },
-  {
-    name: "Contacted",
-    color: "#22D3EE",
-    cards: [{ title: "Downtown Fence Job", meta: "$7,200 · Oakland" }],
-  },
-  {
-    name: "Estimate Sent",
-    color: "#F59E0B",
-    cards: [
-      { title: "Garcia Bathroom Reno", meta: "$12,400 · Fremont" },
-      { title: "Sunset Deck Build", meta: "$9,800 · Hayward" },
+const STAGE_COLORS = ["#00D4FF", "#22D3EE", "#F59E0B", "#10B981", "#A78BFA"];
+
+const COPY = {
+  en: {
+    window: "LeadPrime · Contractor Pipeline (demo)",
+    stages: [
+      { name: "New", cards: [{ title: "Maria's Kitchen Remodel", meta: "$18,500 · San Jose" }] },
+      { name: "Contacted", cards: [{ title: "Downtown Fence Job", meta: "$7,200 · Oakland" }] },
+      {
+        name: "Estimate Sent",
+        cards: [
+          { title: "Garcia Bathroom Reno", meta: "$12,400 · Fremont" },
+          { title: "Sunset Deck Build", meta: "$9,800 · Hayward" },
+        ],
+      },
+      { name: "Signed", cards: [{ title: "Lakeside ADU Project", meta: "$86,000 · Fairfield" }] },
+      { name: "Completed", cards: [{ title: "Vista Roof Replacement", meta: "$24,300 · Paid ✓" }] },
     ],
+    traveling: { title: "Rosa's Patio Cover", meta: "KEEN following up…" },
   },
-  {
-    name: "Signed",
-    color: "#10B981",
-    cards: [{ title: "Lakeside ADU Project", meta: "$86,000 · Fairfield" }],
+  es: {
+    window: "LeadPrime · Pipeline de contratista (demo)",
+    stages: [
+      { name: "Nuevo", cards: [{ title: "Remodelación de cocina de María", meta: "$18,500 · San José" }] },
+      { name: "Contactado", cards: [{ title: "Cerca en el centro", meta: "$7,200 · Oakland" }] },
+      {
+        name: "Estimado enviado",
+        cards: [
+          { title: "Baño de la familia García", meta: "$12,400 · Fremont" },
+          { title: "Deck Sunset", meta: "$9,800 · Hayward" },
+        ],
+      },
+      { name: "Firmado", cards: [{ title: "ADU Lakeside", meta: "$86,000 · Fairfield" }] },
+      { name: "Terminado", cards: [{ title: "Techo nuevo Vista", meta: "$24,300 · Pagado ✓" }] },
+    ],
+    traveling: { title: "Techo de patio de Rosa", meta: "KEEN dando seguimiento…" },
   },
-  {
-    name: "Completed",
-    color: "#A78BFA",
-    cards: [{ title: "Vista Roof Replacement", meta: "$24,300 · Paid ✓" }],
-  },
-];
+} as const;
 
 export default function PipelineMockup() {
+  const t = COPY[useLang()];
+
   return (
     <div className="lp-card rounded-2xl p-4 overflow-hidden" aria-hidden="true">
       {/* Window chrome */}
@@ -43,16 +54,16 @@ export default function PipelineMockup() {
         <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
         <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
         <span className="ml-3 text-[11px] text-white/45 font-semibold tracking-wide">
-          LeadPrime · Contractor Pipeline (demo)
+          {t.window}
         </span>
       </div>
 
       <div className="relative">
         <div className="grid grid-cols-5 gap-2 min-w-[560px]">
-          {stages.map((stage, si) => (
+          {t.stages.map((stage, si) => (
             <div key={stage.name} className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2">
               <div className="flex items-center gap-1.5 mb-2">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: stage.color }} />
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: STAGE_COLORS[si] }} />
                 <span className="text-[10px] font-bold text-white/60 uppercase tracking-wide truncate">
                   {stage.name}
                 </span>
@@ -62,7 +73,7 @@ export default function PipelineMockup() {
                   <div
                     key={c.title}
                     className="rounded-md border border-white/10 bg-[#0D1B30] p-2 lp-mock-fade"
-                    style={{ animationDelay: `${(si * 2 + ci) * 0.15}s`, borderLeft: `2px solid ${stage.color}` }}
+                    style={{ animationDelay: `${(si * 2 + ci) * 0.15}s`, borderLeft: `2px solid ${STAGE_COLORS[si]}` }}
                   >
                     <p className="text-[10.5px] font-semibold text-white/85 leading-tight">{c.title}</p>
                     <p className="text-[9.5px] text-white/45 mt-0.5">{c.meta}</p>
@@ -76,8 +87,8 @@ export default function PipelineMockup() {
         {/* The traveling card: New → Contacted → Estimate Sent, on loop */}
         <div className="absolute top-8 left-0 w-[19%] lp-mock-travel pointer-events-none">
           <div className="rounded-md border border-[#00D4FF]/50 bg-[#0D2237] p-2 shadow-lg shadow-[#00D4FF]/10">
-            <p className="text-[10.5px] font-semibold text-white leading-tight">Rosa's Patio Cover</p>
-            <p className="text-[9.5px] text-[#00D4FF] mt-0.5">KEEN following up…</p>
+            <p className="text-[10.5px] font-semibold text-white leading-tight">{t.traveling.title}</p>
+            <p className="text-[9.5px] text-[#00D4FF] mt-0.5">{t.traveling.meta}</p>
           </div>
         </div>
       </div>
