@@ -12,7 +12,7 @@
 
 1. **URL de agendamiento del diagnóstico gratis (bloqueante).** El recurso de calendario "Chyrris Technologies" existe en LeadPrime (lun–vie 7:00–18:00, verificado con la API de disponibilidad), pero la API no expone una URL pública de reserva y no pude confirmarla desde este entorno. El CTA "Agenda un diagnóstico gratis" lee la constante **`DIAGNOSTIC_BOOKING_URL`** en `client/src/lib/appLinks.ts`; mientras tanto abre un correo a `info@chyrris.com` (el correo público de `/soporte`) con asunto "Quiero agendar mi diagnóstico gratis". Pegar la URL real ahí es un cambio de una línea; si es `https://…`, el enlace se abre en pestaña nueva automáticamente.
 2. **`/hazlo-real` y el Google tag no existen en este repo** (revisado todo el historial de todas las ramas: 0 coincidencias de `hazlo`, `gtag`, `googletagmanager`). Por eso este PR no los toca. Si hoy funcionan en producción, vienen de otra fuente (Cloudflare/GTM u otro deploy): conviene confirmar antes del deploy que publicar desde este repo no los reemplaza. Los `href` de todos los CTA existentes (UTMs incluidos) quedaron idénticos, así que los disparadores de conversión por URL no cambian.
-3. **Fuera de alcance, visto de paso:** `/soporte` muestra los marcadores literales `SOPORTE_TELEFONO` y `SOPORTE_TIEMPO_RESPUESTA` (vienen de `main`). Los contratistas de la campaña podrían llegar ahí; falta el teléfono y el tiempo de respuesta reales.
+3. ~~`/soporte` mostraba los marcadores `SOPORTE_TELEFONO` y `SOPORTE_TIEMPO_RESPUESTA`~~ — **resuelto** (ver sección 7).
 
 ---
 
@@ -63,6 +63,12 @@ Quitado del sitio público: el banner "BUILT FOR CONTRACTORS · PROPERTY MANAGER
 
 - El HTML de las páginas del SPA se sirve con `Cache-Control: no-cache` (+ ETag/304). Antes `/` se cacheaba 1 h: tras un deploy, un navegador podía quedarse con un HTML que apunta a JS ya borrado (página en blanco). Assets con hash siguen con caché de 1 año.
 - `AdaptsSection.tsx` eliminado (sin uso). No se borró ninguna página: `/compare/`, `/about/`, `/evento`, `/support` siguen igual de accesibles.
+
+## 7. Soporte (`/soporte` y `/support`)
+
+- Los marcadores que venían de `main` se reemplazaron con los datos que dio Cowork: **Teléfono / WhatsApp 707 770 4888** (el número abre la llamada con `tel:+17077704888` y hay un enlace "Escríbenos por WhatsApp →" a `https://wa.me/17077704888`), **correo info@chyrris.com** y **"Respondemos el mismo día hábil, lunes a viernes."** (EN: "We reply the same business day, Monday through Friday.").
+- Las etiquetas fijas "CONTACT" y "PRIVACY" ahora se traducen ("CONTACTO", "PRIVACIDAD").
+- `DIAGNOSTIC_BOOKING_URL` sigue en el `mailto:` hasta recibir la URL pública de reserva del recurso "Chyrris Technologies" (en persona / Google Meet) que está exponiendo la sesión del repo `leadprime`.
 
 ---
 
@@ -177,7 +183,7 @@ Formato: **antes → después**. "ES" = versión en español (nueva en todo el s
 - **`/nosotros/` (nueva):** la misma historia en español.
 - **`/compare/`:** "connect with verified contractors, property managers, and investors" → "connect with other license-verified contractors" · "especially Latino contractors, property managers, and real estate investors" → "especially Latino contractors" · footer "Chyrris Technologies LLC".
 - **`/evento`:** "1000 Webster Street, Fairfield, CA 94533" → "Fairfield, California" · público "General contractors, contratistas locales y property managers…" → "Contratistas generales y contratistas locales del área de Fairfield y el Bay Area" · descripción sin el nombre del fundador ni property managers · "Presentado por LeadPrime · Owl Fenc" → "LeadPrime · Chyrris Technologies" (texto e imagen) · "Encuentros privados que conectan a contratistas y property managers del Bay Area." → "Encuentros privados para contratistas del Bay Area." · pie "Powered by Chyrris Technologies" → "Chyrris Technologies LLC".
-- **`/support` / `/soporte`:** "Built for contractors and service businesses…" / "…contratistas y negocios de servicios…" → solo contratistas; `/soporte` abre en español.
+- **`/support` / `/soporte`:** "Built for contractors and service businesses…" / "…contratistas y negocios de servicios…" → solo contratistas; `/soporte` abre en español · "Support phone: SOPORTE_TELEFONO" → "Phone / WhatsApp: 707 770 4888" + "Message us on WhatsApp →" (ES "Teléfono / WhatsApp: 707 770 4888" + "Escríbenos por WhatsApp →") · "Response target: SOPORTE_TIEMPO_RESPUESTA during business days" → "We reply the same business day, Monday through Friday." (ES "Tiempo de respuesta: SOPORTE_TIEMPO_RESPUESTA en días hábiles" → "Respondemos el mismo día hábil, lunes a viernes.") · "CONTACT" / "PRIVACY" → ES "CONTACTO" / "PRIVACIDAD".
 - **`og-image.png`:** "The AI-powered CRM for contractors & real estate pros · Start free · $0 Pay-As-You-Go · leadprimecrm.chyrris.com" → "Your intelligent business partner — built for contractors · Start free · English & Español · leadprimecrm.chyrris.com". **Nueva `og-image-es.png`:** "Tu socio de negocios inteligente — hecho para contratistas · Empieza gratis · En español · leadprimecrm.chyrris.com".
 
 ### Texto completo en español (/es), sección por sección
