@@ -6,6 +6,7 @@
  */
 import { appLink } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 const ICONS = ["🔗", "🛡️", "📄", "🏛️", "💰", "🤖"];
 
@@ -59,7 +60,11 @@ const COPY = {
 } as const;
 
 export default function NetworkSection() {
-  const t = COPY[useLang()];
+  const lang = useLang();
+  const t = COPY[lang];
+  const networkAlt = lang === "es"
+    ? "Dos contratistas hispanos se dan la mano frente a una casa en remodelación; uno sostiene una tableta desenfocada."
+    : "Two Hispanic contractors shake hands in front of a home renovation; one holds a blurred tablet.";
 
   return (
     <section id="network" className="py-24 bg-[#050B18] relative overflow-hidden">
@@ -98,31 +103,20 @@ export default function NetworkSection() {
             </p>
           </div>
 
-          {/* CSS visual — member cards mock (replaces external image) */}
-          <div className="relative" aria-hidden="true">
-            <div className="lp-card rounded-2xl p-6 space-y-4">
-              <p className="text-[10px] uppercase tracking-wider text-white/45">{t.demo}</p>
-              {t.members.map(m => (
-                <div key={m.initials} className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <div className="w-11 h-11 rounded-full bg-[#00D4FF]/15 border border-[#00D4FF]/40 flex items-center justify-center text-[#00D4FF] font-bold text-sm">
-                    {m.initials}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">
-                      {m.name} {m.check && <span className="text-[#10B981]">✓</span>}
-                    </p>
-                    <p className="text-white/50 text-xs truncate">{m.meta}</p>
-                  </div>
-                  <span className="ml-auto text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-[#10B981]/15 text-[#10B981] whitespace-nowrap">
-                    {t.verified}
-                  </span>
-                </div>
-              ))}
-              <div className="rounded-xl border border-dashed border-[#00D4FF]/30 p-4 text-center">
-                <p className="text-[#00D4FF] text-sm font-semibold">{t.yourBusiness}</p>
-              </div>
-            </div>
-          </div>
+          <figure className="relative overflow-hidden rounded-2xl border border-[#00D4FF]/20 shadow-[0_24px_80px_rgba(0,212,255,0.13)]">
+            <ResponsiveImage
+              asset="network"
+              alt={networkAlt}
+              width={1600}
+              height={1067}
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="block"
+              imgClassName="aspect-[3/2] h-full w-full object-cover"
+            />
+            <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#050B18]/85 to-transparent px-5 pb-5 pt-16 text-sm font-semibold text-white">
+              {t.badge}
+            </figcaption>
+          </figure>
         </div>
 
         {/* Benefits grid */}

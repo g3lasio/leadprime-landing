@@ -6,6 +6,7 @@
 import { appLink } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 import KeenAvatar from "@/components/KeenAvatar";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 const ICONS = ["🎯", "💬", "📅", "📚", "🔌", "✨"];
 
@@ -55,8 +56,12 @@ const COPY = {
 } as const;
 
 export default function AIAgentSection() {
-  const t = COPY[useLang()];
+  const lang = useLang();
+  const t = COPY[lang];
   const openKeen = () => window.dispatchEvent(new Event("keen:open"));
+  const rooferAlt = lang === "es"
+    ? "Contratista en un techo mirando su teléfono, con el arnés de seguridad visible y la pantalla fuera de foco."
+    : "Contractor on a roof looking at his phone, with a visible safety harness and the screen out of focus.";
 
   return (
     <section className="py-24 bg-[#0A1628] relative overflow-hidden">
@@ -66,30 +71,43 @@ export default function AIAgentSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Live-agent card — the real KEEN is one click away */}
           <div className="order-2 lg:order-1">
-            <div className="lp-card lp-border-cyan rounded-2xl p-8 max-w-md mx-auto text-center">
-              <div className="flex justify-center mb-4">
-                <KeenAvatar size={96} online />
+            <div className="max-w-md mx-auto">
+              <figure className="overflow-hidden rounded-2xl border border-[#F59E0B]/25 shadow-[0_24px_80px_rgba(245,158,11,0.12)]">
+                <ResponsiveImage
+                  asset="keen-roofer"
+                  alt={rooferAlt}
+                  width={1600}
+                  height={1067}
+                  sizes="(min-width: 1024px) 42vw, 100vw"
+                  className="block"
+                  imgClassName="aspect-[3/2] h-full w-full object-cover"
+                />
+              </figure>
+              <div className="lp-card lp-border-cyan rounded-2xl p-8 mx-4 -mt-12 relative text-center">
+                <div className="flex justify-center mb-4">
+                  <KeenAvatar size={96} online />
+                </div>
+                <p className="text-white font-bold text-lg mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  KEEN
+                  <span className="ml-2 align-middle text-xs px-1.5 py-0.5 rounded bg-[#00D4FF]/15 border border-[#00D4FF]/30 text-[#00D4FF] font-semibold uppercase tracking-wide">
+                    {t.chip}
+                  </span>
+                </p>
+                <p className="text-[#10B981] text-xs mb-5">{t.live}</p>
+                <p className="text-sm text-white/70 leading-relaxed mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {t.liveText}
+                </p>
+                <button
+                  onClick={openKeen}
+                  className="lp-btn-primary px-6 py-3 rounded-xl text-sm font-bold w-full"
+                  aria-label={t.chatAria}
+                >
+                  {t.chatCta}
+                </button>
+                <p className="text-xs text-white/65 mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {t.limits}
+                </p>
               </div>
-              <p className="text-white font-bold text-lg mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                KEEN
-                <span className="ml-2 align-middle text-xs px-1.5 py-0.5 rounded bg-[#00D4FF]/15 border border-[#00D4FF]/30 text-[#00D4FF] font-semibold uppercase tracking-wide">
-                  {t.chip}
-                </span>
-              </p>
-              <p className="text-[#10B981] text-xs mb-5">{t.live}</p>
-              <p className="text-sm text-white/70 leading-relaxed mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {t.liveText}
-              </p>
-              <button
-                onClick={openKeen}
-                className="lp-btn-primary px-6 py-3 rounded-xl text-sm font-bold w-full"
-                aria-label={t.chatAria}
-              >
-                {t.chatCta}
-              </button>
-              <p className="text-xs text-white/65 mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {t.limits}
-              </p>
             </div>
           </div>
 
