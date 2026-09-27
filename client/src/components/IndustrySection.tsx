@@ -8,6 +8,7 @@
 import { appLink } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 import PipelineMockup from "@/components/mockups/PipelineMockup";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 const COPY = {
   en: {
@@ -46,8 +47,28 @@ const COPY = {
   },
 } as const;
 
+const TRADES = {
+  en: [
+    { asset: "fences", label: "Fences", alt: "Fence installer securing a wood fence panel with a level." },
+    { asset: "roofing", label: "Roofing", alt: "Roofer working on an asphalt shingle roof at sunset with a visible safety harness." },
+    { asset: "landscaping", label: "Landscaping", alt: "Landscaper arranging plants in a garden with decorative stone." },
+    { asset: "remodeling", label: "Remodeling", alt: "Contractor measuring cabinets in a kitchen under renovation." },
+    { asset: "electrical", label: "Electrical", alt: "Electrician checking an electrical panel in a garage." },
+    { asset: "stucco", label: "Stucco", alt: "Stucco installer applying finish to an exterior wall." },
+  ],
+  es: [
+    { asset: "fences", label: "Cercas", alt: "Instalador de cercas fijando un panel de madera con un nivel." },
+    { asset: "roofing", label: "Techos", alt: "Techero trabajando sobre un techo de teja asfáltica al atardecer, con arnés de seguridad visible." },
+    { asset: "landscaping", label: "Jardinería", alt: "Paisajista acomodando plantas en un jardín con piedra decorativa." },
+    { asset: "remodeling", label: "Remodelación", alt: "Contratista midiendo gabinetes en una cocina en obra." },
+    { asset: "electrical", label: "Electricidad", alt: "Electricista revisando un panel eléctrico en un garaje." },
+    { asset: "stucco", label: "Yeso y estuco", alt: "Yesero aplicando estuco en una pared exterior." },
+  ],
+} as const;
+
 export default function IndustrySection() {
-  const t = COPY[useLang()];
+  const lang = useLang();
+  const t = COPY[lang];
 
   return (
     <section id="industry" className="py-24 bg-[#0A1628] relative overflow-hidden">
@@ -69,6 +90,25 @@ export default function IndustrySection() {
           <p className="text-lg text-white/60 max-w-2xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
             {t.intro}
           </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-16">
+          {TRADES[lang].map((trade) => (
+            <figure key={trade.asset} className="group relative overflow-hidden rounded-xl border border-white/10 bg-[#050B18] shadow-lg">
+              <ResponsiveImage
+                asset={trade.asset}
+                alt={trade.alt}
+                width={1600}
+                height={2000}
+                sizes="(min-width: 1024px) 16vw, (min-width: 640px) 30vw, 48vw"
+                className="block"
+                imgClassName="aspect-[4/5] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#050B18]/90 to-transparent px-3 pb-3 pt-10 text-sm font-bold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {trade.label}
+              </figcaption>
+            </figure>
+          ))}
         </div>
 
         {/* Contractor benefits (Brief D2) next to the pipeline mockup */}

@@ -13,6 +13,7 @@
 import { diagnosticBookingLink, PROGRAM_JOIN_URL } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 import { HOME_PATH } from "@shared/pageMeta";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 type Program = {
   id: keyof typeof PROGRAM_JOIN_URL;
@@ -197,12 +198,32 @@ const ACCENT: Record<Program["id"], string> = {
   legacy: "#F59E0B",
 };
 
+const PROGRAM_VISUALS = {
+  es: {
+    cafeAlt: "Contratista y asesor revisando una tableta en una cafetería con luz de ventana.",
+    steps: [
+      { asset: "activation-welcome", caption: "1. Te damos la bienvenida", alt: "Pantalla de bienvenida al programa LeadPrime Network en un teléfono." },
+      { asset: "activation-agreement", caption: "2. Firmas tu acuerdo en el teléfono", alt: "Pantalla de firma del acuerdo de LeadPrime en un teléfono." },
+      { asset: "activation-ach", caption: "3. Activas tu cuenta; el cobro es el último paso", alt: "Pantalla de activación ACH de LeadPrime en un teléfono." },
+    ],
+  },
+  en: {
+    cafeAlt: "Contractor and advisor reviewing a tablet in a café with window light.",
+    steps: [
+      { asset: "activation-welcome", caption: "1. We welcome you", alt: "Welcome screen for the LeadPrime Network program on a phone." },
+      { asset: "activation-agreement", caption: "2. Sign your agreement on your phone", alt: "LeadPrime agreement signature screen on a phone." },
+      { asset: "activation-ach", caption: "3. Activate your account; billing is the last step", alt: "LeadPrime ACH activation screen on a phone." },
+    ],
+  },
+} as const;
+
 /** Home section by default; `standalone` renders it as the /programas page body. */
 export default function ProgramsSection({ standalone = false }: { standalone?: boolean }) {
   const lang = useLang();
   const t = COPY[lang];
   const Heading = standalone ? "h1" : "h2";
   const title = standalone ? t.pageTitle : t.title;
+  const visuals = PROGRAM_VISUALS[lang];
   // Carries the page's gclid/utm_* into the booking page.
   const bookingHref = diagnosticBookingLink();
 
@@ -230,6 +251,39 @@ export default function ProgramsSection({ standalone = false }: { standalone?: b
           <p className="text-lg text-white/65 max-w-3xl mx-auto leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
             {t.positioning}
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-8 items-center max-w-6xl mx-auto mb-16">
+          <figure className="overflow-hidden rounded-2xl border border-[#F59E0B]/20 shadow-[0_24px_80px_rgba(245,158,11,0.12)]">
+            <ResponsiveImage
+              asset="programs-cafe"
+              alt={visuals.cafeAlt}
+              width={1600}
+              height={1067}
+              sizes="(min-width: 1024px) 48vw, 100vw"
+              className="block"
+              imgClassName="aspect-[3/2] h-full w-full object-cover"
+            />
+          </figure>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 items-end">
+            {visuals.steps.map((step) => (
+              <figure key={step.asset} className="min-w-0">
+                <ResponsiveImage
+                  asset={step.asset}
+                  alt={step.alt}
+                  width={1330}
+                  height={2704}
+                  widths={[480, 768, 1200]}
+                  sizes="(min-width: 1024px) 15vw, 30vw"
+                  className="block"
+                  imgClassName="h-auto w-full drop-shadow-[0_16px_28px_rgba(0,0,0,0.32)]"
+                />
+                <figcaption className="mt-3 text-center text-xs leading-snug text-white/75" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {step.caption}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto items-stretch">

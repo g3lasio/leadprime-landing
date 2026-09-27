@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { appLink, APP_URL, diagnosticBookingLink } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 import { HOME_PATH } from "@shared/pageMeta";
+import ResponsiveImage from "@/components/ResponsiveImage";
 
 const COPY = {
   en: {
@@ -89,12 +90,25 @@ export default function Footer({ variant = "default" }: { variant?: "default" | 
   const home = HOME_PATH[lang];
   const onHome = location.replace(/\/+$/, "") === home.replace(/\/+$/, "");
   const sectionHref = (id: string) => (onHome ? `#${id}` : `${home}#${id}`);
+  const finalCtaAlt = lang === "es"
+    ? "Contratista junto a una camioneta blanca sin marcas al atardecer."
+    : "Contractor beside an unbranded white pickup truck at sunset.";
 
   return (
     <>
       {/* Final CTA */}
-      <section className="py-24 bg-[#0A1628] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF]/5 via-transparent to-[#F59E0B]/5" aria-hidden="true" />
+      <section className="py-24 bg-[#0A1628] relative overflow-hidden isolate">
+        <ResponsiveImage
+          asset="final-cta"
+          alt={finalCtaAlt}
+          width={1600}
+          height={900}
+          sizes="100vw"
+          className="absolute inset-0 block"
+          imgClassName="h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-[#050B18]/70" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00D4FF]/15 via-transparent to-[#F59E0B]/15" aria-hidden="true" />
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
           <h2
             className="text-4xl lg:text-6xl font-black text-white mb-6"
