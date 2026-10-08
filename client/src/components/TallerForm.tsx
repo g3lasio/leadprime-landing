@@ -22,6 +22,11 @@ export type RegisterResult = {
   code: string;
   email: string;
   inviteSent: boolean;
+  smsRequested: boolean;
+  smsStatus: string;
+  smsError: string | null;
+  smsCopyText: string | null;
+  registrationId: number;
   zoomUrl: string;
 };
 
@@ -52,11 +57,13 @@ export default function TallerForm({ mode, onSuccess }: Props) {
   const [city, setCity] = useState("");
   const [note, setNote] = useState("");
   const [consent, setConsent] = useState(true);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [channelPref, setChannelPref] = useState<"email" | "sms" | "both">("email");
   const [agent, setAgent] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RegisterResult | null>(null);
+  const [copied, setCopied] = useState(false);
   const attribution = useMemo(readAttribution, []);
 
   useEffect(() => {
@@ -86,6 +93,11 @@ export default function TallerForm({ mode, onSuccess }: Props) {
     onError: e => setError(e.message || "No se pudo registrar. Intente de nuevo."),
   });
 
+  const markSmsManual = trpc.taller.markSmsManualSent.useMutation({
+    onSuccess: () => setResult(current => current ? { ...current, smsStatus: "manual_sent" } : current),
+    onError: e => setError(e.message || "No se pudo registrar el envío manual."),
+  });
+
   const reset = () => {
     setFullName("");
     setBusiness("");
@@ -96,6 +108,8 @@ export default function TallerForm({ mode, onSuccess }: Props) {
     setNote("");
     setChannelPref("email");
     setConsent(true);
+    setSmsConsent(false);
+    setCopied(false);
     setResult(null);
     setError(null);
   };
@@ -107,6 +121,9 @@ export default function TallerForm({ mode, onSuccess }: Props) {
     if (phone.replace(/\D/g, "").length < 10) return setError("Escriba un teléfono de 10 dígitos.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError("Escriba un correo válido (ahí llega la invitación).");
     if (!consent) return setError("Marque la casilla de permiso para mandar la invitación.");
+    if ((isTeam ? channelPref : smsConsent ? "both" : "email") !== "email" && !smsConsent) {
+      return setError("Confirme que la persona aceptó recibir mensajes de texto antes de seleccionarlo.");
+    }
     if (isTeam && !agent) return setError("Elija quién registra.");
     if (isTeam && pin.trim().length < 4) return setError("Escriba el PIN del equipo.");
     register.mutate({
@@ -118,11 +135,22 @@ export default function TallerForm({ mode, onSuccess }: Props) {
       city: city.trim() || null,
       note: note.trim() || null,
       consent_contact: consent,
-      channel_pref: isTeam ? channelPref : "email",
+      channel_pref: isTeam ? channelPref : smsConsent ? "both" : "email",
+      sms_consent: smsConsent,
       registered_by: isTeam ? agent : "web",
       teamPin: isTeam ? pin.trim() : undefined,
       ...attribution,
     });
+  };
+
+  const copySms = async () => {
+    if (!result?.smsCopyText) return;
+    try {
+      await navigator.clipboard.writeText(result.smsCopyText);
+      setCopied(true);
+    } catch {
+      setError("No se pudo copiar automáticamente. Seleccione el texto y cópielo manualmente.");
+    }
   };
 
   if (result) {
@@ -139,6 +167,33 @@ export default function TallerForm({ mode, onSuccess }: Props) {
         </p>
         {!result.inviteSent && (
           <a href={result.zoomUrl} className="block mt-3 break-all underline" style={{ color: GOLD }}>{result.zoomUrl}</a>
+        )}
+        {result.smsRequested && (
+          <div className="mt-4 rounded-xl border border-white/10 bg-black/25 p-4 text-left text-sm">
+            {result.smsStatus === "delivered" ? (
+              <p className="text-emerald-200"><strong>SMS entregado.</strong> La confirmación por texto llegó al teléfono indicado.</p>
+            ) : result.smsStatus === "sent" ? (
+              <p className="text-emerald-200"><strong>SMS enviado.</strong> LeadPrime lo entregó al proveedor y seguimos el estado.</p>
+            ) : result.smsStatus === "suppressed" ? (
+              <p className="text-amber-100"><strong>SMS detenido.</strong> Esta persona pidió no recibir más mensajes de texto.</p>
+            ) : result.smsStatus === "manual_sent" ? (
+              <p className="text-emerald-200"><strong>Envío manual registrado.</strong> El equipo confirmó que ya mandó el texto.</p>
+            ) : isTeam && result.smsCopyText ? (
+              <div className="space-y-3">
+                <p className="text-white/80"><strong>SMS listo para el canal autorizado.</strong> El envío automático no está confirmado; copie el texto y envíelo solo si ya tiene el consentimiento.</p>
+                <p className="rounded-lg bg-white/[0.06] p-3 text-white/70 leading-relaxed">{result.smsCopyText}</p>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={copySms} className="rounded-lg border border-[#D4AF37]/60 px-3 py-2 font-bold text-[#f4d97a] hover:bg-[#D4AF37]/10">{copied ? "SMS copiado" : "Copiar SMS"}</button>
+                  <button type="button" disabled={markSmsManual.isPending} onClick={() => {
+                    if (window.confirm("Confirme solo si ya envió este SMS por un canal autorizado.")) markSmsManual.mutate({ pin, id: result.registrationId });
+                  }} className="rounded-lg border border-white/20 px-3 py-2 font-bold text-white/80 hover:bg-white/5 disabled:opacity-60">Marcar enviado manualmente</button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-white/65">La autorización SMS quedó registrada. El correo con Zoom sigue siendo la confirmación principal.</p>
+            )}
+            {result.smsError && result.smsStatus !== "manual_sent" && <p className="mt-2 text-xs text-amber-100/80">Estado: {result.smsError}</p>}
+          </div>
         )}
         <div className="mt-5 rounded-xl bg-black/30 border border-white/10 p-4 text-left text-sm text-white/70 space-y-1">
           <p><span className="text-white/45">Cuándo:</span> <strong className="text-white">{TALLER.dateLabel}, {TALLER.timeLabel}</strong> · {TALLER.durationLabel}</p>
@@ -235,7 +290,7 @@ export default function TallerForm({ mode, onSuccess }: Props) {
               </button>
             ))}
           </div>
-          <p className="text-xs text-white/40 mt-2">El correo sale al instante. El mensaje de texto lo manda LeadPrime en la tarde, solo a quien lo pidió.</p>
+          <p className="text-xs text-white/40 mt-2">El correo sale al instante. El SMS solo se envía si la persona acepta la casilla específica de abajo.</p>
         </div>
       )}
 
@@ -243,8 +298,17 @@ export default function TallerForm({ mode, onSuccess }: Props) {
         <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-[#D4AF37]" />
         <span>
           {isTeam
-            ? "El contratista aceptó recibir la invitación y los recordatorios del taller por correo (y por texto si lo pidió)."
+            ? "El contratista aceptó recibir por correo la invitación y los recordatorios del taller."
             : "Acepto recibir por correo la invitación y los recordatorios del taller. Puedo darme de baja cuando quiera."}
+        </span>
+      </label>
+
+      <label className="flex items-start gap-3 text-sm text-white/65 cursor-pointer rounded-xl border border-white/10 bg-white/[0.025] p-3">
+        <input type="checkbox" checked={smsConsent} onChange={e => setSmsConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-[#D4AF37]" />
+        <span>
+          {isTeam
+            ? "La persona aceptó recibir por SMS la confirmación y los recordatorios del taller en este celular. Puede responder STOP para dejar de recibirlos."
+            : "También acepto recibir por SMS la confirmación y los recordatorios del taller en este celular. Puedo responder STOP para dejar de recibirlos."}
         </span>
       </label>
 

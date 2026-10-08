@@ -17,7 +17,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import type { Express } from "express";
 import pkg from "pg";
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { publicProcedure, router } from "../_core/trpc";
 import {
   TALLER,
@@ -40,6 +40,11 @@ const OWNER_EMAILS = () =>
     .filter(Boolean);
 const ZOOM_URL = () => process.env.TALLER_ZOOM_URL ?? TALLER.zoomUrl;
 const SITE = () => process.env.TALLER_SITE_URL ?? "https://leadprimecrm.chyrris.com";
+const SMS_GATEWAY_URL = () => String(process.env.TALLER_SMS_GATEWAY_URL ?? "").trim();
+const SMS_SHARED_SECRET = () => String(process.env.TALLER_SMS_SHARED_SECRET ?? "").trim();
+const SMS_GATEWAY_SCOPE = "taller-sms.v1";
+const SMS_CALLBACK_SCOPE = "taller-sms-status.v1";
+const SMS_CONSENT_VERSION = "taller-sms-consent-2026-10-08";
 
 // ── Base de datos ──────────────────────────────────────────────────────────
 let _pool: InstanceType<typeof Pool> | null = null;
@@ -76,6 +81,20 @@ function ensureTable(): Promise<void> {
           registered_by TEXT NOT NULL DEFAULT 'web',
           channel_pref TEXT NOT NULL DEFAULT 'email',
           consent_contact BOOLEAN NOT NULL DEFAULT false,
+          sms_consent BOOLEAN NOT NULL DEFAULT false,
+          sms_consent_at TIMESTAMPTZ,
+          sms_consent_version TEXT,
+          sms_consent_by TEXT,
+          sms_status TEXT NOT NULL DEFAULT 'not_requested',
+          sms_provider_id TEXT,
+          sms_sent_at TIMESTAMPTZ,
+          sms_delivered_at TIMESTAMPTZ,
+          sms_error TEXT,
+          sms_manual_sent_at TIMESTAMPTZ,
+          sms_reminder1_sent_at TIMESTAMPTZ,
+          sms_reminder2_sent_at TIMESTAMPTZ,
+          sms_last_reply TEXT,
+          sms_last_reply_at TIMESTAMPTZ,
           utm_source TEXT,
           utm_medium TEXT,
           utm_campaign TEXT,
@@ -95,6 +114,23 @@ function ensureTable(): Promise<void> {
         `CREATE UNIQUE INDEX IF NOT EXISTS taller_registrations_event_email
            ON taller_registrations (event_slug, LOWER(email))`
       );
+      await pool.query(`
+        ALTER TABLE taller_registrations
+          ADD COLUMN IF NOT EXISTS sms_consent BOOLEAN NOT NULL DEFAULT false,
+          ADD COLUMN IF NOT EXISTS sms_consent_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS sms_consent_version TEXT,
+          ADD COLUMN IF NOT EXISTS sms_consent_by TEXT,
+          ADD COLUMN IF NOT EXISTS sms_status TEXT NOT NULL DEFAULT 'not_requested',
+          ADD COLUMN IF NOT EXISTS sms_provider_id TEXT,
+          ADD COLUMN IF NOT EXISTS sms_sent_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS sms_delivered_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS sms_error TEXT,
+          ADD COLUMN IF NOT EXISTS sms_manual_sent_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS sms_reminder1_sent_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS sms_reminder2_sent_at TIMESTAMPTZ,
+          ADD COLUMN IF NOT EXISTS sms_last_reply TEXT,
+          ADD COLUMN IF NOT EXISTS sms_last_reply_at TIMESTAMPTZ
+      `);
     })().catch(e => {
       _tableReady = null;
       throw e;
@@ -116,6 +152,20 @@ export type TallerRegistration = {
   registered_by: string;
   channel_pref: string;
   consent_contact: boolean;
+  sms_consent: boolean;
+  sms_consent_at: string | null;
+  sms_consent_version: string | null;
+  sms_consent_by: string | null;
+  sms_status: string;
+  sms_provider_id: string | null;
+  sms_sent_at: string | null;
+  sms_delivered_at: string | null;
+  sms_error: string | null;
+  sms_manual_sent_at: string | null;
+  sms_reminder1_sent_at: string | null;
+  sms_reminder2_sent_at: string | null;
+  sms_last_reply: string | null;
+  sms_last_reply_at: string | null;
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
@@ -528,35 +578,186 @@ async function sendInvitation(reg: TallerRegistration): Promise<{ ok: boolean; e
   return { ok: !result.error, error: result.error };
 }
 
+// ── SMS del taller ─────────────────────────────────────────────────────────
+// El landing nunca habla con Twilio. Firma una petición corta al backend core,
+// que aplica el remitente de sistema, STOP e idempotencia antes de enviar.
+type TallerSmsKind = "confirmation" | "reminder1" | "reminder2" | "resend";
+type TallerSmsOutcome = {
+  ok: boolean;
+  status: string;
+  error: string | null;
+  providerMessageId: string | null;
+};
+
+function requestedSms(reg: Pick<TallerRegistration, "sms_consent" | "channel_pref">): boolean {
+  return reg.sms_consent && (reg.channel_pref === "sms" || reg.channel_pref === "both");
+}
+
+export function manualSmsText(reg: Pick<TallerRegistration, "full_name">): string {
+  const name = firstName(reg.full_name) || "amigo";
+  return `LeadPrime: ${name}, ya quedó registrado para el taller gratis por Zoom del sábado 17 de octubre a las 8:00 AM, hora de California. Revise su correo para entrar y guardar el calendario. Responda STOP para dejar de recibir textos.`;
+}
+
+function statusFromGateway(value: unknown): string {
+  const allowed = new Set(["processing", "sent", "delivered", "failed", "suppressed", "manual_ready", "pending_configuration"]);
+  const status = String(value || "").toLowerCase();
+  return allowed.has(status) ? status : "failed";
+}
+
+async function saveSmsOutcome(registrationId: number, outcome: TallerSmsOutcome): Promise<void> {
+  const pool = getPool();
+  await pool.query(
+    `UPDATE taller_registrations
+        SET sms_status = CASE
+              WHEN sms_status IN ('suppressed', 'delivered') THEN sms_status
+              WHEN sms_status = 'sent' AND $1 IN ('processing', 'pending_configuration', 'manual_ready') THEN sms_status
+              ELSE $1
+            END,
+            sms_provider_id = COALESCE($2, sms_provider_id),
+            sms_sent_at = CASE WHEN $1 = 'sent' THEN COALESCE(sms_sent_at, NOW()) ELSE sms_sent_at END,
+            sms_delivered_at = CASE WHEN $1 = 'delivered' THEN COALESCE(sms_delivered_at, NOW()) ELSE sms_delivered_at END,
+            sms_error = $3
+      WHERE id = $4 AND sms_status <> 'suppressed'`,
+    [outcome.status, outcome.providerMessageId, outcome.error, registrationId]
+  );
+}
+
+async function sendTallerSms(
+  reg: TallerRegistration,
+  kind: TallerSmsKind,
+  idempotencySuffix = "v1"
+): Promise<TallerSmsOutcome> {
+  if (!requestedSms(reg)) {
+    return { ok: false, status: "not_requested", error: null, providerMessageId: null };
+  }
+
+  const url = SMS_GATEWAY_URL();
+  const secret = SMS_SHARED_SECRET();
+  if (!url || secret.length < 32) {
+    const status = reg.registered_by === "web" ? "pending_configuration" : "manual_ready";
+    const outcome = {
+      ok: false,
+      status,
+      error: "El SMS automático aún no está configurado.",
+      providerMessageId: null,
+    };
+    await saveSmsOutcome(reg.id, outcome);
+    return outcome;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== "https:" && process.env.NODE_ENV === "production") {
+      throw new Error("El gateway SMS debe usar HTTPS.");
+    }
+  } catch (error) {
+    const outcome = {
+      ok: false,
+      status: "failed",
+      error: "La configuración del gateway SMS es inválida.",
+      providerMessageId: null,
+    };
+    await saveSmsOutcome(reg.id, outcome);
+    return outcome;
+  }
+
+  const requestBody = JSON.stringify({
+    eventSlug: TALLER_SLUG,
+    registrationId: reg.id,
+    phone: reg.phone,
+    firstName: firstName(reg.full_name) || reg.full_name,
+    kind,
+    idempotencyKey: `${TALLER_SLUG}:${reg.id}:${kind}:${idempotencySuffix}`,
+  });
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const signed = createHmac("sha256", secret)
+    .update(`${SMS_GATEWAY_SCOPE}.${timestamp}.${requestBody}`)
+    .digest("hex");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8_000);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Taller-Timestamp": timestamp,
+        "X-Taller-Signature": signed,
+      },
+      body: requestBody,
+      signal: controller.signal,
+    });
+    const raw = await response.text();
+    let payload: { success?: boolean; status?: string; error?: string; providerMessageId?: string | null } = {};
+    try { payload = JSON.parse(raw); } catch { /* respuesta no JSON: se maneja abajo */ }
+    const outcome: TallerSmsOutcome = {
+      ok: response.ok && payload.success !== false && statusFromGateway(payload.status) !== "failed",
+      status: statusFromGateway(payload.status || (response.ok ? "sent" : "failed")),
+      error: payload.error ? String(payload.error).slice(0, 500) : response.ok ? null : `Gateway SMS ${response.status}`,
+      providerMessageId: payload.providerMessageId ? String(payload.providerMessageId).slice(0, 100) : null,
+    };
+    await saveSmsOutcome(reg.id, outcome);
+    return outcome;
+  } catch (error: any) {
+    const outcome: TallerSmsOutcome = {
+      ok: false,
+      status: "failed",
+      error: error?.name === "AbortError" ? "El gateway SMS no respondió a tiempo." : "No se pudo contactar el gateway SMS.",
+      providerMessageId: null,
+    };
+    await saveSmsOutcome(reg.id, outcome);
+    return outcome;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // ── Planificador de recordatorios (mismo proceso, estado en la base) ───────
 let schedulerStarted = false;
 let schedulerBusy = false;
 
-export async function runReminderPass(now = new Date()): Promise<{ r1: number; r2: number }> {
+export async function runReminderPass(now = new Date()): Promise<{ r1: number; r2: number; sms1: number; sms2: number }> {
   const pool = getPool();
   await ensureTable();
   const eventStart = new Date(TALLER.startIso).getTime();
   const r1At = new Date(TALLER.reminder1Iso).getTime();
   const r2At = new Date(TALLER.reminder2Iso).getTime();
-  const counts = { r1: 0, r2: 0 };
+  const counts = { r1: 0, r2: 0, sms1: 0, sms2: 0 };
   if (now.getTime() >= eventStart + 40 * 60 * 1000) return counts; // el taller ya pasó
-  const due: Array<{ which: 1 | 2; column: string }> = [];
-  if (now.getTime() >= r1At && now.getTime() < r2At) due.push({ which: 1, column: "reminder1_sent_at" });
-  if (now.getTime() >= r2At) due.push({ which: 2, column: "reminder2_sent_at" });
+  const due: Array<{ which: 1 | 2; emailColumn: string; smsColumn: string }> = [];
+  if (now.getTime() >= r1At && now.getTime() < r2At) due.push({ which: 1, emailColumn: "reminder1_sent_at", smsColumn: "sms_reminder1_sent_at" });
+  if (now.getTime() >= r2At) due.push({ which: 2, emailColumn: "reminder2_sent_at", smsColumn: "sms_reminder2_sent_at" });
   for (const d of due) {
     const pending = await pool.query<TallerRegistration>(
       `SELECT * FROM taller_registrations
-        WHERE event_slug = $1 AND status = 'registered' AND ${d.column} IS NULL
+        WHERE event_slug = $1
+          AND status = 'registered'
+          AND (
+            ${d.emailColumn} IS NULL
+            OR (sms_consent = true AND sms_status <> 'suppressed' AND ${d.smsColumn} IS NULL)
+          )
         ORDER BY id ASC LIMIT 200`,
       [TALLER_SLUG]
     );
     for (const reg of pending.rows) {
-      const mail = reminderEmail(reg, d.which);
-      const result = await sendResend({ ...mail, to: [reg.email] });
-      if (!result.error) {
-        await pool.query(`UPDATE taller_registrations SET ${d.column} = NOW() WHERE id = $1`, [reg.id]);
-        if (d.which === 1) counts.r1++;
-        else counts.r2++;
+      const emailSent = d.which === 1 ? Boolean(reg.reminder1_sent_at) : Boolean(reg.reminder2_sent_at);
+      if (!emailSent) {
+        const mail = reminderEmail(reg, d.which);
+        const result = await sendResend({ ...mail, to: [reg.email] });
+        if (!result.error) {
+          await pool.query(`UPDATE taller_registrations SET ${d.emailColumn} = NOW() WHERE id = $1`, [reg.id]);
+          if (d.which === 1) counts.r1++;
+          else counts.r2++;
+        }
+      }
+
+      const smsSent = d.which === 1 ? Boolean(reg.sms_reminder1_sent_at) : Boolean(reg.sms_reminder2_sent_at);
+      if (requestedSms(reg) && reg.sms_status !== "suppressed" && !smsSent) {
+        const sms = await sendTallerSms(reg, d.which === 1 ? "reminder1" : "reminder2");
+        if (sms.ok && (sms.status === "sent" || sms.status === "delivered")) {
+          await pool.query(`UPDATE taller_registrations SET ${d.smsColumn} = NOW() WHERE id = $1`, [reg.id]);
+          if (d.which === 1) counts.sms1++;
+          else counts.sms2++;
+        }
       }
     }
   }
@@ -575,7 +776,9 @@ export function startTallerScheduler(): void {
     schedulerBusy = true;
     try {
       const sent = await runReminderPass();
-      if (sent.r1 || sent.r2) console.log(`[Taller] Recordatorios enviados: viernes ${sent.r1}, sábado ${sent.r2}`);
+      if (sent.r1 || sent.r2 || sent.sms1 || sent.sms2) {
+        console.log(`[Taller] Recordatorios enviados: correo viernes ${sent.r1}, correo sábado ${sent.r2}, SMS viernes ${sent.sms1}, SMS sábado ${sent.sms2}`);
+      }
     } catch (e) {
       console.error("[Taller] Error en el planificador de recordatorios:", e);
     } finally {
@@ -593,6 +796,84 @@ export function registerTallerRoutes(app: Express): void {
     res.set("Content-Disposition", 'attachment; filename="taller-leadprime-17-oct.ics"');
     res.set("Cache-Control", "public, max-age=3600");
     res.send(buildIcs());
+  });
+  // Core llama aquí después de que Twilio acepta, entrega, falla o recibe STOP.
+  // El cuerpo crudo se preserva en _core/index.ts para comprobar el HMAC exacto.
+  app.post("/api/taller/sms-status", async (req, res) => {
+    const secret = SMS_SHARED_SECRET();
+    const timestamp = String(req.headers["x-taller-timestamp"] ?? "").trim();
+    const received = String(req.headers["x-taller-signature"] ?? "").trim();
+    const rawBody = String((req as typeof req & { rawBody?: string }).rawBody ?? "");
+    const seconds = Number(timestamp);
+    if (!secret || secret.length < 32 || !timestamp || !received || !rawBody || !Number.isFinite(seconds)) {
+      return res.status(401).json({ error: "Callback SMS no autorizado" });
+    }
+    if (Math.abs(Math.floor(Date.now() / 1000) - seconds) > 5 * 60) {
+      return res.status(401).json({ error: "Callback SMS vencido" });
+    }
+    const expected = createHmac("sha256", secret)
+      .update(`${SMS_CALLBACK_SCOPE}.${timestamp}.${rawBody}`)
+      .digest("hex");
+    const a = Buffer.from(received);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      return res.status(401).json({ error: "Callback SMS inválido" });
+    }
+
+    const parsed = z.object({
+      eventSlug: z.literal(TALLER_SLUG),
+      registrationId: z.number().int().positive(),
+      providerMessageId: z.string().max(100).nullable(),
+      status: z.enum(["processing", "sent", "delivered", "failed", "suppressed", "received"]),
+      error: z.string().max(500).nullable(),
+      inboundBody: z.string().max(600).nullable().optional(),
+      inboundAt: z.string().datetime().nullable().optional(),
+    }).safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "Callback SMS inválido" });
+    }
+
+    try {
+      await ensureTable();
+      const value = parsed.data;
+      await getPool().query(
+        `UPDATE taller_registrations
+            SET sms_status = CASE
+                  -- START llega como un callback firmado "sent" con texto
+                  -- entrante. Sólo ese evento puede reactivar un STOP.
+                  WHEN sms_status = 'suppressed' AND $1 = 'sent' AND $4 IS NOT NULL THEN 'sent'
+                  WHEN sms_status IN ('suppressed', 'delivered') THEN sms_status
+                  -- Un callback de un intento anterior no puede degradar el
+                  -- estado del proveedor que el registro ya muestra.
+                  WHEN sms_provider_id IS NOT NULL AND $2 IS NOT NULL AND sms_provider_id <> $2 THEN sms_status
+                  WHEN sms_status = 'failed' AND $1 = 'sent' THEN sms_status
+                  WHEN $1 IN ('sent', 'delivered', 'failed', 'suppressed') THEN $1
+                  ELSE sms_status
+                END,
+                sms_provider_id = CASE
+                  WHEN sms_provider_id IS NOT NULL AND $2 IS NOT NULL AND sms_provider_id <> $2 THEN sms_provider_id
+                  ELSE COALESCE($2, sms_provider_id)
+                END,
+                sms_delivered_at = CASE WHEN $1 = 'delivered' THEN COALESCE(sms_delivered_at, NOW()) ELSE sms_delivered_at END,
+                sms_error = CASE WHEN $1 = 'failed' THEN $3 ELSE sms_error END,
+                sms_last_reply = COALESCE($4, sms_last_reply),
+                sms_last_reply_at = CASE WHEN $4 IS NULL THEN sms_last_reply_at ELSE COALESCE($5::timestamptz, NOW()) END
+          WHERE event_slug = $6 AND id = $7`,
+        [
+          value.status,
+          value.providerMessageId,
+          value.error,
+          value.inboundBody ?? null,
+          value.inboundAt ?? null,
+          value.eventSlug,
+          value.registrationId,
+        ]
+      );
+      return res.json({ ok: true });
+    } catch (error) {
+      console.error("[Taller] callback SMS no pudo guardar el estado", error);
+      return res.status(503).json({ error: "No se pudo guardar el callback SMS" });
+    }
   });
   app.get("/api/taller/health", async (_req, res) => {
     let db = false;
@@ -614,6 +895,7 @@ export function registerTallerRoutes(app: Express): void {
       db,
       mail: Boolean(process.env.RESEND_API_KEY),
       pin: Boolean(process.env.TALLER_TEAM_PIN || process.env.EVENTO_ADMIN_PIN),
+      smsGateway: Boolean(SMS_GATEWAY_URL() && SMS_SHARED_SECRET().length >= 32),
       registrations,
       scheduler: schedulerStarted,
     });
@@ -631,6 +913,7 @@ const registerInput = z.object({
   note: z.string().trim().max(600).optional().nullable(),
   consent_contact: z.boolean().default(true),
   channel_pref: z.enum(["email", "sms", "both"]).default("email"),
+  sms_consent: z.boolean().default(false),
   /** 'web' para el registro público; nombre del agente para el equipo (requiere teamPin). */
   registered_by: z.string().trim().max(40).default("web"),
   teamPin: z.string().max(20).optional(),
@@ -664,6 +947,12 @@ export const tallerRouter = router({
     if (!phone) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Escriba un teléfono de 10 dígitos de Estados Unidos." });
     }
+    if (input.sms_consent && input.channel_pref === "email") {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Elija SMS o ambos canales después de recibir el consentimiento para mensajes de texto." });
+    }
+    if (byTeam && input.channel_pref !== "email" && !input.sms_consent) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Confirme que la persona aceptó recibir SMS antes de seleccionarlo." });
+    }
     const email = input.email.toLowerCase();
     const pool = getPool();
     await ensureTable();
@@ -673,17 +962,47 @@ export const tallerRouter = router({
       [TALLER_SLUG, email]
     );
     if (existing.rows.length > 0) {
-      const reg = existing.rows[0];
+      let reg = existing.rows[0];
       if (reg.status !== "registered") {
         await pool.query(`UPDATE taller_registrations SET status = 'registered' WHERE id = $1`, [reg.id]);
       }
+      // Una persona anónima que conoce un correo no puede elevar el canal de un
+      // registro existente ni provocar un SMS. Sólo un agente autenticado por
+      // PIN puede dejar evidencia de un consentimiento renovado.
+      if (byTeam && input.sms_consent && input.channel_pref !== "email") {
+        const updated = await pool.query<TallerRegistration>(
+          `UPDATE taller_registrations
+              SET sms_consent = true,
+                  sms_consent_at = NOW(),
+                  sms_consent_version = $1,
+                  sms_consent_by = $2,
+                  channel_pref = CASE
+                    WHEN channel_pref = 'email' THEN $3
+                    WHEN channel_pref <> $3 THEN 'both'
+                    ELSE channel_pref
+                  END
+            WHERE id = $4
+            RETURNING *`,
+          [SMS_CONSENT_VERSION, input.registered_by, input.channel_pref, reg.id]
+        );
+        reg = updated.rows[0];
+      }
       const resent = await sendInvitation(reg);
+      const maySendSms = byTeam && input.sms_consent && requestedSms(reg);
+      const sms = maySendSms
+        ? await sendTallerSms(reg, "confirmation")
+        : { ok: false, status: reg.sms_status, error: null, providerMessageId: reg.sms_provider_id };
       return {
         success: true,
         alreadyRegistered: true,
         code: reg.attendee_code,
         email: reg.email,
         inviteSent: resent.ok,
+        smsRequested: requestedSms(reg),
+        smsStatus: sms.status,
+        smsError: sms.error,
+        smsCopyText: byTeam && requestedSms(reg) && !sms.ok ? manualSmsText(reg) : null,
+        registrationId: reg.id,
         zoomUrl: ZOOM_URL(),
       };
     }
@@ -697,9 +1016,9 @@ export const tallerRouter = router({
     const inserted = await pool.query<TallerRegistration>(
       `INSERT INTO taller_registrations (
          event_slug, full_name, business_name, phone, email, trade, city, note,
-         registered_by, channel_pref, consent_contact,
-         utm_source, utm_medium, utm_campaign, gclid, referrer, attendee_code
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+         registered_by, channel_pref, consent_contact, sms_consent, sms_consent_at, sms_consent_version,
+         sms_consent_by, utm_source, utm_medium, utm_campaign, gclid, referrer, attendee_code
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,CASE WHEN $12 THEN NOW() ELSE NULL END,CASE WHEN $12 THEN $13 ELSE NULL END,CASE WHEN $12 THEN $14 ELSE NULL END,$15,$16,$17,$18,$19,$20)
        RETURNING *`,
       [
         TALLER_SLUG,
@@ -713,6 +1032,9 @@ export const tallerRouter = router({
         byTeam ? input.registered_by : "web",
         input.channel_pref,
         input.consent_contact,
+        input.sms_consent,
+        SMS_CONSENT_VERSION,
+        byTeam ? input.registered_by : "web_self",
         input.utm_source || null,
         input.utm_medium || null,
         input.utm_campaign || null,
@@ -723,6 +1045,9 @@ export const tallerRouter = router({
     );
     const reg = inserted.rows[0];
     const invite = await sendInvitation(reg);
+    const sms = requestedSms(reg)
+      ? await sendTallerSms(reg, "confirmation")
+      : { ok: false, status: "not_requested", error: null, providerMessageId: null };
     const total = await pool.query(
       `SELECT COUNT(*)::int AS n FROM taller_registrations WHERE event_slug = $1 AND status = 'registered'`,
       [TALLER_SLUG]
@@ -734,6 +1059,11 @@ export const tallerRouter = router({
       code,
       email,
       inviteSent: invite.ok,
+      smsRequested: requestedSms(reg),
+      smsStatus: sms.status,
+      smsError: sms.error,
+      smsCopyText: byTeam && requestedSms(reg) ? manualSmsText(reg) : null,
+      registrationId: reg.id,
       zoomUrl: ZOOM_URL(),
     };
   }),
@@ -769,6 +1099,11 @@ export const tallerRouter = router({
       byRegisteredBy,
       byTrade,
       invitesFailed: rows.filter(r => r.invite_error).length,
+      smsConsented: rows.filter(r => requestedSms(r)).length,
+      smsSent: rows.filter(r => ["sent", "delivered"].includes(r.sms_status)).length,
+      smsDelivered: rows.filter(r => r.sms_status === "delivered").length,
+      smsFailed: rows.filter(r => r.sms_status === "failed").length,
+      smsSuppressed: rows.filter(r => r.sms_status === "suppressed").length,
     };
   }),
 
@@ -783,6 +1118,53 @@ export const tallerRouter = router({
       const sent = await sendInvitation(r.rows[0]);
       if (!sent.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: sent.error ?? "No se pudo enviar" });
       return { success: true };
+    }),
+
+  /** Panel: reintento explícito del SMS automático, sólo si existe consentimiento. */
+  adminResendSms: publicProcedure
+    .input(z.object({ pin: z.string(), id: z.number() }))
+    .mutation(async ({ input }) => {
+      requirePin(input.pin);
+      const pool = getPool();
+      const r = await pool.query<TallerRegistration>(
+        `SELECT * FROM taller_registrations WHERE event_slug = $1 AND id = $2`,
+        [TALLER_SLUG, input.id]
+      );
+      const reg = r.rows[0];
+      if (!reg) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      if (!requestedSms(reg)) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "No hay consentimiento SMS para este registro." });
+      }
+      if (reg.sms_status === "suppressed") {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "La persona pidió no recibir más SMS." });
+      }
+      // Ventana de cinco minutos: protege contra doble clic sin impedir que el
+      // equipo haga otro reintento consciente más tarde.
+      const sent = await sendTallerSms(reg, "resend", String(Math.floor(Date.now() / (5 * 60 * 1000))));
+      if (!sent.ok) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: sent.error ?? "No se pudo enviar el SMS" });
+      }
+      return { success: true, status: sent.status };
+    }),
+
+  /** Equipo/panel: registra que el agente confirmó el envío manual tras copiarlo. */
+  markSmsManualSent: publicProcedure
+    .input(z.object({ pin: z.string(), id: z.number() }))
+    .mutation(async ({ input }) => {
+      requirePin(input.pin);
+      const pool = getPool();
+      const r = await pool.query<TallerRegistration>(
+        `UPDATE taller_registrations
+            SET sms_status = CASE WHEN sms_status IN ('sent', 'delivered', 'suppressed') THEN sms_status ELSE 'manual_sent' END,
+                sms_manual_sent_at = CASE WHEN sms_status IN ('sent', 'delivered', 'suppressed') THEN sms_manual_sent_at ELSE NOW() END
+          WHERE event_slug = $1 AND id = $2 AND sms_consent = true
+          RETURNING id, sms_status`,
+        [TALLER_SLUG, input.id]
+      );
+      if (r.rows.length === 0) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "El registro no tiene consentimiento SMS." });
+      }
+      return { success: true, status: r.rows[0].sms_status };
     }),
 
   /** Panel: cambiar estado (cancelado / asistió / registrado) (PIN). */

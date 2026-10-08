@@ -21,6 +21,16 @@ type Reg = {
   registered_by: string;
   channel_pref: string;
   consent_contact: boolean;
+  sms_consent: boolean;
+  sms_status: string;
+  sms_sent_at: string | null;
+  sms_delivered_at: string | null;
+  sms_error: string | null;
+  sms_manual_sent_at: string | null;
+  sms_reminder1_sent_at: string | null;
+  sms_reminder2_sent_at: string | null;
+  sms_last_reply: string | null;
+  sms_last_reply_at: string | null;
   attendee_code: string;
   status: string;
   invite_sent_at: string | null;
@@ -36,10 +46,10 @@ function fmt(d: string | null) {
 }
 
 function downloadCSV(rows: Reg[]) {
-  const headers = ["Nombre", "Negocio", "Teléfono", "Correo", "Oficio", "Ciudad", "Nota", "Registró", "Prefiere", "Código", "Estado", "Invitación", "Recordatorio vie", "Recordatorio sáb", "Fecha registro"];
+  const headers = ["Nombre", "Negocio", "Teléfono", "Correo", "Oficio", "Ciudad", "Nota", "Registró", "Prefiere", "Consentimiento SMS", "Estado SMS", "Última respuesta SMS", "Código", "Estado", "Invitación", "Recordatorio vie", "Recordatorio sáb", "SMS vie", "SMS sáb", "Fecha registro"];
   const data = rows.map(r => [
-    r.full_name, r.business_name ?? "", r.phone, r.email, r.trade ?? "", r.city ?? "", r.note ?? "", r.registered_by, r.channel_pref, r.attendee_code, r.status,
-    r.invite_sent_at ? fmt(r.invite_sent_at) : r.invite_error ? `ERROR: ${r.invite_error}` : "", fmt(r.reminder1_sent_at), fmt(r.reminder2_sent_at), fmt(r.created_at),
+    r.full_name, r.business_name ?? "", r.phone, r.email, r.trade ?? "", r.city ?? "", r.note ?? "", r.registered_by, r.channel_pref, r.sms_consent ? "sí" : "no", r.sms_status, r.sms_last_reply ?? "", r.attendee_code, r.status,
+    r.invite_sent_at ? fmt(r.invite_sent_at) : r.invite_error ? `ERROR: ${r.invite_error}` : "", fmt(r.reminder1_sent_at), fmt(r.reminder2_sent_at), fmt(r.sms_reminder1_sent_at), fmt(r.sms_reminder2_sent_at), fmt(r.created_at),
   ]);
   const csv = [headers, ...data].map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
@@ -49,6 +59,23 @@ function downloadCSV(rows: Reg[]) {
   a.download = `taller-17oct-registrados-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function manualSmsText(reg: Reg): string {
+  const name = reg.full_name.trim().split(/\s+/)[0] || "amigo";
+  return `LeadPrime: ${name}, ya quedó registrado para el taller gratis por Zoom del sábado 17 de octubre a las 8:00 AM, hora de California. Revise su correo para entrar y guardar el calendario. Responda STOP para dejar de recibir textos.`;
+}
+
+function smsStatusLabel(reg: Reg): string {
+  if (!reg.sms_consent) return "Sin consentimiento";
+  if (reg.sms_status === "delivered") return `Entregado ${fmt(reg.sms_delivered_at)}`;
+  if (reg.sms_status === "sent") return `Enviado ${fmt(reg.sms_sent_at)}`;
+  if (reg.sms_status === "manual_sent") return `Manual ${fmt(reg.sms_manual_sent_at)}`;
+  if (reg.sms_status === "suppressed") return "STOP / no enviar";
+  if (reg.sms_status === "failed") return `Falló${reg.sms_error ? `: ${reg.sms_error}` : ""}`;
+  if (reg.sms_status === "manual_ready") return "Listo para copiar";
+  if (reg.sms_status === "pending_configuration") return "Pendiente de configurar";
+  return "Pendiente";
 }
 
 export default function AdminTallerPage() {
@@ -77,6 +104,14 @@ export default function AdminTallerPage() {
     onSuccess: () => { toast.success("Invitación reenviada"); refetch(); },
     onError: e => toast.error(e.message),
   });
+  const resendSms = trpc.taller.adminResendSms.useMutation({
+    onSuccess: () => { toast.success("SMS enviado al proveedor"); refetch(); },
+    onError: e => { toast.error(e.message); refetch(); },
+  });
+  const markSmsManual = trpc.taller.markSmsManualSent.useMutation({
+    onSuccess: () => { toast.success("Envío manual registrado"); refetch(); },
+    onError: e => toast.error(e.message),
+  });
   const updateStatus = trpc.taller.adminUpdateStatus.useMutation({
     onSuccess: () => { toast.success("Estado actualizado"); refetch(); },
     onError: e => toast.error(e.message),
@@ -86,7 +121,7 @@ export default function AdminTallerPage() {
     onError: e => toast.error(e.message),
   });
   const runReminders = trpc.taller.adminRunReminders.useMutation({
-    onSuccess: r => { toast.success(`Recordatorios: viernes ${r.r1}, sábado ${r.r2}`); refetch(); },
+    onSuccess: r => { toast.success(`Recordatorios: correo vie ${r.r1}, correo sáb ${r.r2}, SMS vie ${r.sms1}, SMS sáb ${r.sms2}`); refetch(); },
     onError: e => toast.error(e.message),
   });
 
@@ -135,6 +170,10 @@ export default function AdminTallerPage() {
               <Stat label="Hoy" value={data?.today ?? 0} />
               <Stat label="Por el equipo" value={Object.entries(data?.byRegisteredBy ?? {}).filter(([k]) => k !== "web").reduce((a, [, v]) => a + (v as number), 0)} />
               <Stat label="Invitaciones con error" value={data?.invitesFailed ?? 0} warn={(data?.invitesFailed ?? 0) > 0} />
+              <Stat label="SMS con permiso" value={data?.smsConsented ?? 0} />
+              <Stat label="SMS enviados" value={data?.smsSent ?? 0} />
+              <Stat label="SMS entregados" value={data?.smsDelivered ?? 0} />
+              <Stat label="STOP / fallidos" value={(data?.smsSuppressed ?? 0) + (data?.smsFailed ?? 0)} warn={((data?.smsSuppressed ?? 0) + (data?.smsFailed ?? 0)) > 0} />
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-white/50 mb-4">
               {Object.entries(data?.byRegisteredBy ?? {}).map(([k, v]) => (
@@ -160,6 +199,7 @@ export default function AdminTallerPage() {
                     <th className="text-left p-3">Nota</th>
                     <th className="text-left p-3">Registró</th>
                     <th className="text-left p-3">Invitación</th>
+                    <th className="text-left p-3">SMS</th>
                     <th className="text-left p-3">Acciones</th>
                   </tr>
                 </thead>
@@ -183,9 +223,23 @@ export default function AdminTallerPage() {
                         {r.invite_sent_at ? <span className="text-emerald-300">✓ {fmt(r.invite_sent_at)}</span> : <span className="text-red-300">✗ {r.invite_error ?? "sin enviar"}</span>}
                         <br /><span className="text-white/35">vie {r.reminder1_sent_at ? "✓" : "—"} · sáb {r.reminder2_sent_at ? "✓" : "—"}</span>
                       </td>
+                      <td className="p-3 text-xs max-w-[220px]">
+                        <p className={r.sms_status === "delivered" || r.sms_status === "sent" ? "text-emerald-300" : r.sms_status === "failed" || r.sms_status === "suppressed" ? "text-amber-200" : "text-white/60"}>{smsStatusLabel(r)}</p>
+                        {r.sms_consent && <p className="text-white/35 mt-1">vie {r.sms_reminder1_sent_at ? "✓" : "—"} · sáb {r.sms_reminder2_sent_at ? "✓" : "—"}</p>}
+                        {r.sms_last_reply && <p className="mt-1 text-cyan-200/80 break-words">Resp.: {r.sms_last_reply}</p>}
+                      </td>
                       <td className="p-3">
                         <div className="flex flex-col gap-1 text-xs">
                           <button onClick={() => resend.mutate({ pin: enteredPin, id: r.id })} className="px-2 py-1 rounded border border-white/20 hover:border-white/40 text-left">Reenviar invitación</button>
+                          {r.sms_consent && r.sms_status !== "suppressed" && (
+                            <button onClick={() => resendSms.mutate({ pin: enteredPin, id: r.id })} disabled={resendSms.isPending} className="px-2 py-1 rounded border border-[#D4AF37]/45 text-[#f4d97a] hover:border-[#D4AF37] text-left disabled:opacity-50">Reenviar SMS</button>
+                          )}
+                          {r.sms_consent && !["sent", "delivered", "suppressed", "manual_sent"].includes(r.sms_status) && (
+                            <>
+                              <button onClick={() => navigator.clipboard.writeText(manualSmsText(r)).then(() => toast.success("SMS copiado")).catch(() => toast.error("No se pudo copiar el SMS"))} className="px-2 py-1 rounded border border-white/20 hover:border-white/40 text-left">Copiar SMS</button>
+                              <button onClick={() => { if (window.confirm("Confirme solo si ya envió este SMS por un canal autorizado.")) markSmsManual.mutate({ pin: enteredPin, id: r.id }); }} disabled={markSmsManual.isPending} className="px-2 py-1 rounded border border-white/20 hover:border-white/40 text-left disabled:opacity-50">Marcar SMS manual</button>
+                            </>
+                          )}
                           {r.status === "registered" ? (
                             <button onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "cancelled" })} className="px-2 py-1 rounded border border-white/20 hover:border-white/40 text-left">Cancelar</button>
                           ) : (
@@ -197,7 +251,7 @@ export default function AdminTallerPage() {
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={7} className="p-6 text-center text-white/40">Todavía no hay registros.</td></tr>
+                    <tr><td colSpan={8} className="p-6 text-center text-white/40">Todavía no hay registros.</td></tr>
                   )}
                 </tbody>
               </table>
