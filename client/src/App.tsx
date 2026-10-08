@@ -15,6 +15,9 @@ const EventoPage = lazy(() => import("./pages/EventoPage"));
 const AdminEventoPage = lazy(() => import("./pages/AdminEventoPage"));
 const CheckInPage = lazy(() => import("./pages/CheckInPage"));
 const SupportPage = lazy(() => import("./pages/SupportPage"));
+const TallerPage = lazy(() => import("./pages/TallerPage"));
+const TallerEquipoPage = lazy(() => import("./pages/TallerEquipoPage"));
+const AdminTallerPage = lazy(() => import("./pages/AdminTallerPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function RouteFallback() {
@@ -37,6 +40,9 @@ function Router() {
         <Route path={"/support"} component={SupportPage} />
         <Route path={"/soporte"} component={SupportPage} />
         <Route path={"/evento"} component={EventoPage} />
+        <Route path={"/taller"} component={TallerPage} />
+        <Route path={"/taller/equipo"} component={TallerEquipoPage} />
+        <Route path={"/admin/taller"} component={AdminTallerPage} />
         <Route path={"/admin/evento/checkin"} component={CheckInPage} />
         <Route path={"/admin/evento"} component={AdminEventoPage} />
         <Route path={"/404"} component={NotFound} />

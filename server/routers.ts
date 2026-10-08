@@ -1,5 +1,6 @@
 import { COOKIE_NAME } from "@shared/const";
 import { eventoRouter } from "./routers/evento";
+import { tallerRouter } from "./routers/taller";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
@@ -19,6 +20,7 @@ export const appRouter = router({
   }),
 
   evento: eventoRouter,
+  taller: tallerRouter,
 });
 
 export type AppRouter = typeof appRouter;

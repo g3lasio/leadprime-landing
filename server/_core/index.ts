@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import { registerEventoApproveRoute } from "../routers/eventoApprove.js";
 import { registerQRRoute } from "../routers/qrRoute.js";
 import { registerKeenRoutes } from "../keen/route.js";
+import { registerTallerRoutes, startTallerScheduler } from "../routers/taller.js";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -54,6 +55,9 @@ async function startServer() {
   registerQRRoute(app);
   // KEEN live chat (Brief F4) — key only from KEEN_API_KEY env, strict limits
   registerKeenRoutes(app);
+  // Taller virtual del 17-oct: archivo de calendario, salud y recordatorios
+  registerTallerRoutes(app);
+  startTallerScheduler();
   // tRPC API
   app.use(
     "/api/trpc",

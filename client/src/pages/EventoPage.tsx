@@ -12,6 +12,8 @@
  * "LeadPrime · Chyrris Technologies".
  */
 
+import { TALLER } from "@shared/taller";
+
 const GOLD = "#D4AF37";
 
 type PastEvent = {
@@ -73,13 +75,53 @@ export default function EventoPage() {
           Eventos
         </h1>
         <p className="text-white/50 mt-3 max-w-xl mx-auto text-sm md:text-base">
-          Encuentros privados para contratistas del Bay Area. Las próximas
-          fechas se anunciarán aquí.
+          Encuentros para contratistas de California, en español.
         </p>
       </header>
 
-      {/* Galería de eventos pasados */}
       <main className="max-w-5xl mx-auto px-6 pb-20">
+        {/* Próximo evento: taller virtual del 17 de octubre */}
+        <h2 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-6">
+          Próximo evento
+        </h2>
+        <article
+          className="rounded-2xl overflow-hidden border mb-14"
+          style={{ borderColor: `${GOLD}66`, background: `linear-gradient(135deg, ${GOLD}1f, ${GOLD}06)` }}
+        >
+          <div className="p-6 md:p-10">
+            <span
+              className="inline-block text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border mb-5"
+              style={{ color: GOLD, borderColor: `${GOLD}66`, backgroundColor: "rgba(5,11,24,0.85)" }}
+            >
+              Gratis · por Zoom · en español
+            </span>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: GOLD }}>
+              ◆ {TALLER.series} · {TALLER.shortName}
+            </p>
+            <h3 className="text-2xl md:text-4xl font-extrabold leading-tight max-w-3xl">
+              {TALLER.title}
+            </h3>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm md:text-base text-white/70">
+              <span>📅 {TALLER.dateLabel}</span>
+              <span>🕗 {TALLER.timeLabel}</span>
+              <span>⏱ {TALLER.durationLabel}</span>
+            </div>
+            <p className="text-white/75 text-sm md:text-base leading-relaxed mt-5 max-w-3xl">
+              <strong className="text-white">{TALLER.hook.number}</strong> {TALLER.hook.text} El sábado le decimos qué le van a pedir, cómo dejar su contrato en regla y cómo cobrar el depósito con tarjeta antes de empezar.
+            </p>
+            <p className="text-white/50 text-sm mt-3">{TALLER.whoIsItFor}</p>
+            <a
+              href="/taller"
+              className="inline-block mt-6 px-7 py-3.5 rounded-xl font-extrabold text-[#0a1628] hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: GOLD }}
+            >
+              Apartar mi lugar gratis →
+            </a>
+            <p className="text-xs text-white/35 mt-4">{TALLER.disclaimer}</p>
+          </div>
+        </article>
+
+        {/* Galería de eventos pasados */}
         <h2 className="text-sm font-bold uppercase tracking-widest text-white/40 mb-6">
           Eventos realizados
         </h2>
@@ -128,21 +170,11 @@ export default function EventoPage() {
           ))}
         </div>
 
-        {/* Próximos eventos — sin registro hasta que exista fecha confirmada */}
         <div className="mt-12 rounded-2xl border border-dashed border-white/15 p-8 text-center">
-          <p className="text-white/60 font-semibold">¿Próximo evento?</p>
+          <p className="text-white/60 font-semibold">¿Se registró y no le llegó la invitación?</p>
           <p className="text-white/40 text-sm mt-2 max-w-md mx-auto">
-            Estamos preparando la siguiente fecha. Los miembros de LeadPrime
-            Network serán los primeros en enterarse dentro de la plataforma.
+            Revise la carpeta de spam o escríbanos a {TALLER.contactEmail} y se la reenviamos.
           </p>
-          <a
-            href="https://leadprime.chyrris.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-5 px-6 py-3 rounded-xl bg-cyan-400 text-[#050B18] font-bold text-sm hover:bg-cyan-300 transition-colors"
-          >
-            Conocer LeadPrime
-          </a>
         </div>
       </main>
 
