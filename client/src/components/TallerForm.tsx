@@ -165,9 +165,9 @@ export default function TallerForm({ mode, onSuccess }: Props) {
           <div>
             <label className={labelCls} htmlFor="t-agent">Quién registra</label>
             <select id="t-agent" className={inputCls} value={agent} onChange={e => setAgent(e.target.value)}>
-              <option value="">Elegir…</option>
+              <option value="" className="bg-white text-slate-950">Elegir…</option>
               {TALLER_TEAM_MEMBERS.map(m => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m} className="bg-white text-slate-950">{m}</option>
               ))}
             </select>
           </div>
@@ -204,9 +204,9 @@ export default function TallerForm({ mode, onSuccess }: Props) {
         <div>
           <label className={labelCls} htmlFor="t-trade">Oficio</label>
           <select id="t-trade" className={inputCls} value={trade} onChange={e => setTrade(e.target.value)}>
-            <option value="">Elegir…</option>
+            <option value="" className="bg-white text-slate-950">Elegir…</option>
             {TALLER_TRADES.map(t => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t} className="bg-white text-slate-950">{t}</option>
             ))}
           </select>
         </div>
