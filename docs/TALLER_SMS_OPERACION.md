@@ -42,7 +42,7 @@ Mientras falte alguna variable crítica, el sistema **falla cerrado**: no manda 
 
 | Variable | Requisito |
 |---|---|
-| `TALLER_SMS_GATEWAY_URL` | URL HTTPS del Core seguida de `/api/taller-sms/sms`. |
+| `TALLER_SMS_GATEWAY_URL` | URL HTTPS del Core seguida de `/taller-sms/sms`. |
 | `TALLER_SMS_SHARED_SECRET` | El mismo secreto de al menos 32 caracteres configurado en Core. |
 | `NEON_DATABASE_URL` | Base de datos del landing; ya necesaria para el registro y el panel. |
 | `TALLER_TEAM_PIN` | PIN privado para `/taller/equipo` y `/admin/taller`. |
