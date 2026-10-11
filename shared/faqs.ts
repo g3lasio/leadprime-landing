@@ -16,7 +16,7 @@ export const FAQS: Record<Lang, Faq[]> = {
     },
     {
       q: "Is there a free CRM for contractors?",
-      a: "Yes. LeadPrime starts at $0 with the Pay-As-You-Go plan — you get $15 in welcome credits, no credit card required, and you only pay for what you use. Paid plans are optional: Pro is $15/month and Network Elite is $249/month.",
+      a: "Yes. LeadPrime starts at $0 with the Pay-As-You-Go plan — every new account gets $15 in welcome credits, no credit card required, and you only pay for what you use. Paid plans are optional: Pro is $19.90/month and Network Elite is $249/month.",
     },
     {
       q: "What's the difference between the plans and the Growth and Legacy programs?",
@@ -43,7 +43,7 @@ export const FAQS: Record<Lang, Faq[]> = {
     },
     {
       q: "¿Hay un CRM gratis para contratistas?",
-      a: "Sí. LeadPrime empieza en $0 con el plan de pago por uso (Pay-As-You-Go): recibes $15 en créditos de bienvenida, sin tarjeta de crédito, y solo pagas lo que usas. Los planes pagados son opcionales: Pro cuesta $15 al mes y Network Elite $249 al mes.",
+      a: "Sí. LeadPrime empieza en $0 con el plan de pago por uso (Pay-As-You-Go): toda cuenta nueva recibe $15 en créditos de bienvenida, sin tarjeta de crédito, y solo pagas lo que usas. Los planes pagados son opcionales: Pro cuesta $19.90 al mes y Network Elite $249 al mes.",
     },
     {
       q: "¿Cuál es la diferencia entre los planes y los programas Growth y Legacy?",

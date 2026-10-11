@@ -22,7 +22,7 @@ const COPY = {
     secondaryCta: "See how it works",
     programsLink: "Talked to our team? See the Growth & Legacy programs →",
     stats: [
-      { value: "AI", label: "Powered Automation" },
+      { value: "AI", label: "Intelligent Automation" },
       { value: "$0", label: "To Get Started" },
       { value: "5+", label: "Integrations" },
     ],

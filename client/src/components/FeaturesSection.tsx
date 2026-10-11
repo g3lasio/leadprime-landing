@@ -15,6 +15,7 @@ type Feature = {
   color: string;
   icon: ReactNode;
   highlight?: boolean;
+  aiBadge?: boolean;
   comingSoon?: boolean;
 };
 
@@ -56,6 +57,7 @@ const features: Feature[] = [
     },
     color: "#00D4FF",
     highlight: true,
+    aiBadge: true,
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -131,7 +133,7 @@ const features: Feature[] = [
   {
     title: { en: "Business Health Passport", es: "Business Health Passport" },
     desc: {
-      en: "Track your licenses, insurance, and docs so you never miss a renewal or a fine.",
+      en: "Track your licenses, insurance, and docs so you never miss a renewal or get hit with a fine.",
       es: "Controla tus licencias, seguros y documentos para que no se te pase una renovación ni te caiga una multa.",
     },
     color: "#A78BFA",
@@ -249,7 +251,7 @@ export default function FeaturesSection() {
               </div>
               <h3 className="font-bold text-white mb-2 text-sm" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {feat.title[lang]}
-                {feat.highlight && !feat.comingSoon && (
+                {feat.aiBadge && !feat.comingSoon && (
                   <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-[#F59E0B]/20 text-[#F59E0B] font-semibold">
                     {t.ai}
                   </span>
