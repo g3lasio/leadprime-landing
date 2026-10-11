@@ -15,7 +15,7 @@ const COPY = {
     chip: "AI Agent",
     live: "● Live on this page",
     liveText:
-      "This isn't a mockup — KEEN is live right here. Ask it about pricing, features, or whether LeadPrime fits your business. English o español.",
+      "This isn't a mockup — KEEN is live right here. Ask it about pricing, features, or whether LeadPrime fits your business. In English or Spanish.",
     chatCta: "Chat with KEEN now",
     chatAria: "Open the KEEN chat",
     limits: "Public product info only · usage limits apply per visitor.",

@@ -73,7 +73,7 @@ const COPY = {
     },
     passport: {
       kicker: "Business Health Passport · compliance shield",
-      title: { before: "Never miss a", highlight: "license, renewal, or fine." },
+      title: { before: "Your license and insurance,", highlight: "always up to date." },
       text: "Track your licenses, insurance, W-9, and workers' comp in one place. LeadPrime warns you before anything expires — so an expired license or missing document never turns into a fine.",
       risk: "Contracting without an active license can mean fines in the thousands — in some states well into five figures. LeadPrime keeps you covered before it gets there.",
       mock: {
