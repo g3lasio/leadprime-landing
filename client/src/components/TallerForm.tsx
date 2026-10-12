@@ -20,7 +20,7 @@ export type RegisterResult = {
   success: boolean;
   alreadyRegistered: boolean;
   code: string;
-  email: string;
+  email: string | null;
   inviteSent: boolean;
   smsRequested: boolean;
   smsStatus: string;
@@ -57,8 +57,6 @@ export default function TallerForm({ mode, onSuccess }: Props) {
   const [city, setCity] = useState("");
   const [note, setNote] = useState("");
   const [consent, setConsent] = useState(true);
-  const [smsConsent, setSmsConsent] = useState(false);
-  const [channelPref, setChannelPref] = useState<"email" | "sms" | "both">("email");
   const [agent, setAgent] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -106,9 +104,7 @@ export default function TallerForm({ mode, onSuccess }: Props) {
     setTrade("");
     setCity("");
     setNote("");
-    setChannelPref("email");
     setConsent(true);
-    setSmsConsent(false);
     setCopied(false);
     setResult(null);
     setError(null);
@@ -118,25 +114,25 @@ export default function TallerForm({ mode, onSuccess }: Props) {
     e.preventDefault();
     setError(null);
     if (fullName.trim().length < 2) return setError("Escriba el nombre del contratista.");
-    if (phone.replace(/\D/g, "").length < 10) return setError("Escriba un teléfono de 10 dígitos.");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError("Escriba un correo válido (ahí llega la invitación).");
+    // Basta UN canal de contacto: teléfono de 10 dígitos o correo. El correo
+    // es opcional; sin correo, la invitación llega por texto con el Zoom.
+    const phoneDigits = phone.replace(/\D/g, "");
+    const emailTrim = email.trim();
+    if (!emailTrim && phoneDigits.length < 10) return setError("Se necesita un teléfono de 10 dígitos o un correo para mandar la invitación.");
+    if (phoneDigits.length > 0 && phoneDigits.length < 10) return setError("Escriba el teléfono completo de 10 dígitos, o déjelo vacío si solo tiene correo.");
+    if (emailTrim && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrim)) return setError("El correo no se ve válido. Corríjalo o déjelo vacío: sin correo, la invitación llega por texto.");
     if (!consent) return setError("Marque la casilla de permiso para mandar la invitación.");
-    if ((isTeam ? channelPref : smsConsent ? "both" : "email") !== "email" && !smsConsent) {
-      return setError("Confirme que la persona aceptó recibir mensajes de texto antes de seleccionarlo.");
-    }
     if (isTeam && !agent) return setError("Elija quién registra.");
     if (isTeam && pin.trim().length < 4) return setError("Escriba el PIN del equipo.");
     register.mutate({
       full_name: fullName.trim(),
       business_name: business.trim() || null,
-      phone: phone.trim(),
-      email: email.trim(),
+      phone: phone.trim() || null,
+      email: emailTrim || null,
       trade: trade || null,
       city: city.trim() || null,
       note: note.trim() || null,
       consent_contact: consent,
-      channel_pref: isTeam ? channelPref : smsConsent ? "both" : "email",
-      sms_consent: smsConsent,
       registered_by: isTeam ? agent : "web",
       teamPin: isTeam ? pin.trim() : undefined,
       ...attribution,
@@ -163,7 +159,9 @@ export default function TallerForm({ mode, onSuccess }: Props) {
         <p className="text-white/70 mt-2 leading-relaxed">
           {result.inviteSent
             ? <>La invitación con el enlace de Zoom {result.alreadyRegistered ? "se volvió a mandar" : "ya salió"} a <strong className="text-white">{result.email}</strong>. Si no la ve en 2 minutos, revise la carpeta de spam o promociones.</>
-            : <>El registro quedó guardado, pero el correo no salió todavía (lo reintentamos). Guarde este enlace de Zoom: </>}
+            : result.email
+              ? <>El registro quedó guardado, pero el correo no salió todavía (lo reintentamos). Guarde este enlace de Zoom: </>
+              : <>Sin correo no hay problema: la invitación va por mensaje de texto (SMS) con el enlace de Zoom. Guarde también este enlace: </>}
         </p>
         {!result.inviteSent && (
           <a href={result.zoomUrl} className="block mt-3 break-all underline" style={{ color: GOLD }}>{result.zoomUrl}</a>
@@ -190,7 +188,7 @@ export default function TallerForm({ mode, onSuccess }: Props) {
                 </div>
               </div>
             ) : (
-              <p className="text-white/65">La autorización SMS quedó registrada. El correo con Zoom sigue siendo la confirmación principal.</p>
+              <p className="text-white/65">La confirmación por texto quedó registrada y trae el enlace de Zoom.</p>
             )}
             {result.smsError && result.smsStatus !== "manual_sent" && <p className="mt-2 text-xs text-amber-100/80">Estado: {result.smsError}</p>}
           </div>
@@ -246,14 +244,16 @@ export default function TallerForm({ mode, onSuccess }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls} htmlFor="t-phone">Teléfono (celular) *</label>
+          <label className={labelCls} htmlFor="t-phone">Teléfono (celular)</label>
           <input id="t-phone" className={inputCls} type="tel" inputMode="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="(707) 000-0000" autoComplete="tel" />
         </div>
         <div>
-          <label className={labelCls} htmlFor="t-email">Correo (ahí llega la invitación) *</label>
+          <label className={labelCls} htmlFor="t-email">Correo electrónico (si tiene)</label>
           <input id="t-email" className={inputCls} type="email" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="nombre@gmail.com" autoComplete="email" />
         </div>
       </div>
+
+      <p className="text-sm text-white/55 -mt-1">La invitación se manda por correo <strong className="text-white/75">y</strong> por mensaje de texto. Sin correo no hay problema: la invitación llega por texto con el enlace de Zoom.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -276,39 +276,12 @@ export default function TallerForm({ mode, onSuccess }: Props) {
         <textarea id="t-note" className={inputCls + " min-h-[88px]"} value={note} onChange={e => setNote(e.target.value)} maxLength={600} placeholder={isTeam ? "Ej. Tiene 3 ayudantes, nunca ha tenido workers' comp, le deben $8,000 de un trabajo" : "Ej. Quiero saber si mi contrato cumple y cómo cobrar el depósito con tarjeta"} />
       </div>
 
-      {isTeam && (
-        <div>
-          <p className={labelCls}>¿Cómo quiere recibir la invitación?</p>
-          <div className="flex flex-wrap gap-2">
-            {([
-              ["email", "Correo"],
-              ["sms", "Mensaje de texto"],
-              ["both", "Correo y texto"],
-            ] as const).map(([v, l]) => (
-              <button type="button" key={v} onClick={() => setChannelPref(v)} className={`px-4 py-2 rounded-full border text-sm font-bold transition-colors ${channelPref === v ? "border-[#D4AF37] text-[#0a1628]" : "border-white/20 text-white/70 hover:border-white/40"}`} style={channelPref === v ? { backgroundColor: GOLD } : undefined}>
-                {l}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-white/40 mt-2">El correo sale al instante. El SMS solo se envía si la persona acepta la casilla específica de abajo.</p>
-        </div>
-      )}
-
-      <label className="flex items-start gap-3 text-sm text-white/65 cursor-pointer">
+      <label className="flex items-start gap-3 text-sm text-white/65 cursor-pointer rounded-xl border border-white/10 bg-white/[0.025] p-3">
         <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-[#D4AF37]" />
         <span>
           {isTeam
-            ? "El contratista aceptó recibir por correo la invitación y los recordatorios del taller."
-            : "Acepto recibir por correo la invitación y los recordatorios del taller. Puedo darme de baja cuando quiera."}
-        </span>
-      </label>
-
-      <label className="flex items-start gap-3 text-sm text-white/65 cursor-pointer rounded-xl border border-white/10 bg-white/[0.025] p-3">
-        <input type="checkbox" checked={smsConsent} onChange={e => setSmsConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-[#D4AF37]" />
-        <span>
-          {isTeam
-            ? "La persona aceptó recibir por SMS la confirmación y los recordatorios del taller en este celular. Puede responder STOP para dejar de recibirlos."
-            : "También acepto recibir por SMS la confirmación y los recordatorios del taller en este celular. Puedo responder STOP para dejar de recibirlos."}
+            ? "La persona acepta recibir la invitación y los recordatorios por correo y por mensaje de texto (SMS)."
+            : "Acepto recibir mi invitación y los recordatorios del taller por correo y por mensaje de texto (SMS)."}
         </span>
       </label>
 

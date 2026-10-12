@@ -37,7 +37,7 @@ export default function TallerEquipoPage() {
         <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: GOLD }}>◆ Registro en la llamada</p>
         <h1 className="text-2xl md:text-3xl font-extrabold">Taller del {TALLER.dateLabel}</h1>
         <p className="text-white/60 mt-2 text-sm md:text-base leading-relaxed">
-          Llene esto mientras el contratista está en la línea. Al dar clic, la invitación con el enlace de Zoom le llega a su correo en segundos y usted sigue con la siguiente llamada. Deletree el correo de vuelta antes de enviar.
+          Llene esto mientras el contratista está en la línea. Al dar clic, la invitación con el enlace de Zoom le llega por correo y por mensaje de texto en segundos y usted sigue con la siguiente llamada. Si da correo, deletréelo de vuelta antes de enviar.
         </p>
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-[#0A1222] p-6 md:p-7">
@@ -46,7 +46,7 @@ export default function TallerEquipoPage() {
 
         <div className="mt-8 rounded-2xl border border-dashed border-white/15 p-5 text-sm text-white/55 space-y-2">
           <p className="font-bold text-white/80">Lo que debe decir el registro</p>
-          <p>Nombre completo, teléfono de 10 dígitos y el correo deletreado de vuelta. Si no tiene correo, pregunte por el de un hijo o de su esposa que lo vea por él; sin correo no hay invitación.</p>
+          <p>Nombre completo y teléfono de 10 dígitos. El correo es opcional: si lo da, deletréelo de vuelta. Si no tiene correo, no hay problema: la invitación llega por texto con el enlace de Zoom.</p>
           <p>En la nota escriba lo que dijo en sus palabras: cuántos ayudantes tiene, si tiene workers' comp, cuánto le deben. Eso se usa el sábado.</p>
           <p>Después de registrarlo, en LeadPrime: Callback + nota «TALLER 17-oct · registrado».</p>
         </div>
