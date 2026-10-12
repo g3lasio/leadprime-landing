@@ -1,7 +1,7 @@
 /**
  * /taller — registro público al taller virtual del sábado 17 de octubre de 2026.
  * Español. El contratista se registra solo; la invitación con el enlace de
- * Zoom le llega al instante por correo.
+ * Zoom le llega al instante por correo y por SMS (sin correo, solo por SMS).
  */
 import { useEffect } from "react";
 import TallerForm from "@/components/TallerForm";
@@ -86,7 +86,7 @@ export default function TallerPage() {
         <section id="registro" className="lg:sticky lg:top-6 self-start">
           <div className="rounded-2xl border border-white/10 bg-[#0A1222] p-6 md:p-7 shadow-2xl">
             <h2 className="text-xl md:text-2xl font-extrabold">Aparte su lugar</h2>
-            <p className="text-white/55 text-sm mt-1 mb-5">Es gratis. La invitación con el enlace de Zoom le llega al correo en segundos.</p>
+            <p className="text-white/55 text-sm mt-1 mb-5">Es gratis. La invitación con el enlace de Zoom le llega por correo y por mensaje de texto en segundos. Sin correo, llega por texto.</p>
             <TallerForm mode="public" />
           </div>
         </section>

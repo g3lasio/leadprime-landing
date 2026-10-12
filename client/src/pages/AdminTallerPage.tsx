@@ -14,7 +14,7 @@ type Reg = {
   full_name: string;
   business_name: string | null;
   phone: string;
-  email: string;
+  email: string | null;
   trade: string | null;
   city: string | null;
   note: string | null;
@@ -48,7 +48,7 @@ function fmt(d: string | null) {
 function downloadCSV(rows: Reg[]) {
   const headers = ["Nombre", "Negocio", "Teléfono", "Correo", "Oficio", "Ciudad", "Nota", "Registró", "Prefiere", "Consentimiento SMS", "Estado SMS", "Última respuesta SMS", "Código", "Estado", "Invitación", "Recordatorio vie", "Recordatorio sáb", "SMS vie", "SMS sáb", "Fecha registro"];
   const data = rows.map(r => [
-    r.full_name, r.business_name ?? "", r.phone, r.email, r.trade ?? "", r.city ?? "", r.note ?? "", r.registered_by, r.channel_pref, r.sms_consent ? "sí" : "no", r.sms_status, r.sms_last_reply ?? "", r.attendee_code, r.status,
+    r.full_name, r.business_name ?? "", r.phone, r.email ?? "", r.trade ?? "", r.city ?? "", r.note ?? "", r.registered_by, r.channel_pref, r.sms_consent ? "sí" : "no", r.sms_status, r.sms_last_reply ?? "", r.attendee_code, r.status,
     r.invite_sent_at ? fmt(r.invite_sent_at) : r.invite_error ? `ERROR: ${r.invite_error}` : "", fmt(r.reminder1_sent_at), fmt(r.reminder2_sent_at), fmt(r.sms_reminder1_sent_at), fmt(r.sms_reminder2_sent_at), fmt(r.created_at),
   ]);
   const csv = [headers, ...data].map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -63,7 +63,7 @@ function downloadCSV(rows: Reg[]) {
 
 function manualSmsText(reg: Reg): string {
   const name = reg.full_name.trim().split(/\s+/)[0] || "amigo";
-  return `LeadPrime: ${name}, ya quedó registrado para el taller gratis por Zoom del sábado 17 de octubre a las 8:00 AM, hora de California. Revise su correo para entrar y guardar el calendario. Responda STOP para dejar de recibir textos.`;
+  return `LeadPrime: ${name}, ya quedó registrado para el taller gratis por Zoom del sábado 17 de octubre a las 8:00 AM, hora de California. Entre aquí: ${TALLER.zoomUrl} Responda STOP para dejar de recibir textos.`;
 }
 
 function smsStatusLabel(reg: Reg): string {

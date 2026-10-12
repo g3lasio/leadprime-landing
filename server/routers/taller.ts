@@ -6,6 +6,8 @@
  *   1. se guarda en Neon (tabla taller_registrations, se crea sola),
  *   2. recibe al instante la invitación por correo (Resend, desde
  *      leadprime@chyrris.com) con el enlace de Zoom y el archivo de calendario,
+ *      y por SMS si dejó teléfono — el correo es opcional: sin correo, el SMS
+ *      con el enlace de Zoom ES la invitación,
  *   3. avisa al equipo (TALLER_OWNER_EMAIL),
  *   4. recibe dos recordatorios automáticos (viernes 9:00 AM y sábado 7:15 AM,
  *      hora de California) que manda el planificador de este mismo proceso.
@@ -131,6 +133,14 @@ function ensureTable(): Promise<void> {
           ADD COLUMN IF NOT EXISTS sms_last_reply TEXT,
           ADD COLUMN IF NOT EXISTS sms_last_reply_at TIMESTAMPTZ
       `);
+      // Regla nueva (2026-10-12): el correo es opcional. Basta UN canal de
+      // contacto — correo o teléfono — y la invitación sale por los que haya.
+      // Los registros existentes tienen ambos datos; solo se relaja el NOT NULL.
+      await pool.query(`
+        ALTER TABLE taller_registrations
+          ALTER COLUMN email DROP NOT NULL,
+          ALTER COLUMN phone DROP NOT NULL
+      `);
     })().catch(e => {
       _tableReady = null;
       throw e;
@@ -144,8 +154,9 @@ export type TallerRegistration = {
   event_slug: string;
   full_name: string;
   business_name: string | null;
-  phone: string;
-  email: string;
+  /** Puede faltar: basta un canal de contacto (correo o teléfono). */
+  phone: string | null;
+  email: string | null;
   trade: string | null;
   city: string | null;
   note: string | null;
@@ -529,8 +540,8 @@ function ownerEmail(reg: TallerRegistration, total: number): EmailPayload {
   const rows: Array<[string, string]> = [
     ["Nombre", reg.full_name],
     ["Negocio", reg.business_name ?? "—"],
-    ["Teléfono", reg.phone],
-    ["Correo", reg.email],
+    ["Teléfono", reg.phone ?? "—"],
+    ["Correo", reg.email ?? "—"],
     ["Oficio", reg.trade ?? "—"],
     ["Ciudad", reg.city ?? "—"],
     ["Nota", reg.note ?? "—"],
@@ -547,7 +558,7 @@ function ownerEmail(reg: TallerRegistration, total: number): EmailPayload {
   const html = layout(
     `<tr><td style="padding:0 8px 16px;">
       <h2 style="margin:0 0 4px;color:${GOLD};font-size:20px;">🎟 Registro #${total} al taller del 17</h2>
-      <p style="margin:0 0 14px;color:rgba(255,255,255,0.5);font-size:13px;">La invitación ya salió al correo del contratista${reg.channel_pref !== "email" ? " · pidió también mensaje de texto" : ""}.</p>
+      <p style="margin:0 0 14px;color:rgba(255,255,255,0.5);font-size:13px;">${reg.email && reg.phone ? "La invitación ya salió por correo y por mensaje de texto." : reg.phone ? "Sin correo: la invitación salió por mensaje de texto." : "La invitación ya salió al correo del contratista."}</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${table}</table>
       <p style="margin:16px 0 0;color:rgba(255,255,255,0.4);font-size:12px;">Lista completa: <a href="${SITE()}/admin/taller" style="color:${GOLD};">${SITE()}/admin/taller</a></p>
     </td></tr>`,
@@ -564,9 +575,13 @@ function ownerEmail(reg: TallerRegistration, total: number): EmailPayload {
 
 // ── Envío de invitación (con registro del resultado) ───────────────────────
 async function sendInvitation(reg: TallerRegistration): Promise<{ ok: boolean; error: string | null }> {
+  // Sin correo no hay nada que mandar por este canal: no es un error, la
+  // invitación de ese registro ES el SMS de confirmación (trae el Zoom).
+  const to = reg.email;
+  if (!to) return { ok: false, error: null };
   const pool = getPool();
   const mail = invitationEmail(reg);
-  const result = await sendResend({ ...mail, to: [reg.email] });
+  const result = await sendResend({ ...mail, to: [to] });
   await pool.query(
     `UPDATE taller_registrations
        SET invite_email_id = COALESCE($1, invite_email_id),
@@ -595,7 +610,7 @@ function requestedSms(reg: Pick<TallerRegistration, "sms_consent" | "channel_pre
 
 export function manualSmsText(reg: Pick<TallerRegistration, "full_name">): string {
   const name = firstName(reg.full_name) || "amigo";
-  return `LeadPrime: ${name}, ya quedó registrado para el taller gratis por Zoom del sábado 17 de octubre a las 8:00 AM, hora de California. Revise su correo para entrar y guardar el calendario. Responda STOP para dejar de recibir textos.`;
+  return `LeadPrime: ${name}, ya quedó registrado para el taller gratis por Zoom del sábado 17 de octubre a las 8:00 AM, hora de California. Entre aquí: ${ZOOM_URL()} Responda STOP para dejar de recibir textos.`;
 }
 
 function statusFromGateway(value: unknown): string {
@@ -627,7 +642,7 @@ async function sendTallerSms(
   kind: TallerSmsKind,
   idempotencySuffix = "v1"
 ): Promise<TallerSmsOutcome> {
-  if (!requestedSms(reg)) {
+  if (!requestedSms(reg) || !reg.phone) {
     return { ok: false, status: "not_requested", error: null, providerMessageId: null };
   }
 
@@ -740,7 +755,7 @@ export async function runReminderPass(now = new Date()): Promise<{ r1: number; r
     );
     for (const reg of pending.rows) {
       const emailSent = d.which === 1 ? Boolean(reg.reminder1_sent_at) : Boolean(reg.reminder2_sent_at);
-      if (!emailSent) {
+      if (!emailSent && reg.email) {
         const mail = reminderEmail(reg, d.which);
         const result = await sendResend({ ...mail, to: [reg.email] });
         if (!result.error) {
@@ -903,26 +918,61 @@ export function registerTallerRoutes(app: Express): void {
 }
 
 // ── tRPC ───────────────────────────────────────────────────────────────────
-const registerInput = z.object({
-  full_name: z.string().trim().min(2).max(100),
-  business_name: z.string().trim().max(120).optional().nullable(),
-  phone: z.string().trim().min(7).max(25),
-  email: z.string().trim().email().max(160),
-  trade: z.string().trim().max(80).optional().nullable(),
-  city: z.string().trim().max(80).optional().nullable(),
-  note: z.string().trim().max(600).optional().nullable(),
-  consent_contact: z.boolean().default(true),
-  channel_pref: z.enum(["email", "sms", "both"]).default("email"),
-  sms_consent: z.boolean().default(false),
-  /** 'web' para el registro público; nombre del agente para el equipo (requiere teamPin). */
-  registered_by: z.string().trim().max(40).default("web"),
-  teamPin: z.string().max(20).optional(),
-  utm_source: z.string().max(120).optional().nullable(),
-  utm_medium: z.string().max(120).optional().nullable(),
-  utm_campaign: z.string().max(120).optional().nullable(),
-  gclid: z.string().max(200).optional().nullable(),
-  referrer: z.string().max(300).optional().nullable(),
-});
+// Regla 2026-10-12: la invitación se manda SIEMPRE por correo Y por SMS, sin
+// selector de canal. El correo es opcional: basta un canal de contacto y, si
+// no hay correo, el SMS (con el enlace de Zoom) es la invitación. Una sola
+// bandera de consentimiento (consent_contact) cubre ambos canales; de ella se
+// derivan channel_pref, email_consent (consent_contact) y sms_consent.
+// channel_pref / sms_consent del cliente se aceptan solo por compatibilidad
+// con formularios viejos en caché: se ignoran por completo.
+const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const registerInput = z
+  .object({
+    full_name: z.string().trim().min(2).max(100),
+    business_name: z.string().trim().max(120).optional().nullable(),
+    phone: z.string().trim().max(25).optional().nullable(),
+    email: z.string().trim().max(160).optional().nullable(),
+    trade: z.string().trim().max(80).optional().nullable(),
+    city: z.string().trim().max(80).optional().nullable(),
+    note: z.string().trim().max(600).optional().nullable(),
+    consent_contact: z.boolean().default(true),
+    channel_pref: z.enum(["email", "sms", "both"]).optional(),
+    sms_consent: z.boolean().optional(),
+    /** 'web' para el registro público; nombre del agente para el equipo (requiere teamPin). */
+    registered_by: z.string().trim().max(40).default("web"),
+    teamPin: z.string().max(20).optional(),
+    utm_source: z.string().max(120).optional().nullable(),
+    utm_medium: z.string().max(120).optional().nullable(),
+    utm_campaign: z.string().max(120).optional().nullable(),
+    gclid: z.string().max(200).optional().nullable(),
+    referrer: z.string().max(300).optional().nullable(),
+  })
+  .superRefine((val, ctx) => {
+    const email = (val.email ?? "").trim();
+    const phone = (val.phone ?? "").trim();
+    if (!email && !phone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["phone"],
+        message: "Se necesita al menos un correo o un teléfono para mandar la invitación.",
+      });
+    }
+    if (email && !EMAIL_FORMAT.test(email)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["email"],
+        message: "El correo no se ve válido. Corríjalo o déjelo vacío: sin correo, la invitación llega por mensaje de texto.",
+      });
+    }
+  });
+
+/** Canal derivado de los datos de contacto: nunca lo elige el cliente. */
+function deriveChannel(email: string | null, phone: string | null): "email" | "sms" | "both" {
+  if (email && phone) return "both";
+  if (phone) return "sms";
+  return "email";
+}
 
 export const tallerRouter = router({
   /** Datos públicos del evento (para la página). */
@@ -943,52 +993,69 @@ export const tallerRouter = router({
     }
     const byTeam = input.registered_by !== "web";
     if (byTeam) requirePin(input.teamPin ?? "");
-    const phone = normalizePhone(input.phone);
-    if (!phone) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Escriba un teléfono de 10 dígitos de Estados Unidos." });
+    const rawEmail = (input.email ?? "").trim();
+    const email = rawEmail ? rawEmail.toLowerCase() : null;
+    const rawPhone = (input.phone ?? "").trim();
+    let phone: string | null = null;
+    if (rawPhone) {
+      phone = normalizePhone(rawPhone);
+      if (!phone) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Escriba un teléfono de 10 dígitos de Estados Unidos." });
+      }
     }
-    if (input.sms_consent && input.channel_pref === "email") {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Elija SMS o ambos canales después de recibir el consentimiento para mensajes de texto." });
+    if (!email && !phone) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "Se necesita al menos un correo o un teléfono para mandar la invitación." });
     }
-    if (byTeam && input.channel_pref !== "email" && !input.sms_consent) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Confirme que la persona aceptó recibir SMS antes de seleccionarlo." });
-    }
-    const email = input.email.toLowerCase();
+    // Una sola aceptación cubre la invitación por correo y por texto; el canal
+    // y el consentimiento SMS se derivan de los datos de contacto presentes.
+    const accepted = input.consent_contact;
+    const smsConsent = accepted && Boolean(phone);
+    const channelPref = deriveChannel(email, phone);
     const pool = getPool();
     await ensureTable();
 
-    const existing = await pool.query<TallerRegistration>(
-      `SELECT * FROM taller_registrations WHERE event_slug = $1 AND LOWER(email) = $2`,
-      [TALLER_SLUG, email]
-    );
-    if (existing.rows.length > 0) {
+    // Duplicado: por correo si lo hay; si no hay (o no coincide), por teléfono
+    // normalizado (últimos 10 dígitos).
+    let existing = email
+      ? await pool.query<TallerRegistration>(
+          `SELECT * FROM taller_registrations WHERE event_slug = $1 AND LOWER(email) = $2 ORDER BY created_at ASC LIMIT 1`,
+          [TALLER_SLUG, email]
+        )
+      : null;
+    if ((!existing || existing.rows.length === 0) && phone) {
+      existing = await pool.query<TallerRegistration>(
+        `SELECT * FROM taller_registrations
+          WHERE event_slug = $1
+            AND RIGHT(REGEXP_REPLACE(COALESCE(phone, ''), '\\D', '', 'g'), 10) = $2
+          ORDER BY created_at ASC LIMIT 1`,
+        [TALLER_SLUG, phone.replace(/\D/g, "").slice(-10)]
+      );
+    }
+    if (existing && existing.rows.length > 0) {
       let reg = existing.rows[0];
       if (reg.status !== "registered") {
         await pool.query(`UPDATE taller_registrations SET status = 'registered' WHERE id = $1`, [reg.id]);
       }
-      // Una persona anónima que conoce un correo no puede elevar el canal de un
-      // registro existente ni provocar un SMS. Sólo un agente autenticado por
-      // PIN puede dejar evidencia de un consentimiento renovado.
-      if (byTeam && input.sms_consent && input.channel_pref !== "email") {
+      // Una persona anónima que conoce un correo no puede renovar el
+      // consentimiento de un registro existente ni provocar un SMS. Sólo un
+      // agente autenticado por PIN puede dejar evidencia de la aceptación.
+      if (byTeam && accepted) {
         const updated = await pool.query<TallerRegistration>(
           `UPDATE taller_registrations
-              SET sms_consent = true,
-                  sms_consent_at = NOW(),
-                  sms_consent_version = $1,
-                  sms_consent_by = $2,
-                  channel_pref = CASE
-                    WHEN channel_pref = 'email' THEN $3
-                    WHEN channel_pref <> $3 THEN 'both'
-                    ELSE channel_pref
-                  END
-            WHERE id = $4
+              SET consent_contact = true,
+                  sms_consent = $1,
+                  sms_consent_at = CASE WHEN $1 THEN NOW() ELSE sms_consent_at END,
+                  sms_consent_version = CASE WHEN $1 THEN $2 ELSE sms_consent_version END,
+                  sms_consent_by = CASE WHEN $1 THEN $3 ELSE sms_consent_by END,
+                  channel_pref = $4
+            WHERE id = $5
             RETURNING *`,
-          [SMS_CONSENT_VERSION, input.registered_by, input.channel_pref, reg.id]
+          [Boolean(reg.phone), SMS_CONSENT_VERSION, input.registered_by, deriveChannel(reg.email, reg.phone), reg.id]
         );
         reg = updated.rows[0];
       }
       const resent = await sendInvitation(reg);
-      const maySendSms = byTeam && input.sms_consent && requestedSms(reg);
+      const maySendSms = byTeam && accepted && requestedSms(reg);
       const sms = maySendSms
         ? await sendTallerSms(reg, "confirmation")
         : { ok: false, status: reg.sms_status, error: null, providerMessageId: reg.sms_provider_id };
@@ -1030,9 +1097,9 @@ export const tallerRouter = router({
         input.city || null,
         input.note || null,
         byTeam ? input.registered_by : "web",
-        input.channel_pref,
-        input.consent_contact,
-        input.sms_consent,
+        channelPref,
+        accepted,
+        smsConsent,
         SMS_CONSENT_VERSION,
         byTeam ? input.registered_by : "web_self",
         input.utm_source || null,
@@ -1115,6 +1182,9 @@ export const tallerRouter = router({
       const pool = getPool();
       const r = await pool.query<TallerRegistration>(`SELECT * FROM taller_registrations WHERE id = $1`, [input.id]);
       if (r.rows.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      if (!r.rows[0].email) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Este registro no tiene correo: su invitación va por SMS." });
+      }
       const sent = await sendInvitation(r.rows[0]);
       if (!sent.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: sent.error ?? "No se pudo enviar" });
       return { success: true };
