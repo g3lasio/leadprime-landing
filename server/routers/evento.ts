@@ -432,6 +432,7 @@ const step2Input = z.object({
   code: z.string().length(6),
   business_name: z.string().nullable().optional(),
   trade_types: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
   has_cslb_license: z.string().nullable().optional(),
   cslb_license_number: z.string().nullable().optional(),
   years_in_business: z.string().nullable().optional(),
