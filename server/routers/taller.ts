@@ -496,8 +496,8 @@ export function reminderEmail(
     ? `Mañana a las 8:00 AM, ${name}. Aquí está su enlace.`
     : `Empezamos en 45 minutos, ${name}.`;
   const sub = isTomorrow
-    ? `El taller gratis «${TALLER.shortName}» es mañana sábado a las 8:00 AM, hora de California. Dura 40 minutos. Entre 10 minutos antes y tenga a la mano su contrato actual.`
-    : `Entre ya por Zoom; abrimos la sala 10 minutos antes. 40 minutos y se va con su contrato en regla y una forma de cobrar el depósito antes de empezar.`;
+    ? `El taller gratis «${TALLER.shortName}» es mañana sábado a las 8:00 AM, hora de California. Dura 40 minutos. Lo organiza LeadPrime Network, la comunidad de contratistas hispanos del Área de la Bahía, y su lugar ya está apartado: no se lo pierda, porque se hablarán cosas muy importantes — papeles en regla, cómo protegerse de las multas de 2026 y cobrar sin arriesgar su dinero. Entre 10 minutos antes y tenga a la mano su contrato actual.`
+    : `Su comunidad ya está entrando: entre ya por Zoom, abrimos la sala 10 minutos antes. Lo de hoy no se repite — 40 minutos y se va con su contrato en regla y una forma de cobrar el depósito antes de empezar.`;
   const html = layout(
     `
 <tr><td style="padding:0 8px 18px;text-align:center;">
@@ -529,8 +529,8 @@ ${detailsBlock()}
   return {
     to: [],
     subject: isTomorrow
-      ? `⏰ Mañana 8:00 AM: su taller gratis por Zoom (enlace adentro)`
-      : `🔴 En 45 minutos empezamos — entre aquí a su taller`,
+      ? `⏰ Mañana 8:00 AM: su comunidad se reúne — taller gratis por Zoom (enlace adentro)`
+      : `🔴 En 45 minutos empezamos — su comunidad ya está entrando`,
     html,
     text,
   };
