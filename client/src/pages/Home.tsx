@@ -42,7 +42,7 @@ export default function Home() {
   return (
     <LangContext.Provider value={lang}>
       <div className="min-h-screen bg-[#050B18]">
-        <Navbar logoInHero />
+        <Navbar />
         <main>
           <HeroSection />
           <HowItWorksSection />

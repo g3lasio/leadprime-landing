@@ -82,10 +82,17 @@ function LangToggle() {
 }
 
 /**
- * `logoInHero`: the page's hero already shows the logo + slogan lockup, so the
- * navbar logo stays hidden until the visitor scrolls past the top.
+ * The navbar logo is ALWAYS visible, at every breakpoint and scroll position
+ * (owner bug report, 27-Oct-2026: on mobile the fixed header showed only the
+ * EN/ES switch and the hamburger button — the previous `logoInHero` behaviour
+ * hid the logo at the top of the home page because the hero repeats the
+ * lockup; a fixed header with no brand mark reads as broken, so the header
+ * wins). Criterion per breakpoint: the full official lockup
+ * (`/logo-full.png`, 3:1) is used everywhere — at the mobile height (h-9,
+ * ≈108px wide) it fits alongside the language switch + hamburger even at
+ * 320px (≈236px of ≈288px usable), so no symbol-only variant is needed.
  */
-export default function Navbar({ logoInHero = false }: { logoInHero?: boolean }) {
+export default function Navbar() {
   const lang = useLang();
   const t = COPY[lang];
   const [, navigate] = useLocation();
@@ -106,8 +113,6 @@ export default function Navbar({ logoInHero = false }: { logoInHero?: boolean })
     if (section) section.scrollIntoView({ behavior: "smooth" });
     else navigate(`${HOME_PATH[lang]}#${id}`);
   };
-
-  const hideLogo = logoInHero && !scrolled && !mobileOpen;
 
   const goHome = (e: MouseEvent) => {
     e.preventDefault();
@@ -136,14 +141,12 @@ export default function Navbar({ logoInHero = false }: { logoInHero?: boolean })
             href={HOME_PATH[lang]}
             onClick={goHome}
             aria-label={t.home}
-            className={`flex items-center transition-opacity duration-300 ${
-              hideLogo ? "opacity-0 invisible" : "opacity-100"
-            }`}
+            className="flex shrink-0 items-center"
           >
             <img
               src="/logo-full.png"
               alt="LeadPrime"
-              className="h-10 lg:h-12 w-auto"
+              className="h-9 sm:h-10 lg:h-12 w-auto max-w-none"
               height={48}
             />
           </a>
@@ -191,7 +194,7 @@ export default function Navbar({ logoInHero = false }: { logoInHero?: boolean })
           </div>
 
           {/* Mobile: language switch stays visible next to the menu button */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="lg:hidden flex shrink-0 items-center gap-2">
             <LangToggle />
             <button
               className="text-white/70 hover:text-white p-2"

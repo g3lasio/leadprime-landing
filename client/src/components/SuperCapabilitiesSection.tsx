@@ -172,8 +172,8 @@ function TimeCompare({ them, themLabel, us, usLabel }: { them: string; themLabel
         <p className="text-lg font-black text-white/45 line-through" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{them}</p>
         <p className="text-[11px] text-white/55 mt-0.5">{themLabel}</p>
       </div>
-      <div className="rounded-xl border border-[#10B981]/40 bg-[#10B981]/10 p-3.5 text-center">
-        <p className="text-lg font-black text-[#10B981]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{us}</p>
+      <div className="rounded-xl border border-[#00D4FF]/40 bg-[#00D4FF]/10 p-3.5 text-center">
+        <p className="text-lg font-black text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{us}</p>
         <p className="text-[11px] text-white/65 mt-0.5">{usLabel}</p>
       </div>
     </div>
@@ -186,13 +186,13 @@ export default function SuperCapabilitiesSection() {
 
   return (
     <section id="super-capabilities" className="py-24 bg-[#0A1628] relative overflow-hidden">
-      <div className="absolute top-0 right-1/4 w-96 max-w-full h-96 bg-[#10B981]/5 rounded-full blur-3xl" aria-hidden="true" />
+      <div className="absolute top-0 right-1/4 w-96 max-w-full h-96 bg-[#00D4FF]/5 rounded-full blur-3xl" aria-hidden="true" />
       <div className="absolute bottom-0 left-0 w-96 max-w-full h-96 bg-[#00D4FF]/5 rounded-full blur-3xl" aria-hidden="true" />
 
       <div className="container mx-auto px-4 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 mb-6">
-            <span className="text-sm font-semibold text-[#10B981]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00D4FF]/10 border border-[#00D4FF]/30 mb-6">
+            <span className="text-sm font-semibold text-[#00D4FF]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               {t.badge}
             </span>
           </div>

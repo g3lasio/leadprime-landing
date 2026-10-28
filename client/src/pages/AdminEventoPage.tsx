@@ -43,7 +43,7 @@ const STATUS_COLORS: Record<string, string> = {
   approved: "#22C55E",
   confirmed: "#22C55E",
   rejected: "#EF4444",
-  waitlist: "#A78BFA",
+  waitlist: "#F59E0B",
   cancelled: "#EF4444",
   attended: "#D4AF37",
 };
@@ -413,7 +413,7 @@ export default function AdminEventoPage() {
                               </button>
                               <button
                                 onClick={() => updateStatus.mutate({ pin: enteredPin, id: r.id, status: "waitlist" })}
-                                className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                                className="px-2 py-1 rounded text-xs bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors"
                                 title="Lista de espera"
                               >
                                 ⏳ Espera
@@ -599,7 +599,7 @@ export default function AdminEventoPage() {
                   </button>
                   <button
                     onClick={() => updateStatus.mutate({ pin: enteredPin, id: selectedReg.id, status: "waitlist" })}
-                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                    className="flex-1 py-2 rounded-lg text-sm font-bold bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors"
                   >
                     ⏳ Lista espera
                   </button>

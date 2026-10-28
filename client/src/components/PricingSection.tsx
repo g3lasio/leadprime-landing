@@ -9,7 +9,7 @@ import { appLink } from "@/lib/appLinks";
 import { useLang } from "@/lib/i18n";
 
 const PLAN_STYLE = [
-  { campaign: "pricing-payg", accent: "#10B981", featured: false },
+  { campaign: "pricing-payg", accent: "#00D4FF", featured: false },
   { campaign: "pricing-pro", accent: "#00D4FF", featured: true },
   { campaign: "pricing-elite", accent: "#F59E0B", featured: false },
 ] as const;
