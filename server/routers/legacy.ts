@@ -372,7 +372,44 @@ export const legacyRouter = router({
       conteosPorCiudad(),
     ]);
 
-    const proximos = eventosPorCiudad(enlaces, conteos, true);
+    // Los próximos eventos: las paradas del tour que la app ya
+    // tiene creadas (su definición viva — Sacramento, Concord,
+    // Napa, San José y el Cierre existen ahí aunque aún no
+    // tengan enlace propio; se registran por el flujo fundador,
+    // como ya se llenaron Stockton y Sacramento), enriquecidas
+    // con la sede/cupo de su enlace si ya existe, MÁS cualquier
+    // enlace futuro fuera del tour. Nada hardcodeado aquí: si
+    // el tour crece en la app, crece solo en esta página.
+    const hoy = hoyPT();
+    const porEnlace = new Map(
+      eventosPorCiudad(enlaces, conteos, true).map((e) => [e.ciudad.toLowerCase(), e]),
+    );
+    const proximos: VistaEvento[] = [];
+    const ciudadesTour = new Set<string>();
+    for (const p of (definicion?.paradas ?? []) as Array<{
+      ciudad: string; etiqueta: string; fechaISO: string;
+    }>) {
+      const fecha = fechaPT(p.fechaISO);
+      if (fecha && fecha < hoy) continue;
+      ciudadesTour.add(p.ciudad.toLowerCase());
+      const delEnlace = porEnlace.get(p.ciudad.toLowerCase());
+      proximos.push({
+        ciudad: p.ciudad,
+        etiqueta: p.etiqueta,
+        fechaISO: p.fechaISO,
+        tituloEvento: delEnlace?.tituloEvento ?? null,
+        cupo: delEnlace?.cupo ?? 25,
+        sedeDefinida: delEnlace?.sedeDefinida ?? false,
+        sedeNombre: delEnlace?.sedeNombre ?? null,
+        registrados: conteos.get(p.ciudad) ?? 0,
+      });
+    }
+    for (const e of Array.from(porEnlace.values())) {
+      if (!ciudadesTour.has(e.ciudad.toLowerCase())) proximos.push(e);
+    }
+    proximos.sort((a, b) =>
+      String(a.fechaISO ?? "9999").localeCompare(String(b.fechaISO ?? "9999")),
+    );
 
     // Historial: las paradas del tour ya ejecutadas…
     const pasadosTour = eventosPorCiudad(enlaces, conteos, false).map((p) => ({
