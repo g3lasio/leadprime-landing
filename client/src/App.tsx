@@ -12,6 +12,8 @@ import ProgramasPage from "./pages/ProgramasPage";
 // The Spanish event gallery, the admin dashboard, the QR scanner (jsqr), and
 // the 404 page load on demand.
 const EventoPage = lazy(() => import("./pages/EventoPage"));
+const EventosPage = lazy(() => import("./pages/EventosPage"));
+const AdminRegistradosPage = lazy(() => import("./pages/AdminRegistradosPage"));
 const AdminEventoPage = lazy(() => import("./pages/AdminEventoPage"));
 const CheckInPage = lazy(() => import("./pages/CheckInPage"));
 const SupportPage = lazy(() => import("./pages/SupportPage"));
@@ -40,6 +42,8 @@ function Router() {
         <Route path={"/support"} component={SupportPage} />
         <Route path={"/soporte"} component={SupportPage} />
         <Route path={"/evento"} component={EventoPage} />
+        <Route path={"/eventos"} component={EventosPage} />
+        <Route path={"/admin/registrados"} component={AdminRegistradosPage} />
         <Route path={"/taller"} component={TallerPage} />
         <Route path={"/taller/equipo"} component={TallerEquipoPage} />
         <Route path={"/admin/taller"} component={AdminTallerPage} />

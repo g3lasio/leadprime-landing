@@ -14,6 +14,7 @@ const COPY = {
       { label: "Programs", id: "programas" },
     ],
     about: { label: "About", href: "/about/" },
+    events: { label: "Events", href: "/eventos" },
     signIn: "Sign In",
     getStarted: "Get Started Free",
     openMenu: "Open menu",
@@ -30,6 +31,7 @@ const COPY = {
       { label: "Programas", id: "programas" },
     ],
     about: { label: "Nosotros", href: "/nosotros/" },
+    events: { label: "Eventos", href: "/eventos" },
     signIn: "Iniciar sesión",
     getStarted: "Empieza gratis",
     openMenu: "Abrir menú",
@@ -170,6 +172,13 @@ export default function Navbar() {
             >
               {t.about.label}
             </a>
+            <a
+              href={t.events.href}
+              className="text-sm font-medium text-white/70 hover:text-[#00D4FF] transition-colors duration-200"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {t.events.label}
+            </a>
           </div>
 
           {/* CTA */}
@@ -233,6 +242,12 @@ export default function Navbar() {
                 className="text-left text-sm font-medium text-white/70 hover:text-[#00D4FF] transition-colors py-1"
               >
                 {t.about.label}
+              </a>
+              <a
+                href={t.events.href}
+                className="text-left text-sm font-medium text-white/70 hover:text-[#00D4FF] transition-colors py-1"
+              >
+                {t.events.label}
               </a>
               <a
                 href={appLink("navbar", "signup")}

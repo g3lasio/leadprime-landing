@@ -1,5 +1,6 @@
 import { COOKIE_NAME } from "@shared/const";
 import { eventoRouter } from "./routers/evento";
+import { legacyRouter } from "./routers/legacy";
 import { tallerRouter } from "./routers/taller";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -20,6 +21,7 @@ export const appRouter = router({
   }),
 
   evento: eventoRouter,
+  legacy: legacyRouter,
   taller: tallerRouter,
 });
 
