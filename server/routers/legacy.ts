@@ -592,7 +592,7 @@ export const legacyRouter = router({
       const { rows } = await pool.query(
         `SELECT r.id, r.nombre, r.compania, r.ciudad, r.ciudad_evento, r.evento_origen,
                 r.evento_cambiado_at, r.telefono, r.correo, r.website_url, r.sin_website,
-                r.salida, r.estado, e.titulo_evento AS enlace_titulo, r.created_at
+                r.salida, r.estado, r.registrado_por, e.titulo_evento AS enlace_titulo, r.created_at
            FROM legacy_prime_registros r
            JOIN legacy_prime_enlaces e ON e.id = r.enlace_id
           WHERE e.contractor_id = $1
@@ -619,6 +619,9 @@ export const legacyRouter = router({
           websiteBase: info.base,
           websiteUrlValida: info.urlValida,
           salida: r.salida as string,
+          // Quién asentó el registro (migración 520 de la app): 'agente',
+          // 'agente_recuperado' o 'agente_barrido'; null = formulario/equipo.
+          registradoPor: (r.registrado_por ?? null) as string | null,
           estado: (r.estado === "confirmado" ? "confirmado" : "registrado") as string,
           enlaceTitulo: (r.enlace_titulo ?? null) as string | null,
           createdAt: new Date(r.created_at).toISOString(),

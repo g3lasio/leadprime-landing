@@ -34,6 +34,8 @@ type Registro = {
   websiteUrlValida: string | null;
   salida: string;
   estado: string;
+  /** 'agente' | 'agente_recuperado' | 'agente_barrido'; null = formulario/equipo. */
+  registradoPor: string | null;
   enlaceTitulo: string | null;
   createdAt: string;
 };
@@ -241,6 +243,15 @@ export default function AdminRegistradosPage() {
                   <td className="px-3 py-2.5">
                     <p className="font-semibold text-white">{r.nombre}</p>
                     <p className="text-white/50 text-xs">{r.compania}</p>
+                    {r.registradoPor && (
+                      <p className="text-[#00D4FF]/80 text-xs">
+                        {r.registradoPor === "agente_recuperado"
+                          ? "🤖 agente — recuperado de transcripción"
+                          : r.registradoPor === "agente_barrido"
+                            ? "🤖 agente — barrido post-llamada"
+                            : "🤖 registrado por el agente"}
+                      </p>
+                    )}
                   </td>
                   <td className="px-3 py-2.5 whitespace-nowrap">{r.telefono ?? "—"}</td>
                   <td className="px-3 py-2.5">{r.correo ?? "—"}</td>
