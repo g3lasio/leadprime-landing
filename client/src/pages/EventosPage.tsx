@@ -341,7 +341,7 @@ export default function EventosPage() {
               {(definicion?.preguntas ?? []).length > 0 && (
                 <div className="space-y-4 border-t border-white/10 pt-5">
                   <p className="text-white/60 text-sm">
-                    Cinco preguntas de perfil — opcionales. Con tus datos de contacto tu asiento queda
+                    Tres preguntas de perfil — opcionales. Con tus datos de contacto tu asiento queda
                     apartado y recibes tu pase; el equipo revisa cada perfil personalmente.
                   </p>
                   {(definicion.preguntas as any[]).map((p) => (
