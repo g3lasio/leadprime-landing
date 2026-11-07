@@ -49,6 +49,15 @@
  *   escribió); sin_website=true → sin website (su fila nació
  *   por la vía sin-website); sin ninguna señal → por verificar
  *   (jamás se afirma que no tiene sin que conste).
+ * - adminMarcarAsistencia (protegido, 6-nov-2026): el check-in
+ *   del dueño en la puerta — un checkbox por registrado que
+ *   asienta asistio/asistio_at en la MISMA fila (columnas
+ *   aditivas, ver drizzle/neon/2026-11-06_asistencia_legacy_
+ *   prime_registros.sql). Cada fila es el registro de UN
+ *   evento (su enlace + ciudad_evento), así que la marca es
+ *   por evento y sirve igual en cada parada futura del tour.
+ *   NO confundir con evento.checkIn: ese opera la tabla vieja
+ *   event_registrations (Networking Fairfield), no esta.
  */
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -592,7 +601,8 @@ export const legacyRouter = router({
       const { rows } = await pool.query(
         `SELECT r.id, r.nombre, r.compania, r.ciudad, r.ciudad_evento, r.evento_origen,
                 r.evento_cambiado_at, r.telefono, r.correo, r.website_url, r.sin_website,
-                r.salida, r.estado, r.registrado_por, e.titulo_evento AS enlace_titulo, r.created_at
+                r.salida, r.estado, r.registrado_por, r.asistio, r.asistio_at,
+                e.titulo_evento AS enlace_titulo, r.created_at
            FROM legacy_prime_registros r
            JOIN legacy_prime_enlaces e ON e.id = r.enlace_id
           WHERE e.contractor_id = $1
@@ -622,6 +632,10 @@ export const legacyRouter = router({
           // Quién asentó el registro (migración 520 de la app): 'agente',
           // 'agente_recuperado' o 'agente_barrido'; null = formulario/equipo.
           registradoPor: (r.registrado_por ?? null) as string | null,
+          // Check-in en la puerta (6-nov-2026): la marca vive en
+          // la fila misma; asistio_at es la hora en que se marcó.
+          asistio: r.asistio === true,
+          asistioAt: r.asistio_at ? new Date(r.asistio_at).toISOString() : null,
           estado: (r.estado === "confirmado" ? "confirmado" : "registrado") as string,
           enlaceTitulo: (r.enlace_titulo ?? null) as string | null,
           createdAt: new Date(r.created_at).toISOString(),
@@ -631,6 +645,7 @@ export const legacyRouter = router({
         registros,
         totales: {
           total: registros.length,
+          asistieron: registros.filter((r) => r.asistio).length,
           tiene: registros.filter((r) => r.websiteEstado === "tiene").length,
           sinWebsite: registros.filter((r) => r.websiteEstado === "sin_website").length,
           porVerificar: registros.filter((r) => r.websiteEstado === "por_verificar").length,
@@ -676,5 +691,51 @@ export const legacyRouter = router({
         )
         .catch(() => undefined);
       return { ok: true as const };
+    }),
+
+  /**
+   * Protegido (PIN): el check-in del dueño en la puerta del
+   * evento — marca o desmarca la ASISTENCIA de un registrado.
+   * La marca queda en la fila misma de legacy_prime_registros
+   * (asistio + asistio_at con la hora del servidor al marcar;
+   * al desmarcar, asistio_at vuelve a NULL). Como cada fila es
+   * el registro de un evento concreto, la asistencia queda por
+   * evento y el mismo checkbox sirve en todas las paradas
+   * futuras sin tocar nada más.
+   */
+  adminMarcarAsistencia: publicProcedure
+    .input(
+      z.object({
+        pin: z.string().min(1).max(64),
+        id: z.string().uuid(),
+        asistio: z.boolean(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      requireAdminPin(input.pin, ctx?.req?.ip ?? "legacy-admin");
+      const pool = getPool();
+      const { rows } = await pool.query(
+        `UPDATE legacy_prime_registros r
+            SET asistio = $2,
+                asistio_at = CASE WHEN $2 THEN now() ELSE NULL END,
+                updated_at = now()
+          WHERE r.id = $1
+            AND EXISTS (
+              SELECT 1 FROM legacy_prime_enlaces e
+               WHERE e.id = r.enlace_id AND e.contractor_id = $3
+            )
+          RETURNING r.asistio, r.asistio_at`,
+        [input.id, input.asistio, CONTRYRRIS_CONTRACTOR_ID],
+      );
+      if (!rows.length) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Registro no encontrado" });
+      }
+      return {
+        ok: true as const,
+        asistio: rows[0].asistio === true,
+        asistioAt: rows[0].asistio_at
+          ? new Date(rows[0].asistio_at).toISOString()
+          : null,
+      };
     }),
 });

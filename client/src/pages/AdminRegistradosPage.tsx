@@ -13,6 +13,12 @@
  * se afirma que alguien no tiene website sin que conste.
  * El conteo «X registrados · Y sin website» acompaña al filtro:
  * la lista de trabajo para construirles su sitio en 24 h.
+ *
+ * CHECK-IN (6-nov-2026, pedido del dueño): la primera columna
+ * es el checkbox de ASISTENCIA para usar en la puerta con la
+ * tablet — marcar asienta asistio/asistio_at en la fila misma
+ * (legacy.adminMarcarAsistencia), con la hora a la vista, y
+ * sirve igual en cada evento futuro del tour.
  */
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +39,9 @@ type Registro = {
   websiteBase: "url" | "texto" | "registro" | "sin_dato";
   websiteUrlValida: string | null;
   salida: string;
+  /** Check-in en la puerta: marca de asistencia + hora en que se marcó. */
+  asistio: boolean;
+  asistioAt: string | null;
   estado: string;
   /** 'agente' | 'agente_recuperado' | 'agente_barrido'; null = formulario/equipo. */
   registradoPor: string | null;
@@ -50,6 +59,17 @@ const TEXTO_BASE: Record<Registro["websiteBase"], string> = {
 function digitos(tel: string | null): string {
   const d = (tel ?? "").replace(/\D/g, "");
   return d.length === 10 ? `1${d}` : d;
+}
+
+/** Hora del check-in en hora del Pacífico, corta para la puerta. */
+function horaCheckIn(iso: string): string {
+  return new Date(iso).toLocaleString("es-MX", {
+    timeZone: "America/Los_Angeles",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export default function AdminRegistradosPage() {
@@ -72,6 +92,14 @@ export default function AdminRegistradosPage() {
       toast.success("Website asentado");
       setAsentandoId(null);
       setUrlNueva("");
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const marcarAsistencia = trpc.legacy.adminMarcarAsistencia.useMutation({
+    onSuccess: (res) => {
+      toast.success(res.asistio ? "Asistencia marcada ✅" : "Asistencia desmarcada");
       refetch();
     },
     onError: (e) => toast.error(e.message),
@@ -102,6 +130,7 @@ export default function AdminRegistradosPage() {
   }, [registros, search, filtroEvento, filtroCiudad, soloSinWebsite]);
 
   const sinWebsiteFiltrados = filtrados.filter((r) => r.websiteEstado === "sin_website").length;
+  const asistieronFiltrados = filtrados.filter((r) => r.asistio).length;
 
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,12 +197,14 @@ export default function AdminRegistradosPage() {
             </h1>
             <p className="text-white/50 text-sm mt-1">
               Todos los eventos, una sola tabla · {data?.totales.total ?? 0} en total ·{" "}
-              {data?.totales.tiene ?? 0} con website · {data?.totales.sinWebsite ?? 0} sin website ·{" "}
-              {data?.totales.porVerificar ?? 0} por verificar
+              {data?.totales.asistieron ?? 0} asistieron · {data?.totales.tiene ?? 0} con website ·{" "}
+              {data?.totales.sinWebsite ?? 0} sin website · {data?.totales.porVerificar ?? 0} por
+              verificar
             </p>
           </div>
           <p className="text-lg font-bold" style={{ color: "#D4AF37" }}>
-            {filtrados.length} registrados · {sinWebsiteFiltrados} sin website
+            {filtrados.length} registrados · {asistieronFiltrados} asistieron ·{" "}
+            {sinWebsiteFiltrados} sin website
           </p>
         </header>
 
@@ -227,6 +258,7 @@ export default function AdminRegistradosPage() {
           <table className="w-full text-sm min-w-[980px]">
             <thead>
               <tr className="bg-white/5 text-left text-white/60">
+                <th className="px-3 py-2.5 font-semibold text-center">Asistencia</th>
                 <th className="px-3 py-2.5 font-semibold">Nombre</th>
                 <th className="px-3 py-2.5 font-semibold">Teléfono</th>
                 <th className="px-3 py-2.5 font-semibold">Correo</th>
@@ -239,7 +271,36 @@ export default function AdminRegistradosPage() {
             </thead>
             <tbody>
               {filtrados.map((r) => (
-                <tr key={r.id} className="border-t border-white/8 hover:bg-white/[0.03] align-top">
+                <tr
+                  key={r.id}
+                  className={`border-t border-white/8 hover:bg-white/[0.03] align-top ${
+                    r.asistio ? "bg-emerald-400/[0.07]" : ""
+                  }`}
+                >
+                  <td className="px-3 py-2.5 text-center">
+                    <input
+                      type="checkbox"
+                      checked={r.asistio}
+                      disabled={marcarAsistencia.isPending}
+                      onChange={(e) =>
+                        marcarAsistencia.mutate({
+                          pin: enteredPin,
+                          id: r.id,
+                          asistio: e.target.checked,
+                        })
+                      }
+                      aria-label={`Marcar asistencia de ${r.nombre}`}
+                      className="w-7 h-7 cursor-pointer accent-emerald-400 disabled:opacity-50"
+                    />
+                    {r.asistio &&
+                      (r.asistioAt ? (
+                        <p className="text-emerald-300 text-xs mt-1 whitespace-nowrap">
+                          ✅ {horaCheckIn(r.asistioAt)}
+                        </p>
+                      ) : (
+                        <p className="text-emerald-300 text-xs mt-1">✅ Llegó</p>
+                      ))}
+                  </td>
                   <td className="px-3 py-2.5">
                     <p className="font-semibold text-white">{r.nombre}</p>
                     <p className="text-white/50 text-xs">{r.compania}</p>
@@ -372,7 +433,7 @@ export default function AdminRegistradosPage() {
               ))}
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-white/45">
+                  <td colSpan={9} className="px-3 py-8 text-center text-white/45">
                     Sin registros con esos filtros.
                   </td>
                 </tr>
@@ -383,7 +444,9 @@ export default function AdminRegistradosPage() {
 
         <p className="text-white/35 text-xs">
           La misma tabla única de registrados de Legacy Prime (la de la app): lo que se asienta aquí se
-          ve allá, y viceversa. Las filas de los enlaces marcados «QA — NO USAR» son pruebas del equipo.
+          ve allá, y viceversa. El checkbox de la primera columna marca la asistencia en la puerta y
+          queda guardado con su hora. Las filas de los enlaces marcados «QA — NO USAR» son pruebas del
+          equipo.
         </p>
       </div>
     </div>
