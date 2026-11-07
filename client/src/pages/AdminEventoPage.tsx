@@ -222,7 +222,7 @@ export default function AdminEventoPage() {
           </div>
           <div className="flex gap-3 flex-wrap">
             <a
-              href="/admin/evento/checkin"
+              href="/admin/registrados"
               className="px-4 py-2 rounded-lg text-sm font-black transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
               style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5E6A3 100%)", color: "#080C14" }}
             >

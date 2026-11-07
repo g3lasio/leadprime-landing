@@ -44,7 +44,10 @@ export async function setupVite(app: Express, server: Server) {
         await vite.transformIndexHtml(url, template),
         pageMetaFor(url.split(/[?#]/)[0]) ?? PAGE_META["/"]
       );
-      res.status(200).set({ "Content-Type": "text/html" }).end(page);
+      res
+        .status(200)
+        .set({ "Content-Type": "text/html", "Cache-Control": "no-store" })
+        .end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -81,7 +84,20 @@ export function serveStatic(app: Express) {
       .status(200)
       .set({
         "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-cache",
+        // El shell NUNCA se almacena en caché (blindaje 7-nov-2026):
+        // referencia los bundles con hash de la versión desplegada, y
+        // un teléfono que se queda con una copia vieja corre un router
+        // al que le faltan rutas vigentes y pinta el 404 del SPA
+        // aunque el servidor esté sano (pasó la mañana del evento de
+        // Stockton: el dueño veía «404 Page Not Found» con el servidor
+        // respondiendo 200). Antes iba "no-cache" sin ETag ni
+        // Last-Modified, revalidación que no todos los navegadores
+        // móviles honran al restaurar la pestaña. Con "no-store" cada
+        // navegación baja el shell vigente; los assets con hash sí
+        // quedan inmutables por un año (abajo), que es lo seguro.
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
       })
       .send(pages.get(pagePath ?? "/"));
 

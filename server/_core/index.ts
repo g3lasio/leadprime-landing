@@ -44,6 +44,32 @@ async function startServer() {
     }
     next();
   });
+  // Check-in del dueño (7-nov-2026): la lista de registrados ES la
+  // página de asistencia (checkbox por registrado). Toda variante
+  // razonable que un teléfono puede traer — el hub /admin, /registrados
+  // a secas, o la ruta vieja /admin/evento/checkin, que operaba la
+  // tabla legacy del Networking Fairfield (event_registrations) y no
+  // ve a los registrados del tour — redirige 301 a la canónica en el
+  // servidor, antes de que cargue cualquier bundle: así el aterrizaje
+  // correcto no depende de qué tan vieja sea la copia del SPA que el
+  // teléfono tenga guardada. El cliente trae las mismas redirecciones
+  // como segunda capa (client/src/App.tsx).
+  const REGISTRADOS_REDIRECTS = new Set([
+    "/admin",
+    "/registrados",
+    "/checkin",
+    "/admin/checkin",
+    "/admin/evento/checkin",
+  ]);
+  app.use((req, res, next) => {
+    if (req.method !== "GET" && req.method !== "HEAD") return next();
+    const clean = req.path.replace(/\/+$/, "") || "/";
+    if (!REGISTRADOS_REDIRECTS.has(clean)) return next();
+    const qs = req.originalUrl.includes("?")
+      ? req.originalUrl.slice(req.originalUrl.indexOf("?"))
+      : "";
+    return res.redirect(301, `/admin/registrados${qs}`);
+  });
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({
     limit: "50mb",
